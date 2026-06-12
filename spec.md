@@ -1048,4 +1048,378 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 
 ---
 
-*Fase Sport · Technical Spec v1.0 · Junho 2025 · Documento confidencial — uso interno*
+---
+
+## 18. Progresso de Implementação
+
+> **Atualizado:** Junho 2026
+
+### 18.1 Concluído
+
+#### Infra e configuração
+- [x] `next.config.ts` — remotePatterns para Cloudflare R2
+- [x] `.env.example` — todas as variáveis do §13.3
+- [x] `src/app/layout.tsx` — metadata PT-BR, OpenGraph, fontes Inter + Barlow Condensed
+- [x] Pacotes instalados: `jose`, `bcryptjs`, `swr`, `@upstash/ratelimit`, `@upstash/redis`, `tsx`
+- [x] Script `type-check` (`tsc --noEmit`) no `package.json`
+- [x] Prisma seed configurado (`prisma.seed` → `tsx prisma/seed.ts`)
+
+#### Banco de dados
+- [x] `prisma/schema.prisma` — modelos: Category, Subcategory, Product, ProductImage, Lead, Testimonial, Faq, AdminUser
+- [x] `docker/docker-compose.yml` + `docker/Dockerfile.dev`
+- [x] `prisma/seed.ts` — cria admin + 8 categorias padrão
+
+#### Libs compartilhadas
+- [x] `src/lib/db.ts` — singleton Prisma
+- [x] `src/lib/r2.ts` — cliente S3/R2, `uploadToR2`, `deleteFromR2`
+- [x] `src/lib/resend.ts` — cliente Resend, `sendLeadNotification`
+- [x] `src/lib/ratelimit.ts` — sliding window 5 req / 10 min
+- [x] `src/lib/validations/contact.ts` — `ContactSchema` (Zod)
+- [x] `src/lib/validations/auth.ts` — `LoginSchema` (Zod)
+
+#### Auth e middleware
+- [x] `src/middleware.ts` — JWT guard em `/admin` e `/api/admin`
+
+#### API Routes — Públicas
+- [x] `GET /api/categories` — lista categorias ativas com contagem de produtos
+- [x] `GET /api/categories/[slug]` — categoria com produtos, subcategorias e FAQs
+- [x] `GET /api/products` — lista produtos (query: category, subcategory, featured, limit)
+- [x] `GET /api/products/[slug]` — produto com galeria completa
+- [x] `POST /api/contact` — cria lead, rate limit, notificação por e-mail
+
+#### API Routes — Admin
+- [x] `POST /api/admin/auth/login` — JWT httpOnly cookie
+- [x] `POST /api/admin/auth/logout` — limpa cookie
+- [x] `GET/POST /api/admin/products` — lista/cria produtos
+- [x] `PATCH/DELETE /api/admin/products/[id]` — edita / soft delete
+- [x] `GET/POST /api/admin/categories` — lista/cria categorias
+- [x] `PATCH /api/admin/categories/[id]` — edita categoria
+- [x] `GET/POST /api/admin/leads` — lista leads (filtro por status) / cria
+- [x] `PATCH /api/admin/leads/[id]` — atualiza status
+- [x] `GET/POST /api/admin/testimonials` — lista/cria depoimentos
+- [x] `PATCH/DELETE /api/admin/testimonials/[id]`
+- [x] `GET/POST /api/admin/faqs` — lista (filtro por categoryId)/cria
+- [x] `PATCH/DELETE /api/admin/faqs/[id]`
+- [x] `POST /api/upload` — upload para R2, registra ProductImage
+
+#### CMS Admin — Páginas
+- [x] `src/app/(admin)/layout.tsx` — sidebar + verificação JWT server-side
+- [x] `src/app/(admin)/login/page.tsx`
+- [x] `src/app/(admin)/dashboard/page.tsx` — cards de resumo + atalhos
+- [x] `src/app/(admin)/leads/page.tsx` — tabela com filtro de status + painel lateral
+- [x] `src/app/(admin)/categorias/page.tsx` + `CategoryRow.tsx` — edição inline de ordem/ativo
+- [x] `src/app/(admin)/depoimentos/page.tsx` + `TestimonialToggle.tsx`
+- [x] `src/app/(admin)/faqs/page.tsx` — edição inline, por categoria ou global
+- [x] `src/app/(admin)/produtos/page.tsx` — tabela de produtos
+- [x] `src/app/(admin)/produtos/novo/page.tsx`
+- [x] `src/app/(admin)/produtos/[id]/page.tsx`
+- [x] `src/app/(admin)/produtos/_components/ProductForm.tsx` — form completo com upload de imagens
+
+#### Formulário de orçamento
+- [x] `src/components/forms/OrcamentoForm.tsx` — form multi-step (3 steps), validação Zod client-side
+- [x] `src/app/(marketing)/orcamento/page.tsx`
+
+---
+
+### 18.2 Em andamento
+
+#### Design System (desenvolvido em paralelo pelo designer)
+- [ ] `src/app/globals.css` — tokens de cor Fase (`--color-primary: #1A2B5F`, `--color-accent: #E8B500`, etc.)
+- [ ] Componentes base restantes do shadcn/ui configurados com o design system
+
+---
+
+### 18.3 Próximas etapas — spec detalhada
+
+Ver §19 (Marketing Pages), §20 (SEO), §21 (Testes), §22 (CI/CD).
+
+---
+
+## 19. Spec — Marketing Pages
+
+> **Pré-requisito:** Design system finalizado (§18.2).
+> **Agente:** arquiteto → plano → implementador → revisor.
+
+### 19.1 Layout e componentes compartilhados
+
+Antes das páginas, precisam existir:
+
+| Componente | Arquivo | Descrição |
+|---|---|---|
+| `Navbar` | `src/components/layout/Navbar.tsx` | Sticky, compacta ao rolar. Logo + links + botão WhatsApp + CTA Orçamento. Server Component com `"use client"` isolado para o toggle mobile. |
+| `Footer` | `src/components/layout/Footer.tsx` | Links, redes sociais, contato, selos. Server Component. |
+| `WhatsAppButton` | `src/components/ui/WhatsAppButton.tsx` | FAB flutuante em mobile, botão inline em desktop. Abre `wa.me` com mensagem pré-formatada. Lê `NEXT_PUBLIC_WHATSAPP_NUMBER`. |
+| `(marketing)/layout.tsx` | `src/app/(marketing)/layout.tsx` | Wrapper com Navbar + Footer + WhatsAppButton. |
+
+**Mensagem pré-formatada do WhatsApp:**
+```
+Olá Fase Sport! Vi o modelo [Nome] e quero um orçamento para [N] conjuntos de [Modalidade].
+```
+Quando não há produto/modalidade específicos: `Olá Fase Sport! Gostaria de solicitar um orçamento.`
+
+---
+
+### 19.2 Homepage — `src/app/(marketing)/page.tsx`
+
+Server Component. Busca dados no banco diretamente via Prisma (sem fetch HTTP interno).
+
+**Dados necessários:**
+```typescript
+const [categories, featuredProducts, testimonials] = await Promise.all([
+  prisma.category.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
+  prisma.product.findMany({ where: { isActive: true, isFeatured: true }, take: 4, include: { images: { where: { isPrimary: true }, take: 1 }, category: true } }),
+  prisma.testimonial.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
+])
+```
+
+**Seções (ordem de rolagem):**
+
+| Seção | Componente | Notas |
+|---|---|---|
+| Hero | `src/components/sections/HeroSection.tsx` | Full-width, overlay, headline animada (Framer Motion `whileInView`), 2 CTAs: "Simular Uniforme" (link externo simulador) + "Pedir Orçamento" (`/orcamento`) |
+| Categorias | `src/components/sections/CategoriesSection.tsx` | Grid de `CategoryCard` com ícone + nome. Cada card leva para `/{categoria.slug}`. |
+| Destaque | `src/components/sections/FeaturedSection.tsx` | Grid 3-4 `ProductCard`. Dados: `featuredProducts`. |
+| Como Funciona | `src/components/sections/ProcessSection.tsx` | 4 etapas. Layout horizontal desktop / vertical mobile. |
+| Clientes | `src/components/sections/TestimonialsSection.tsx` | Carrossel (`"use client"` + Framer Motion). Dados: `testimonials`. |
+| Por que a Fase? | `src/components/sections/WhySection.tsx` | 3–4 diferenciais estáticos. |
+| Contato | `src/components/sections/ContactSection.tsx` | `<OrcamentoForm />` + mapa embed + endereço. |
+
+**Componentes de produto/categoria reutilizáveis:**
+
+```typescript
+// src/components/products/ProductCard.tsx
+interface ProductCardProps {
+  product: {
+    slug: string
+    name: string
+    fabric: string | null
+    images: { url: string; altText: string | null }[]
+    category: { slug: string; name: string }
+  }
+  className?: string
+}
+
+// src/components/categories/CategoryCard.tsx
+interface CategoryCardProps {
+  category: {
+    slug: string
+    name: string
+    imageUrl: string | null
+    iconUrl: string | null
+    _count?: { products: number }
+  }
+}
+```
+
+---
+
+### 19.3 Páginas de Categoria — `src/app/(marketing)/[categoria]/page.tsx`
+
+Server Component com geração estática via `generateStaticParams`.
+
+```typescript
+export async function generateStaticParams() {
+  const categories = await prisma.category.findMany({
+    where: { isActive: true },
+    select: { slug: true },
+  })
+  return categories.map((c) => ({ categoria: c.slug }))
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ categoria: string }> }) {
+  const { categoria } = await params
+  const category = await prisma.category.findUnique({ where: { slug: categoria } })
+  if (!category) return {}
+  return {
+    title: category.seoTitle ?? `Uniforme de ${category.name} Personalizado`,
+    description: category.seoDesc,
+  }
+}
+```
+
+**Estrutura da página:**
+1. Hero da categoria (imagem de fundo + headline + breadcrumb)
+2. `FilterBar` — tabs de sub-categoria (Client Component para interatividade sem reload)
+3. Grid de produtos — `ProductGrid` (Server Component, filtra por sub-categoria via searchParams)
+4. Banner CTA simulador
+5. FAQ da modalidade (acordeão, `"use client"`)
+
+**`FilterBar`** recebe a lista de subcategorias e o slug ativo, atualiza `?sub=` na URL via `useRouter().push`.
+
+**`ProductGrid`** é Server Component — lê `searchParams.sub` e faz a query diretamente:
+```typescript
+// params e searchParams são Promise no Next.js 16
+const { categoria } = await params
+const { sub } = await searchParams
+```
+
+---
+
+### 19.4 Página de Detalhe do Produto — `src/app/(marketing)/[categoria]/[produto]/page.tsx`
+
+Server Component.
+
+```typescript
+export async function generateStaticParams() {
+  const products = await prisma.product.findMany({
+    where: { isActive: true },
+    select: { slug: true, category: { select: { slug: true } } },
+    include: { category: { select: { slug: true } } },
+  })
+  return products.map((p) => ({ categoria: p.category.slug, produto: p.slug }))
+}
+```
+
+**Estrutura:**
+1. `ProductGallery` — galeria com thumbnail strip + swipe mobile (`"use client"`, Framer Motion)
+2. Nome, tecido, qtd mínima
+3. CTA duplo: "Simular no Simulador" (link externo) + "Chamar no WhatsApp" (link `wa.me` com mensagem pré-formatada incluindo nome do produto)
+4. Descrição expandida
+5. Breadcrumb: Home → [Categoria] → [Produto]
+
+**Mensagem WhatsApp do produto:**
+```typescript
+const msg = encodeURIComponent(
+  `Olá Fase Sport! Vi o modelo ${product.name} e quero um orçamento para conjuntos de ${product.category.name}.`
+)
+const href = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${msg}`
+```
+
+---
+
+### 19.5 Página Como Funciona — `src/app/(marketing)/como-funciona/page.tsx`
+
+Server Component estático (sem dados do banco).
+
+**Estrutura:**
+1. Hero estático com headline
+2. Passo a passo visual detalhado (4 etapas com ícone, número, título, texto)
+3. FAQ global — busca `prisma.faq.findMany({ where: { categoryId: null, isActive: true } })`
+4. CTA para `/orcamento`
+
+---
+
+## 20. Spec — SEO
+
+### 20.1 Sitemap dinâmico
+
+```typescript
+// src/app/sitemap.ts
+import { prisma } from '@/lib/db'
+import type { MetadataRoute } from 'next'
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://fasesport.com'
+
+  const [categories, products] = await Promise.all([
+    prisma.category.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true } }),
+    prisma.product.findMany({ where: { isActive: true }, select: { slug: true, updatedAt: true, category: { select: { slug: true } } }, include: { category: { select: { slug: true } } } }),
+  ])
+
+  return [
+    { url: base, lastModified: new Date(), priority: 1 },
+    { url: `${base}/orcamento`, priority: 0.8 },
+    { url: `${base}/como-funciona`, priority: 0.7 },
+    ...categories.map((c) => ({ url: `${base}/${c.slug}`, lastModified: c.updatedAt, priority: 0.9 })),
+    ...products.map((p) => ({ url: `${base}/${p.category.slug}/${p.slug}`, lastModified: p.updatedAt, priority: 0.7 })),
+  ]
+}
+```
+
+### 20.2 Robots
+
+```typescript
+// src/app/robots.ts
+export default function robots() {
+  return {
+    rules: { userAgent: '*', allow: '/', disallow: '/admin/' },
+    sitemap: `${process.env.NEXT_PUBLIC_APP_URL}/sitemap.xml`,
+  }
+}
+```
+
+### 20.3 Schema.org
+
+Implementar nos componentes relevantes via JSON-LD (`<script type="application/ld+json">`):
+
+| Página | Schema |
+|---|---|
+| Homepage | `LocalBusiness` com endereço, telefone, horário |
+| Categoria | `BreadcrumbList` |
+| Produto | `Product` (name, image, description) + `BreadcrumbList` |
+
+---
+
+## 21. Spec — Testes
+
+> **Agente:** testador
+
+### 21.1 Testes unitários (Vitest)
+
+Configuração mínima `vitest.config.ts`:
+```typescript
+import { defineConfig } from 'vitest/config'
+import react from '@vitejs/plugin-react'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./tests/setup.ts'],
+  },
+  resolve: {
+    alias: { '@': path.resolve(__dirname, './src') },
+  },
+})
+```
+
+**Cobertura obrigatória:**
+- `ContactSchema` — casos válidos, e-mail inválido, esporte inválido, campo obrigatório ausente
+- `LoginSchema` — senha curta, e-mail inválido
+- `OrcamentoForm` — renderiza steps corretamente, avança ao preencher campos válidos, bloqueia sem campos obrigatórios
+- `WhatsAppButton` — gera URL `wa.me` correta com e sem produto
+
+### 21.2 Testes E2E (Playwright)
+
+Arquivo: `tests/e2e/conversion-flows.spec.ts` (spec já definida em §16.2).
+
+Configuração `playwright.config.ts`:
+```typescript
+import { defineConfig } from '@playwright/test'
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  use: { baseURL: 'http://localhost:3000' },
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'mobile', use: { ...devices['iPhone 13'] } },
+  ],
+})
+```
+
+**Testes obrigatórios:**
+1. Fluxo A: Homepage → Categoria → Produto → WhatsApp (link `wa.me` correto)
+2. Fluxo B: `/orcamento` → preenche 3 steps → submit → mensagem de sucesso
+3. Responsividade mobile (375px): navbar colapsada, WhatsApp FAB visível
+4. Admin login: credenciais erradas → mensagem de erro; credenciais corretas → redirect dashboard
+
+---
+
+## 22. Spec — CI/CD
+
+Arquivo: `.github/workflows/ci.yml` (spec já definida em §14.3).
+
+**Segredos necessários no GitHub Actions:**
+- `VERCEL_TOKEN`
+- `DATABASE_URL_PROD`
+- `JWT_SECRET`
+- `RESEND_API_KEY`
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+- `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`
+
+---
+
+*Fase Sport · Technical Spec v1.1 · Junho 2026 · Documento confidencial — uso interno*
