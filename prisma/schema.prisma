@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  name          String
+  description   String?
+  imageUrl      String?
+  iconUrl       String?
+  sortOrder     Int           @default(0)
+  isActive      Boolean       @default(true)
+  seoTitle      String?
+  seoDesc       String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  subcategories Subcategory[]
+  products      Product[]
+  faqs          Faq[]
+}
+
+model Subcategory {
+  id         String    @id @default(cuid())
+  slug       String
+  name       String
+  sortOrder  Int       @default(0)
+  category   Category  @relation(fields: [categoryId], references: [id])
+  categoryId String
+  products   Product[]
+
+  @@unique([categoryId, slug])
+}
+
+model Product {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  name          String
+  description   String?
+  fabric        String?
+  minQty        Int            @default(10)
+  isFeatured    Boolean        @default(false)
+  isActive      Boolean        @default(true)
+  seoTitle      String?
+  seoDesc       String?
+  simulatorUrl  String?
+  sortOrder     Int            @default(0)
+  category      Category       @relation(fields: [categoryId], references: [id])
+  categoryId    String
+  subcategory   Subcategory?   @relation(fields: [subcategoryId], references: [id])
+  subcategoryId String?
+  images        ProductImage[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  url       String
+  altText   String?
+  sortOrder Int     @default(0)
+  isPrimary Boolean @default(false)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+}
+
+model Lead {
+  id          String     @id @default(cuid())
+  name        String
+  email       String
+  phone       String
+  city        String?
+  sport       String
+  quantity    Int?
+  details     String?
+  productSlug String?
+  status      LeadStatus @default(NEW)
+  source      String?
+  createdAt   DateTime   @default(now())
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  IN_PROGRESS
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+model Testimonial {
+  id         String  @id @default(cuid())
+  clientName String
+  teamName   String?
+  sport      String?
+  text       String
+  photoUrl   String?
+  logoUrl    String?
+  rating     Int     @default(5)
+  isActive   Boolean @default(true)
+  sortOrder  Int     @default(0)
+}
+
+model Faq {
+  id         String    @id @default(cuid())
+  question   String
+  answer     String
+  sortOrder  Int       @default(0)
+  isActive   Boolean   @default(true)
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+}
