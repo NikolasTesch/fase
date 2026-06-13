@@ -1,6 +1,7 @@
 import { Shield, Clock, Users, MapPin } from "lucide-react";
 
 import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
+import { StaggerContainer, StaggerItem } from "@/components/ui/AnimatedSection";
 
 const DIFFERENTIALS = [
   {
@@ -41,9 +42,9 @@ export function WhySection() {
             O que faz do seu uniforme um diferencial dentro e fora de campo.
           </p>
         </RevealOnScroll>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {DIFFERENTIALS.map((item, index) => (
-            <RevealOnScroll key={item.title} delay={index * 0.05}>
+        <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {DIFFERENTIALS.map((item) => (
+            <StaggerItem key={item.title}>
               <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-card p-6 text-card-foreground">
                 <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <item.icon className="size-6" aria-hidden="true" />
@@ -51,9 +52,9 @@ export function WhySection() {
                 <h3 className="font-heading text-2xl">{item.title}</h3>
                 <p className="text-muted-foreground">{item.description}</p>
               </div>
-            </RevealOnScroll>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );

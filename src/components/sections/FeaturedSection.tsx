@@ -1,5 +1,6 @@
 import { ProductCard } from "@/components/products/ProductCard";
 import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
+import { StaggerContainer, StaggerItem } from "@/components/ui/AnimatedSection";
 
 interface FeaturedProduct {
   slug: string;
@@ -15,9 +16,7 @@ interface FeaturedSectionProps {
 }
 
 export function FeaturedSection({ products }: FeaturedSectionProps) {
-  if (products.length === 0) {
-    return null;
-  }
+  if (products.length === 0) return null;
 
   return (
     <section className="bg-muted py-16 lg:py-24">
@@ -30,9 +29,9 @@ export function FeaturedSection({ products }: FeaturedSectionProps) {
             Modelos selecionados para inspirar o próximo uniforme do seu time.
           </p>
         </RevealOnScroll>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {products.map((product, index) => (
-            <RevealOnScroll key={product.slug} delay={index * 0.05}>
+        <StaggerContainer className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {products.map((product) => (
+            <StaggerItem key={product.slug}>
               <ProductCard
                 slug={product.slug}
                 name={product.name}
@@ -41,9 +40,9 @@ export function FeaturedSection({ products }: FeaturedSectionProps) {
                 imageUrl={product.imageUrl}
                 imageAlt={product.imageAlt}
               />
-            </RevealOnScroll>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );

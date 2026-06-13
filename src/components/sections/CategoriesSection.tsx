@@ -1,14 +1,13 @@
 import { CategoryCard } from "@/components/categories/CategoryCard";
 import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
+import { StaggerContainer, StaggerItem } from "@/components/ui/AnimatedSection";
 
 interface CategoriesSectionProps {
   categories: { slug: string; name: string; imageUrl: string | null }[];
 }
 
 export function CategoriesSection({ categories }: CategoriesSectionProps) {
-  if (categories.length === 0) {
-    return null;
-  }
+  if (categories.length === 0) return null;
 
   return (
     <section id="categorias" className="bg-background py-16 lg:py-24">
@@ -22,17 +21,17 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
             personalização.
           </p>
         </RevealOnScroll>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          {categories.map((category, index) => (
-            <RevealOnScroll key={category.slug} delay={index * 0.05}>
+        <StaggerContainer className="grid grid-cols-2 gap-4 md:grid-cols-3">
+          {categories.map((category) => (
+            <StaggerItem key={category.slug}>
               <CategoryCard
                 slug={category.slug}
                 name={category.name}
                 imageUrl={category.imageUrl}
               />
-            </RevealOnScroll>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );

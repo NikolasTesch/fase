@@ -1,6 +1,7 @@
 import { Search, Palette, Truck } from "lucide-react";
 
 import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
+import { StaggerContainer, StaggerItem } from "@/components/ui/AnimatedSection";
 
 const STEPS = [
   {
@@ -35,9 +36,9 @@ export function HowItWorksSection() {
             Do modelo à entrega, em três passos simples.
           </p>
         </RevealOnScroll>
-        <div className="grid gap-6 md:grid-cols-3">
-          {STEPS.map((step, index) => (
-            <RevealOnScroll key={step.title} delay={index * 0.05}>
+        <StaggerContainer className="grid gap-6 md:grid-cols-3">
+          {STEPS.map((step) => (
+            <StaggerItem key={step.title}>
               <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-card p-6 text-card-foreground">
                 <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <step.icon className="size-6" aria-hidden="true" />
@@ -45,9 +46,9 @@ export function HowItWorksSection() {
                 <h3 className="font-heading text-2xl">{step.title}</h3>
                 <p className="text-muted-foreground">{step.description}</p>
               </div>
-            </RevealOnScroll>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );
