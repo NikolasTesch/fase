@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 
-export const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 function escapeHtml(value: string): string {
   return value
@@ -25,6 +27,7 @@ export async function sendLeadNotification(lead: {
   const to = process.env.EMAIL_TO_SALES ?? "contato@fasesport.com";
   const from = process.env.EMAIL_FROM ?? "noreply@fasesport.com";
 
+  const resend = getResend();
   await resend.emails.send({
     from,
     to,
