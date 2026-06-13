@@ -79,7 +79,7 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
   if (submitted) {
     return (
       <div data-testid="form-success" className="text-center py-12">
-        <h2 className="text-2xl font-semibold mb-2">Orçamento enviado!</h2>
+        <h2 className="text-2xl mb-2">Orçamento enviado!</h2>
         <p className="text-muted-foreground">
           Recebemos sua solicitação. Nossa equipe entrará em contato em breve.
         </p>

@@ -4,7 +4,16 @@ import { LeadStatus } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   try {
-    const status = req.nextUrl.searchParams.get("status") as LeadStatus | null;
+    const statusParam = req.nextUrl.searchParams.get("status");
+
+    if (statusParam !== null && !(statusParam in LeadStatus)) {
+      return Response.json(
+        { message: "Status inválido" },
+        { status: 400 }
+      );
+    }
+
+    const status = statusParam as LeadStatus | null;
 
     const leads = await prisma.lead.findMany({
       where: status ? { status } : undefined,

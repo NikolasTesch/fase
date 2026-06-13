@@ -41,7 +41,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30">
       <div className="w-full max-w-sm bg-card rounded-xl border border-border p-8 shadow-sm">
-        <h1 className="text-xl font-semibold mb-6">Fase Sport — Painel</h1>
+        <h1 className="text-xl mb-6">Fase Sport — Painel</h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

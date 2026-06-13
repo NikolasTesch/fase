@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = { title: "Produtos — Admin" };
 
@@ -16,13 +17,10 @@ export default async function ProdutosPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Produtos</h1>
-        <Link
-          href="/admin/produtos/novo"
-          className="rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/80 transition-colors"
-        >
+        <h1 className="text-2xl">Produtos</h1>
+        <Button render={<Link href="/admin/produtos/novo" />}>
           Novo produto
-        </Link>
+        </Button>
       </div>
 
       <div className="rounded-xl border border-border overflow-hidden">
@@ -45,7 +43,7 @@ export default async function ProdutosPage() {
                 <td className="px-4 py-3">
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs ${
-                      p.isActive ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"
+                      p.isActive ? "bg-brand-tint text-brand-dark" : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {p.isActive ? "Ativo" : "Inativo"}

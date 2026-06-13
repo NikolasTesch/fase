@@ -103,6 +103,7 @@ Todas as mudanças são cirúrgicas dentro de arquivos existentes. Nenhuma mudan
 
 ## Critérios de Aceitação
 
+- [ ] `globals.css` define `--destructive-foreground` em `:root`, `.dark` e `@theme inline`
 - [ ] Nenhum arquivo em `src/` usa `bg-green-*`, `text-green-*`, `text-white` em contextos de UI
 - [ ] Nenhum heading (`h1`-`h6`) usa `font-bold` ou `font-semibold` diretamente (peso vem do `@layer base`)
 - [ ] `POST /api/upload` (sem prefixo `/admin`) retorna 404

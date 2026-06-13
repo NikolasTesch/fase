@@ -12,7 +12,7 @@ export default async function CategoriasPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-6">Categorias</h1>
+      <h1 className="text-2xl mb-6">Categorias</h1>
 
       <div className="rounded-xl border border-border overflow-hidden">
         <table className="w-full text-sm">

@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     return Response.json({ url }, { status: 201 });
   } catch (error) {
-    console.error("[POST /api/upload]", error);
+    console.error("[POST /api/admin/upload]", error);
     return Response.json({ message: "Erro interno" }, { status: 500 });
   }
 }

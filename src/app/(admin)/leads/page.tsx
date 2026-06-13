@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 
 type Lead = {
   id: string;
@@ -58,7 +59,7 @@ export default function LeadsPage() {
     <div className="flex gap-6 h-full">
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Leads</h1>
+          <h1 className="text-2xl">Leads</h1>
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
@@ -123,9 +124,9 @@ export default function LeadsPage() {
             <h2 className="font-semibold">Detalhes</h2>
             <button
               onClick={() => setSelected(null)}
-              className="text-muted-foreground text-lg leading-none"
+              className="text-muted-foreground leading-none"
             >
-              ×
+              <X size={16} />
             </button>
           </div>
           <dl className="space-y-2 text-sm">

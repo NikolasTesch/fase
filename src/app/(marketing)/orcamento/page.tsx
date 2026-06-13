@@ -11,7 +11,7 @@ export default function OrcamentoPage() {
   return (
     <main className="min-h-screen py-16 px-4">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2">Solicitar Orçamento</h1>
+        <h1 className="text-5xl mb-2">Solicitar Orçamento</h1>
         <p className="text-muted-foreground mb-10">
           Preencha o formulário abaixo e nossa equipe entrará em contato em até 24 horas.
         </p>

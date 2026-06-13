@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Category {
@@ -129,7 +131,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
       fd.append("productId", product.id);
       fd.append("isPrimary", String(isPrimary));
 
-      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
       if (res.ok) {
         const data = await res.json();
         setImages((prev) => [
@@ -270,8 +272,13 @@ export function ProductForm({ categories, product }: ProductFormProps) {
           <div className="flex flex-wrap gap-3 mb-3">
             {images.map((img) => (
               <div key={img.id} className="relative w-24 h-24 rounded-md overflow-hidden border border-border">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.url} alt={img.altText ?? ""} className="w-full h-full object-cover" />
+                <Image
+                  src={img.url}
+                  alt={img.altText ?? ""}
+                  fill
+                  sizes="120px"
+                  className="object-cover"
+                />
                 {img.isPrimary && (
                   <span className="absolute top-1 left-1 bg-primary text-primary-foreground text-[10px] px-1 rounded">
                     Principal
@@ -279,9 +286,9 @@ export function ProductForm({ categories, product }: ProductFormProps) {
                 )}
                 <button
                   onClick={() => handleRemoveImage(img.id)}
-                  className="absolute top-1 right-1 bg-destructive text-white rounded-full w-4 h-4 text-xs leading-none flex items-center justify-center"
+                  className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 text-xs leading-none flex items-center justify-center"
                 >
-                  ×
+                  <X size={14} />
                 </button>
               </div>
             ))}

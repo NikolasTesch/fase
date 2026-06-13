@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { Button } from "@/components/ui/button";
 import { TestimonialToggle } from "./_components/TestimonialToggle";
 
 export const metadata: Metadata = { title: "Depoimentos — Admin" };
@@ -13,13 +14,8 @@ export default async function DepoimentosPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Depoimentos</h1>
-        <Link
-          href="/admin/depoimentos/novo"
-          className="rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/80 transition-colors"
-        >
-          Novo depoimento
-        </Link>
+        <h1 className="text-2xl">Depoimentos</h1>
+        <Button render={<Link href="#" />}>Novo depoimento</Button>
       </div>
 
       <div className="rounded-xl border border-border overflow-hidden">
@@ -46,7 +42,7 @@ export default async function DepoimentosPage() {
                 </td>
                 <td className="px-4 py-3">
                   <Link
-                    href={`/admin/depoimentos/${t.id}`}
+                    href="#"
                     className="text-xs text-primary hover:underline"
                   >
                     Editar

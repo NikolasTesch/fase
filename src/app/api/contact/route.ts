@@ -6,7 +6,8 @@ import { ContactSchema } from "@/lib/validations/contact";
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get("x-forwarded-for") ?? "anonymous";
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "anonymous";
     const { success } = await ratelimit.limit(ip);
 
     if (!success) {
