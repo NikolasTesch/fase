@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Barlow_Condensed, Inter, Geist_Mono } from "next/font/google";
+import { organizationJsonLd } from "@/lib/seo";
 import "./globals.css";
 
 const inter = Inter({
@@ -35,6 +36,10 @@ export const metadata: Metadata = {
     siteName: "Fase Sport",
     locale: "pt_BR",
     type: "website",
+    images: ["/og-image.jpg"],
+  },
+  twitter: {
+    card: "summary_large_image",
   },
 };
 
@@ -48,7 +53,15 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${inter.variable} ${barlowCondensed.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd()),
+          }}
+        />
+      </body>
     </html>
   );
 }

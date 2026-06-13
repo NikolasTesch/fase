@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ContactSchema, type ContactInput } from "@/lib/validations/contact";
-import { Button } from "@/components/ui/button";
+import { buildWhatsAppUrl } from "@/lib/site";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 const SPORTS = [
   { value: "futebol", label: "Futebol" },
@@ -83,6 +85,19 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
         <p className="text-muted-foreground">
           Recebemos sua solicitação. Nossa equipe entrará em contato em breve.
         </p>
+        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+          <Link href="/" className={buttonVariants({ variant: "outline" })}>
+            Voltar à home
+          </Link>
+          <a
+            href={buildWhatsAppUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants()}
+          >
+            Falar no WhatsApp
+          </a>
+        </div>
       </div>
     );
   }

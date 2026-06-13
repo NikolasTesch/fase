@@ -1,0 +1,164 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { Breadcrumb } from "@/components/layout/Breadcrumb";
+import { ProductGallery } from "@/components/products/ProductGallery";
+import { ProductWhatsAppCta } from "@/components/products/ProductWhatsAppCta";
+import { Button } from "@/components/ui/button";
+import { prisma } from "@/lib/db";
+
+interface ProductPageProps {
+  params: Promise<{ categoria: string; produto: string }>;
+}
+
+export async function generateStaticParams() {
+  const products = await prisma.product.findMany({
+    where: { isActive: true },
+    select: { slug: true, category: { select: { slug: true } } },
+  });
+
+  return products.map((product) => ({
+    categoria: product.category.slug,
+    produto: product.slug,
+  }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ categoria: string; produto: string }>;
+}): Promise<Metadata> {
+  const { produto } = await params;
+  const product = await prisma.product.findUnique({
+    where: { slug: produto },
+    select: {
+      name: true,
+      seoTitle: true,
+      seoDesc: true,
+      images: {
+        where: { isPrimary: true },
+        take: 1,
+        select: { url: true },
+      },
+    },
+  });
+
+  if (!product) {
+    return {};
+  }
+
+  const image = product.images[0]?.url;
+
+  return {
+    title: product.seoTitle ?? `${product.name} | Fase Sport`,
+    description:
+      product.seoDesc ??
+      `Uniforme ${product.name} personalizado. Solicite seu orçamento.`,
+    openGraph: image ? { images: [image] } : undefined,
+  };
+}
+
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { categoria, produto } = await params;
+
+  const product = await prisma.product.findUnique({
+    where: { slug: produto },
+    select: {
+      slug: true,
+      name: true,
+      description: true,
+      fabric: true,
+      minQty: true,
+      isActive: true,
+      seoTitle: true,
+      seoDesc: true,
+      images: {
+        orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
+        select: { url: true, altText: true },
+      },
+      category: { select: { slug: true, name: true } },
+    },
+  });
+
+  if (!product || !product.isActive) {
+    notFound();
+  }
+
+  if (product.category.slug !== categoria) {
+    notFound();
+  }
+
+  const { category } = product;
+  const primaryImage = product.images[0];
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: primaryImage?.url,
+  };
+
+  return (
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 lg:py-12">
+      <Breadcrumb
+        items={[
+          { label: "Início", href: "/" },
+          { label: category.name, href: `/${category.slug}` },
+          { label: product.name },
+        ]}
+      />
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+        <ProductGallery images={product.images} productName={product.name} />
+
+        <div className="flex flex-col gap-6">
+          <h1 className="font-heading text-4xl text-foreground">
+            {product.name}
+          </h1>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {product.fabric ? (
+              <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm font-medium text-foreground">
+                {product.fabric}
+              </span>
+            ) : null}
+            <span className="text-sm text-muted-foreground">
+              Quantidade mínima: {product.minQty} unidades
+            </span>
+          </div>
+
+          {product.description ? (
+            <p className="text-base leading-relaxed text-muted-foreground">
+              {product.description}
+            </p>
+          ) : null}
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <ProductWhatsAppCta
+              productName={product.name}
+              categoryName={category.name}
+            />
+            <Button
+              size="lg"
+              variant="outline"
+              render={
+                <Link
+                  href={`/orcamento?produto=${product.slug}&sport=${category.slug}`}
+                />
+              }
+            >
+              Solicitar Orçamento
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+    </div>
+  );
+}
