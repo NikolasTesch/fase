@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     const productId = formData.get("productId") as string | null;
+    const categoryId = formData.get("categoryId") as string | null;
     const isPrimary = formData.get("isPrimary") === "true";
     const altText = (formData.get("altText") as string) || null;
 
@@ -32,20 +33,31 @@ export async function POST(req: NextRequest) {
 
     const ext = file.type.split("/")[1];
     const timestamp = Date.now();
-    const key = productId
-      ? `products/${productId}/${timestamp}.${ext}`
-      : `uploads/${timestamp}.${ext}`;
+    let key = `uploads/${timestamp}.${ext}`;
+    if (productId) {
+      key = `products/${productId}/${timestamp}.${ext}`;
+    } else if (categoryId) {
+      key = `categories/${categoryId}/${timestamp}.${ext}`;
+    }
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const url = await uploadToR2(key, buffer, file.type);
 
-    // Se veio com productId, salva o registro de imagem no banco
     if (productId) {
       const image = await prisma.productImage.create({
         data: { url, altText, isPrimary, productId },
       });
 
       return Response.json({ url, imageId: image.id }, { status: 201 });
+    }
+
+    if (categoryId) {
+      await prisma.category.update({
+        where: { id: categoryId },
+        data: { imageUrl: url },
+      });
+
+      return Response.json({ url }, { status: 201 });
     }
 
     return Response.json({ url }, { status: 201 });

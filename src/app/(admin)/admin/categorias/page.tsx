@@ -26,6 +26,9 @@ export default async function CategoriasPage() {
         <table className="w-full text-sm">
           <thead className="bg-muted/50 border-b border-border">
             <tr>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider w-20">
+                Imagem
+              </th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
                 Nome
               </th>
