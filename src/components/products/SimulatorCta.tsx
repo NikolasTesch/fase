@@ -6,19 +6,21 @@ interface SimulatorCtaProps {
   url: string;
   location?: "product" | "category";
   productSlug?: string;
+  testId?: string;
 }
 
 export function SimulatorCta({
   url,
   location = "product",
   productSlug,
+  testId = "simulator-cta",
 }: SimulatorCtaProps) {
   return (
     <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      data-testid="simulator-cta"
+      data-testid={testId}
       onClick={() =>
         trackEvent("simulator_click", { location, product_slug: productSlug })
       }

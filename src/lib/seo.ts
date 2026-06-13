@@ -45,8 +45,8 @@ export function buildProductJsonLd(product: {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    description: product.description,
-    image: product.image,
+    ...(product.description ? { description: product.description } : {}),
+    ...(product.image ? { image: product.image } : {}),
     brand: { "@type": "Brand", name: "Fase Sport" },
     offers: {
       "@type": "Offer",

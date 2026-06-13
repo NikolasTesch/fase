@@ -165,9 +165,7 @@ export default async function CategoryPage({
           <CategoryWhatsAppCta url={whatsAppUrl} />
         </div>
         {simulatorUrl ? (
-          <div data-testid="simulator-cta-category">
-            <SimulatorCta url={simulatorUrl} location="category" />
-          </div>
+          <SimulatorCta url={simulatorUrl} location="category" testId="simulator-cta-category" />
         ) : null}
       </section>
 

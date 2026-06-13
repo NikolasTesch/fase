@@ -79,7 +79,7 @@ export function OrcamentoForm({
     if (valid) {
       setStep((s) => {
         const next = s + 1;
-        trackEvent("orcamento_step", { step: next + 1 });
+        trackEvent("orcamento_step", { step: next });
         return next;
       });
     }
