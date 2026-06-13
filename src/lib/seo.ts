@@ -11,8 +11,8 @@ export function organizationJsonLd() {
     email: SITE_CONTACT.email,
     address: {
       "@type": "PostalAddress",
-      addressLocality: "Colatina",
-      addressRegion: "ES",
+      addressLocality: "Teixeira de Freitas",
+      addressRegion: "BA",
       addressCountry: "BR",
       streetAddress: SITE_CONTACT.address,
     },

@@ -24,7 +24,7 @@ const DIFFERENTIALS = [
   },
   {
     icon: MapPin,
-    title: "Feito em Colatina-ES",
+    title: "Feito em Teixeira de Freitas-BA",
     description:
       "Produção local com a confiança de quem conhece o esporte da região.",
   },

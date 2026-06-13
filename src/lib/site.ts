@@ -17,8 +17,8 @@ export const CATEGORY_NAV: CategoryNavItem[] = [
 export const SITE_CONTACT = {
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "",
   email: "contato@fasesport.com.br",
-  address: "Colatina-ES",
-  city: "Colatina-ES",
+  address: "Av. Mal. Castelo Branco, 258 - Centro, Teixeira de Freitas - BA, 45985-160",
+  city: "Teixeira de Freitas - BA",
 } as const;
 
 const DEFAULT_WHATSAPP_MESSAGE =

@@ -17,7 +17,7 @@ describe("ContactSchema", () => {
   it("accepts a complete valid payload", () => {
     const result = ContactSchema.safeParse({
       ...validInput,
-      city: "Colatina-ES",
+      city: "Teixeira de Freitas-BA",
       quantity: 20,
       details: "Camisas com escudo bordado",
       productSlug: "camisa-futebol-pro",

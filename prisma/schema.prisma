@@ -71,7 +71,7 @@ model ProductImage {
 model Lead {
   id          String     @id @default(cuid())
   name        String
-  email       String
+  email       String?
   phone       String
   city        String?
   sport       String

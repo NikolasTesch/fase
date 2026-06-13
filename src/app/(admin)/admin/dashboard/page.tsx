@@ -13,6 +13,7 @@ import {
   Plus,
 } from "lucide-react";
 import { DashboardCards } from "./_components/DashboardCards";
+import { LeadMetrics } from "./_components/LeadMetrics";
 
 export const metadata: Metadata = { title: "Dashboard — Admin" };
 
@@ -88,6 +89,8 @@ export default async function DashboardPage() {
 
       {/* Cards de métricas */}
       <DashboardCards cards={cards} />
+
+      <LeadMetrics />
 
       {/* Atalhos rápidos */}
       <div className="mt-10">

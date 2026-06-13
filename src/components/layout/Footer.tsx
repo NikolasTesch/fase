@@ -85,8 +85,16 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-primary-foreground/20 pt-6 text-xs text-primary-foreground/70">
-          © {new Date().getFullYear()} Fase Sport. Todos os direitos reservados.
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-primary-foreground/20 pt-6 text-xs text-primary-foreground/70">
+          <span>© {new Date().getFullYear()} Fase Sport. Todos os direitos reservados.</span>
+          <div className="flex gap-4">
+            <Link href="/privacidade" className="hover:text-primary-foreground transition-colors">
+              Privacidade
+            </Link>
+            <Link href="/termos" className="hover:text-primary-foreground transition-colors">
+              Termos
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

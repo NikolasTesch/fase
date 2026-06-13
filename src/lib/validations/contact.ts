@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const ContactSchema = z.object({
   name: z.string().min(2).max(100),
-  email: z.string().email(),
+  email: z.string().email().optional(),
   phone: z
     .string()
     .transform((v) => v.replace(/\D/g, ""))

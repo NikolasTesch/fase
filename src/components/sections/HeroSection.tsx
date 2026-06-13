@@ -46,7 +46,7 @@ export function HeroSection() {
           animate="show"
           transition={{ duration: 0.55, ease, delay: 0.12 }}
         >
-          Personalização completa de uniformes para o seu time em Colatina-ES.
+          Personalização completa de uniformes para o seu time em Teixeira de Freitas-BA.
           Qualidade, prazo garantido e atendimento direto com a Fase Sport.
         </motion.p>
 

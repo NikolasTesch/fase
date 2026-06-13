@@ -25,30 +25,18 @@ export async function generateMetadata({
   const { produto } = await params;
   const product = await prisma.product.findUnique({
     where: { slug: produto },
-    select: {
-      name: true,
-      seoTitle: true,
-      seoDesc: true,
-      images: {
-        where: { isPrimary: true },
-        take: 1,
-        select: { url: true },
-      },
-    },
+    select: { name: true, seoTitle: true, seoDesc: true },
   });
 
   if (!product) {
     return {};
   }
 
-  const image = product.images[0]?.url;
-
   return {
     title: product.seoTitle ?? `${product.name} | Fase Sport`,
     description:
       product.seoDesc ??
       `Uniforme ${product.name} personalizado. Solicite seu orçamento.`,
-    openGraph: image ? { images: [image] } : undefined,
   };
 }
 

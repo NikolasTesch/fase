@@ -19,8 +19,8 @@ function formatPhoneNumber(phone: string) {
 
 export function ContactSection() {
   const mapUrl = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    ? `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=Fase+Sport,Colatina+ES`
-    : "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29946.031575775836!2d-40.640698!3d-19.53818!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xb82bfb5463f253%3A0xe54e69b0fa69db43!2sColatina%20-%20ES!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-BR!2sbr";
+    ? `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=Fase+Sport,Teixeira+de+Freitas+BA`
+    : "https://maps.google.com/maps?q=Av.+Mal.+Castelo+Branco,+258+-+Centro,+Teixeira+de+Freitas+-+BA&t=&z=15&ie=UTF8&iwloc=&output=embed";
 
   return (
     <section id="contato" className="py-16 lg:py-24 bg-background">
@@ -46,7 +46,7 @@ export function ContactSection() {
                   <div>
                     <h3 className="font-medium text-foreground">Endereço</h3>
                     <p className="text-sm text-muted-foreground mt-0.5">
-                      Colatina - ES
+                      {SITE_CONTACT.address}
                     </p>
                   </div>
                 </div>

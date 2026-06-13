@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 
@@ -38,8 +39,15 @@ export function ConsentBanner({ initialConsent }: ConsentBannerProps) {
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
-          Usamos cookies para analisar o tráfego e melhorar sua experiência. Você
-          pode aceitar ou recusar a coleta de dados analíticos.
+          Usamos cookies para analisar o tráfego e melhorar sua experiência. Veja
+          nossa{" "}
+          <Link
+            href="/privacidade"
+            className="underline underline-offset-4 hover:text-foreground"
+          >
+            Política de Privacidade
+          </Link>
+          . Você pode aceitar ou recusar a coleta de dados analíticos.
         </p>
         <div className="flex shrink-0 gap-3">
           <Button variant="outline" onClick={handleReject}>

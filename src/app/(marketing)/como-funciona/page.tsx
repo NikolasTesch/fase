@@ -12,7 +12,7 @@ import { FaqAccordion } from "@/components/sections/FaqAccordion";
 export const metadata: Metadata = {
   title: "Como Funciona | Fase Sport",
   description:
-    "Entenda como funciona o processo de pedido de uniformes esportivos personalizados na Fase Sport de Colatina-ES.",
+    "Entenda como funciona o processo de pedido de uniformes esportivos personalizados na Fase Sport de Teixeira de Freitas-BA.",
 };
 
 export default async function ComoFuncionaPage() {

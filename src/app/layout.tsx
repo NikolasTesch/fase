@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: "%s | Fase Sport",
   },
   description:
-    "Uniformes esportivos personalizados para times, academias e atléticas em Colatina-ES. Futebol, vôlei, basquete e mais. Solicite seu orçamento.",
+    "Uniformes esportivos personalizados para times, academias e atléticas em Teixeira de Freitas-BA. Futebol, vôlei, basquete e mais. Solicite seu orçamento.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "https://fasesport.com"
   ),

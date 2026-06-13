@@ -22,6 +22,30 @@ const SPORTS = [
   { value: "acessorios", label: "Acessórios" },
 ] as const;
 
+const SPORT_LABELS: Record<string, string> = {
+  futebol: "Futebol",
+  volei: "Vôlei",
+  basquete: "Basquete",
+  handebol: "Handebol",
+  passeio: "Passeio / Comissão",
+  agasalho: "Agasalho",
+  colete: "Colete",
+  acessorios: "Acessórios",
+};
+
+function buildOrcamentoWhatsAppMessage(data: ContactInput): string {
+  const lines = ["Olá, Fase Sport! Gostaria de solicitar um orçamento."];
+  lines.push("");
+  lines.push(`Nome: ${data.name}`);
+  lines.push(`Telefone: ${data.phone}`);
+  if (data.city) lines.push(`Cidade: ${data.city}`);
+  lines.push(`Modalidade: ${SPORT_LABELS[data.sport] ?? data.sport}`);
+  if (data.quantity) lines.push(`Quantidade: ${data.quantity} peça(s)`);
+  if (data.details) lines.push(`Detalhes: ${data.details}`);
+  if (data.productSlug) lines.push(`Produto de interesse: ${data.productSlug}`);
+  return lines.join("\n");
+}
+
 const STEPS = ["Modalidade", "Personalização", "Contato"] as const;
 
 interface OrcamentoFormProps {
@@ -44,15 +68,15 @@ export function OrcamentoForm({
 }: OrcamentoFormProps) {
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
   const stepHeadingRef = useRef<HTMLHeadingElement>(null);
+  const isMounted = useRef(false);
 
   const {
     register,
     handleSubmit,
     trigger,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ContactInput>({
     resolver: zodResolver(ContactSchema),
     defaultValues: {
@@ -63,6 +87,10 @@ export function OrcamentoForm({
   });
 
   useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
     stepHeadingRef.current?.focus();
   }, [step]);
 
@@ -73,7 +101,7 @@ export function OrcamentoForm({
     const fields: (keyof ContactInput)[][] = [
       ["sport", "quantity"],
       ["details"],
-      ["name", "email", "phone", "city"],
+      ["name", "phone", "city"],
     ];
 
     const valid = await trigger(fields[step]);
@@ -86,28 +114,12 @@ export function OrcamentoForm({
     }
   }
 
-  async function onSubmit(data: ContactInput) {
-    setServerError(null);
-    try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const json = await res.json();
-        setServerError(json.message ?? "Erro ao enviar. Tente novamente.");
-        return;
-      }
-
-      trackEvent("lead_submit", { sport: data.sport, source: "form" });
-      setSubmitted(true);
-    } catch {
-      setServerError(
-        "Erro de conexão. Verifique sua internet e tente novamente."
-      );
-    }
+  function onSubmit(data: ContactInput) {
+    trackEvent("lead_submit", { sport: data.sport, source: "form" });
+    const message = buildOrcamentoWhatsAppMessage(data);
+    const url = buildWhatsAppUrl(message);
+    window.open(url, "_blank", "noopener,noreferrer");
+    setSubmitted(true);
   }
 
   if (submitted) {
@@ -315,33 +327,6 @@ export function OrcamentoForm({
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-1">
-                E-mail *
-              </label>
-              <input
-                id="email"
-                type="email"
-                {...register("email")}
-                aria-invalid={errors.email ? "true" : undefined}
-                aria-describedby={errors.email ? "email-error" : undefined}
-                className={cn(
-                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
-                  errors.email ? "border-destructive" : "border-border"
-                )}
-                placeholder="seu@email.com"
-              />
-              {errors.email && (
-                <p
-                  id="email-error"
-                  role="alert"
-                  className="text-destructive text-xs mt-1"
-                >
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div>
               <label htmlFor="phone" className="block text-sm font-medium mb-1">
                 Telefone / WhatsApp *
               </label>
@@ -398,11 +383,6 @@ export function OrcamentoForm({
               )}
             </div>
 
-            {serverError && (
-              <p role="alert" className="text-destructive text-sm">
-                {serverError}
-              </p>
-            )}
           </div>
         )}
 
@@ -430,10 +410,9 @@ export function OrcamentoForm({
             <Button
               type="submit"
               data-testid="submit-form"
-              disabled={isSubmitting}
               className="ml-auto"
             >
-              {isSubmitting ? "Enviando..." : "Enviar orçamento"}
+              Solicitar orçamento no WhatsApp
             </Button>
           )}
         </div>
