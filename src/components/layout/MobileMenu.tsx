@@ -49,7 +49,11 @@ export function MobileMenu() {
           "focus-visible:ring-3 focus-visible:ring-ring/50"
         )}
       >
-        {open ? <X className="size-6" /> : <Menu className="size-6" />}
+        {open ? (
+          <X className="size-6" aria-hidden="true" />
+        ) : (
+          <Menu className="size-6" aria-hidden="true" />
+        )}
       </button>
 
       <AnimatePresence>

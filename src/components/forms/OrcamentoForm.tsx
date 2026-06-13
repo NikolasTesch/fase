@@ -66,7 +66,8 @@ export function OrcamentoForm({
     stepHeadingRef.current?.focus();
   }, [step]);
 
-  const { onChange: _rhfOnChange, ...phoneReg } = register("phone");
+  const phoneReg = { ...register("phone") };
+  delete (phoneReg as { onChange?: unknown }).onChange;
 
   async function advance() {
     const fields: (keyof ContactInput)[][] = [

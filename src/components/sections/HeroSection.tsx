@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,17 @@ export function HeroSection() {
 
   return (
     <section className="relative isolate overflow-hidden bg-primary text-primary-foreground">
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary to-brand-dark" />
+      <div className="absolute inset-0 -z-10">
+        <Image
+          src="/images/hero-bg.png"
+          alt="Uniformes esportivos personalizados da Fase Sport"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover opacity-20"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/80 to-brand-dark/95" />
+      </div>
       <div className="mx-auto flex w-full max-w-7xl flex-col items-start gap-6 px-4 py-20 lg:py-28">
         <motion.h1
           className="max-w-3xl font-heading text-6xl leading-none lg:text-7xl"

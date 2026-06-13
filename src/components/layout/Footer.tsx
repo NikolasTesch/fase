@@ -74,6 +74,7 @@ export function Footer() {
               <li>
                 <a
                   href={`mailto:${SITE_CONTACT.email}`}
+                  aria-label={`Enviar e-mail para ${SITE_CONTACT.email}`}
                   className="transition-colors hover:text-primary-foreground"
                 >
                   {SITE_CONTACT.email}

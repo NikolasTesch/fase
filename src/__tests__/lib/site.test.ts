@@ -1,7 +1,17 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildWhatsAppUrl } from "@/lib/site";
 
 describe("buildWhatsAppUrl", () => {
+  const originalWhatsAppNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+
+  beforeAll(() => {
+    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER = "5527999999999";
+  });
+
+  afterAll(() => {
+    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER = originalWhatsAppNumber;
+  });
+
   it("returns a URL starting with https://wa.me/", () => {
     expect(buildWhatsAppUrl()).toMatch(/^https:\/\/wa\.me\//);
   });
@@ -25,3 +35,4 @@ describe("buildWhatsAppUrl", () => {
     expect(url).toContain("?text=teste");
   });
 });
+

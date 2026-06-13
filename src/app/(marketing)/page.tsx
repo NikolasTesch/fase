@@ -7,7 +7,9 @@ import { FeaturedSection } from "@/components/sections/FeaturedSection";
 import { HowItWorksSection } from "@/components/sections/HowItWorksSection";
 import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
 import { WhySection } from "@/components/sections/WhySection";
+import { ContactSection } from "@/components/sections/ContactSection";
 import { CtaBannerSection } from "@/components/sections/CtaBannerSection";
+
 
 async function getHomepageData() {
   try {
@@ -80,6 +82,7 @@ export default async function HomePage() {
       <HowItWorksSection />
       <TestimonialsSection testimonials={testimonialItems} />
       <WhySection />
+      <ContactSection />
       <CtaBannerSection />
     </>
   );

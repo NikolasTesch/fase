@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CATEGORY_NAV } from "@/lib/site";
 import { MobileMenu } from "./MobileMenu";
+import { SearchForm } from "./SearchForm";
 
 export function Navbar() {
   return (
@@ -33,6 +34,7 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <SearchForm />
           <Button
             size="lg"
             className="hidden md:inline-flex"

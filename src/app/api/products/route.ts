@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
     const category = searchParams.get("category") ?? undefined;
     const subcategory = searchParams.get("subcategory") ?? undefined;
     const featured = searchParams.get("featured");
+    const q = searchParams.get("q") ?? undefined;
     const limit = searchParams.get("limit");
     const parsedLimit = limit ? parseInt(limit, 10) : undefined;
 
@@ -16,6 +17,12 @@ export async function GET(req: NextRequest) {
         ...(category && { category: { slug: category } }),
         ...(subcategory && { subcategory: { slug: subcategory } }),
         ...(featured === "true" && { isFeatured: true }),
+        ...(q && {
+          OR: [
+            { name: { contains: q, mode: "insensitive" as const } },
+            { description: { contains: q, mode: "insensitive" as const } },
+          ],
+        }),
       },
       orderBy: { sortOrder: "asc" },
       take:

@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Fase Sport
 
-## Getting Started
+Plataforma web de catálogo e conversão para a Fase Sport — loja de uniformes esportivos personalizados em Colatina-ES.
 
-First, run the development server:
+## Stack
+
+- **Framework:** Next.js 16 App Router
+- **UI:** React 19 + Tailwind CSS 4 + shadcn/ui
+- **ORM:** Prisma 7 (Neon Postgres)
+- **Storage:** Cloudflare R2 (AWS SDK v3)
+- **E-mail:** Resend
+- **Auth:** JWT via jose + bcryptjs
+- **Rate limit:** Upstash Redis
+
+## Desenvolvimento local
 
 ```bash
+npm install
+cp .env.example .env.local   # preencha as variáveis abaixo
+npx prisma generate
+npx prisma db push
+npx prisma db seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variáveis de ambiente
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Configure todas as variáveis no painel da Vercel (Settings → Environment Variables) para os ambientes **Production** e **Preview**.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Banco de dados (Neon)
 
-## Learn More
+| Variável | Descrição |
+|---|---|
+| `DATABASE_URL` | Connection string do Neon Postgres (pooled) |
 
-To learn more about Next.js, take a look at the following resources:
+### Storage (Cloudflare R2)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variável | Descrição |
+|---|---|
+| `R2_ACCOUNT_ID` | ID da conta Cloudflare |
+| `R2_ACCESS_KEY_ID` | Access key do bucket R2 |
+| `R2_SECRET_ACCESS_KEY` | Secret key do bucket R2 |
+| `R2_BUCKET_NAME` | Nome do bucket (ex: `fase-media`) |
+| `NEXT_PUBLIC_R2_URL` | URL pública do bucket (ex: `https://media.fasesport.com`) |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### E-mail (Resend)
 
-## Deploy on Vercel
+| Variável | Descrição |
+|---|---|
+| `RESEND_API_KEY` | API key do Resend |
+| `EMAIL_FROM` | Remetente (ex: `noreply@fasesport.com`) |
+| `EMAIL_TO_SALES` | Destinatário dos leads (ex: `vendas@fasesport.com`) |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Autenticação admin (JWT)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Variável | Descrição |
+|---|---|
+| `JWT_SECRET` | Secret para assinar tokens (mín. 32 caracteres aleatórios) |
+| `JWT_EXPIRES_IN` | Expiração do token (ex: `7d`) |
+
+### Rate limiting (Upstash Redis)
+
+| Variável | Descrição |
+|---|---|
+| `UPSTASH_REDIS_REST_URL` | URL REST do Upstash Redis |
+| `UPSTASH_REDIS_REST_TOKEN` | Token de autenticação do Upstash |
+
+### Integrações públicas
+
+| Variável | Descrição |
+|---|---|
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Número WhatsApp sem formatação (ex: `5527999999999`) |
+| `NEXT_PUBLIC_SIMULATOR_URL` | URL do simulador de uniforme (opcional) |
+| `NEXT_PUBLIC_APP_URL` | URL canônica do site (ex: `https://fasesport.com.br`) |
+
+## Scripts
+
+```bash
+npm run dev          # servidor de desenvolvimento
+npm run build        # build de produção
+npm run lint         # ESLint
+npm run type-check   # TypeScript sem emitir
+npm run test:unit    # Vitest (testes unitários)
+npm run test:e2e     # Playwright E2E (requer servidor rodando)
+npm run test:e2e:ui  # Playwright com UI interativa
+```
+
+## Deploy
+
+O projeto é publicado automaticamente na Vercel via GitHub Actions a cada push na branch `main`. O pipeline valida lint, typecheck, testes unitários e o build antes de publicar.
+
+Para deploy manual:
+```bash
+vercel --prod
+```
