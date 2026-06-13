@@ -1052,7 +1052,7 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 
 ## 18. Progresso de Implementação
 
-> **Atualizado:** Junho 2026
+> **Atualizado:** 2026-06-13 — plataforma V1 completa (21 specs finalizadas)
 
 ### 18.1 Concluído
 
@@ -1064,6 +1064,10 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 - [x] Script `type-check` (`tsc --noEmit`) no `package.json`
 - [x] Prisma seed configurado (`prisma.seed` → `tsx prisma/seed.ts`)
 
+#### Design System
+- [x] `src/app/globals.css` — tokens FASE brand (`--color-brand: #CD3438`, `--color-brand-dark`, `--color-brand-light`, `--color-brand-tint`) + bridge Tailwind v4 + shadcn/ui tokens
+- [x] Componentes shadcn/ui configurados com design system (Button, Input, Card, etc.)
+
 #### Banco de dados
 - [x] `prisma/schema.prisma` — modelos: Category, Subcategory, Product, ProductImage, Lead, Testimonial, Faq, AdminUser
 - [x] `docker/docker-compose.yml` + `docker/Dockerfile.dev`
@@ -1074,6 +1078,9 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 - [x] `src/lib/r2.ts` — cliente S3/R2, `uploadToR2`, `deleteFromR2`
 - [x] `src/lib/resend.ts` — cliente Resend, `sendLeadNotification`
 - [x] `src/lib/ratelimit.ts` — sliding window 5 req / 10 min
+- [x] `src/lib/seo.ts` — `buildProductJsonLd`, `buildBreadcrumbJsonLd`, `buildFaqJsonLd`, metadata helpers
+- [x] `src/lib/site.ts` — constantes do site (nome, URL, WhatsApp, simulador)
+- [x] `src/lib/analytics.ts` — `trackEvent` tipado (GA4/GTM)
 - [x] `src/lib/validations/contact.ts` — `ContactSchema` (Zod)
 - [x] `src/lib/validations/auth.ts` — `LoginSchema` (Zod)
 
@@ -1083,7 +1090,7 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 #### API Routes — Públicas
 - [x] `GET /api/categories` — lista categorias ativas com contagem de produtos
 - [x] `GET /api/categories/[slug]` — categoria com produtos, subcategorias e FAQs
-- [x] `GET /api/products` — lista produtos (query: category, subcategory, featured, limit)
+- [x] `GET /api/products` — lista produtos (query: category, subcategory, featured, limit, **q** para busca por nome/descrição)
 - [x] `GET /api/products/[slug]` — produto com galeria completa
 - [x] `POST /api/contact` — cria lead, rate limit, notificação por e-mail
 
@@ -1104,34 +1111,92 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 
 #### CMS Admin — Páginas
 - [x] `src/app/(admin)/layout.tsx` — sidebar + verificação JWT server-side
-- [x] `src/app/(admin)/login/page.tsx`
-- [x] `src/app/(admin)/dashboard/page.tsx` — cards de resumo + atalhos
-- [x] `src/app/(admin)/leads/page.tsx` — tabela com filtro de status + painel lateral
-- [x] `src/app/(admin)/categorias/page.tsx` + `CategoryRow.tsx` — edição inline de ordem/ativo
-- [x] `src/app/(admin)/depoimentos/page.tsx` + `TestimonialToggle.tsx`
-- [x] `src/app/(admin)/faqs/page.tsx` — edição inline, por categoria ou global
-- [x] `src/app/(admin)/produtos/page.tsx` — tabela de produtos
-- [x] `src/app/(admin)/produtos/novo/page.tsx`
-- [x] `src/app/(admin)/produtos/[id]/page.tsx`
-- [x] `src/app/(admin)/produtos/_components/ProductForm.tsx` — form completo com upload de imagens
+- [x] `src/app/admin/login/page.tsx`
+- [x] `src/app/(admin)/admin/dashboard/page.tsx` — cards de resumo + atalhos
+- [x] `src/app/(admin)/admin/leads/page.tsx` — tabela com filtro de status + painel lateral
+- [x] `src/app/(admin)/admin/categorias/page.tsx` + `CategoryRow.tsx` — edição inline de ordem/ativo
+- [x] `src/app/(admin)/admin/depoimentos/page.tsx` + `TestimonialToggle.tsx` + `AnimatedTestimonialRows.tsx`
+- [x] `src/app/(admin)/admin/faqs/page.tsx` — edição inline, por categoria ou global
+- [x] `src/app/(admin)/admin/produtos/page.tsx` + `AnimatedTableRows.tsx` — tabela de produtos
+- [x] `src/app/(admin)/admin/produtos/novo/page.tsx`
+- [x] `src/app/(admin)/admin/produtos/[id]/page.tsx`
+- [x] `src/app/(admin)/admin/produtos/_components/ProductForm.tsx` — form completo com upload de imagens
 
-#### Formulário de orçamento
-- [x] `src/components/forms/OrcamentoForm.tsx` — form multi-step (3 steps), validação Zod client-side
-- [x] `src/app/(marketing)/orcamento/page.tsx`
+#### Layout público
+- [x] `src/app/(marketing)/layout.tsx` — wrapper com Navbar + Footer + WhatsAppFab
+- [x] `src/components/layout/Navbar.tsx` — sticky, mobile-menu, campo de busca integrado
+- [x] `src/components/layout/MobileMenu.tsx`
+- [x] `src/components/layout/Footer.tsx`
+- [x] `src/components/layout/FooterWhatsAppLink.tsx`
+- [x] `src/components/layout/SearchForm.tsx`
+- [x] `src/components/layout/Breadcrumb.tsx`
+- [x] `src/components/ui/WhatsAppFab.tsx` — FAB flutuante
+
+#### Homepage — `src/app/(marketing)/page.tsx`
+- [x] `HeroSection` — CTA duplo (simulador + orçamento)
+- [x] `CategoriesSection` + `CategoryCard`
+- [x] `FeaturedSection` + `ProductCard`
+- [x] `HowItWorksSection` + `ProcessSteps`
+- [x] `TestimonialsSection`
+- [x] `WhySection`
+- [x] `CtaBannerSection`
+- [x] `ContactSection` — `OrcamentoForm` + Google Maps embed + endereço
+
+#### Página de Categoria — `src/app/(marketing)/[categoria]/page.tsx`
+- [x] SSG via `generateStaticParams`, `generateMetadata` com SEO dinâmico
+- [x] `CategoryHero`, `SubcategoryFilter`, `ProductGrid`
+- [x] `SimulatorCta`, `FaqAccordion`
+- [x] `CategoryWhatsAppCta`
+
+#### Página de Produto — `src/app/(marketing)/[categoria]/[produto]/page.tsx`
+- [x] SSG via `generateStaticParams`, JSON-LD `Product` + `BreadcrumbList`
+- [x] `ProductGallery` (swipe mobile, thumbnails)
+- [x] `ProductWhatsAppCta`, `SimulatorCta`
+
+#### Páginas estáticas
+- [x] `src/app/(marketing)/como-funciona/page.tsx` — passo a passo + FAQ global + CTA
+- [x] `src/app/(marketing)/orcamento/page.tsx` + `OrcamentoForm` — form multi-step 3 passos, maskPhone, focus management
+- [x] `src/app/(marketing)/busca/page.tsx` — resultados de busca por `?q=`, empty state
+- [x] `src/app/(marketing)/not-found.tsx` + `src/app/not-found.tsx` + `NotFoundContent.tsx`
+- [x] `src/app/(marketing)/error.tsx`, `loading.tsx`
+
+#### SEO e metadata
+- [x] `src/app/sitemap.ts` — sitemap dinâmico (categorias + produtos)
+- [x] `src/app/robots.ts` — `/admin/` bloqueado, sitemap apontado
+- [x] JSON-LD: `LocalBusiness` (homepage), `Product` (produto), `BreadcrumbList` (categoria/produto), `FAQPage` (como-funciona)
+- [x] OG/Twitter cards em todas as páginas
+
+#### Analytics e LGPD
+- [x] `src/components/analytics/AnalyticsProvider.tsx` — GA4 + GTM, respeita consentimento
+- [x] `src/components/analytics/ConsentBanner.tsx` — banner de cookies LGPD
+- [x] `src/components/analytics/RouteChangeTracker.tsx`
+- [x] Eventos rastreados: `page_view`, `whatsapp_click`, `simulator_click`, `orcamento_step`, `lead_submit`
+
+#### CTA Simulador
+- [x] `src/components/products/SimulatorCta.tsx` — renderização condicional com `getSimulatorUrl`
+- [x] `buildWhatsAppUrl` com guard (validação do número)
+
+#### Testes E2E (Playwright)
+- [x] `tests/e2e/conversion-flows.spec.ts` — Fluxo A (homepage → categoria → produto → WhatsApp), Fluxo B (orçamento 3 steps), responsividade mobile
+- [x] `tests/e2e/admin-auth.spec.ts` — login admin
+
+#### CI/CD
+- [x] `.github/workflows/ci.yml` — type-check, lint, unit tests, next build em PRs e pushes para main
+- [x] `vercel.json` — headers de segurança (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
 
 ---
 
-### 18.2 Em andamento
+### 18.2 Pendente — gaps antes do lançamento
 
-#### Design System (desenvolvido em paralelo pelo designer)
-- [ ] `src/app/globals.css` — tokens de cor Fase (`--color-primary: #1A2B5F`, `--color-accent: #E8B500`, etc.)
-- [ ] Componentes base restantes do shadcn/ui configurados com o design system
-
----
-
-### 18.3 Próximas etapas — spec detalhada
-
-Ver §19 (Marketing Pages), §20 (SEO), §21 (Testes), §22 (CI/CD).
+| Item | Tipo | Prioridade |
+|---|---|---|
+| Testes unitários Vitest (`tests/unit/`) | Código — `vitest.config.ts` existe, sem arquivos de teste | ALTA — CI já roda `npm run test:unit` |
+| Audit de acessibilidade WCAG AA manual | QA | MÉDIA |
+| Imagens reais de produtos cadastradas no R2 | Conteúdo | ALTA |
+| Depoimentos reais de clientes cadastrados | Conteúdo | MÉDIA |
+| FAQ respondida com informações reais (prazo, qtd. mínima, pagamento) | Conteúdo | MÉDIA |
+| Variáveis de ambiente de produção configuradas no Vercel | Config | BLOQUEANTE para deploy |
+| Google Search Console + sitemap enviado | Config | Pós-deploy |
 
 ---
 
