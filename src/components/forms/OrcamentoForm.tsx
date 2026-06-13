@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ContactSchema, type ContactInput } from "@/lib/validations/contact";
+import { ContactSchema, type ContactInput, type ContactOutput } from "@/lib/validations/contact";
 import { buildWhatsAppUrl } from "@/lib/site";
 import { Button, buttonVariants } from "@/components/ui/button";
 
@@ -37,7 +37,7 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
     trigger,
     formState: { errors, isSubmitting },
     watch,
-  } = useForm<ContactInput>({
+  } = useForm<ContactInput, unknown, ContactOutput>({
     resolver: zodResolver(ContactSchema),
     defaultValues: {
       sport: defaultSport,
@@ -57,7 +57,7 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
     if (valid) setStep((s) => s + 1);
   }
 
-  async function onSubmit(data: ContactInput) {
+  async function onSubmit(data: ContactOutput) {
     setServerError(null);
     try {
       const res = await fetch("/api/contact", {

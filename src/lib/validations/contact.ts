@@ -21,4 +21,5 @@ export const ContactSchema = z.object({
   source: z.enum(["form", "whatsapp", "simulator"]).default("form"),
 });
 
-export type ContactInput = z.infer<typeof ContactSchema>;
+export type ContactInput = z.input<typeof ContactSchema>;
+export type ContactOutput = z.output<typeof ContactSchema>;
