@@ -359,7 +359,7 @@ model AdminUser {
 | `PATCH` | `/api/admin/products/:id` | Atualiza produto |
 | `DELETE` | `/api/admin/products/:id` | Soft delete de produto |
 | `POST` | `/api/upload` | Upload de imagem para Cloudflare R2 (`multipart/form-data`) |
-| `GET` | `/api/admin/leads` | Lista leads de orçamento |
+| `GET/POST` | `/api/admin/leads` | Lista leads de orçamento _(POST não implementado — leads criados via POST `/api/contact`)_ |
 | `PATCH` | `/api/admin/leads/:id` | Atualiza status do lead |
 | `GET` | `/api/admin/categories` | Lista todas as categorias |
 | `POST` | `/api/admin/categories` | Cria categoria |
@@ -1100,7 +1100,7 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 - [x] `PATCH/DELETE /api/admin/testimonials/[id]`
 - [x] `GET/POST /api/admin/faqs` — lista (filtro por categoryId)/cria
 - [x] `PATCH/DELETE /api/admin/faqs/[id]`
-- [x] `POST /api/upload` — upload para R2, registra ProductImage
+- [x] `POST /api/admin/upload` — upload para R2, registra ProductImage
 
 #### CMS Admin — Páginas
 - [x] `src/app/(admin)/layout.tsx` — sidebar + verificação JWT server-side

@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
     const subcategory = searchParams.get("subcategory") ?? undefined;
     const featured = searchParams.get("featured");
     const limit = searchParams.get("limit");
+    const parsedLimit = limit ? parseInt(limit, 10) : undefined;
 
     const products = await prisma.product.findMany({
       where: {
@@ -17,7 +18,10 @@ export async function GET(req: NextRequest) {
         ...(featured === "true" && { isFeatured: true }),
       },
       orderBy: { sortOrder: "asc" },
-      take: limit ? parseInt(limit) : undefined,
+      take:
+        parsedLimit !== undefined && !Number.isNaN(parsedLimit)
+          ? parsedLimit
+          : undefined,
       include: {
         images: { where: { isPrimary: true }, take: 1 },
         category: { select: { slug: true, name: true } },

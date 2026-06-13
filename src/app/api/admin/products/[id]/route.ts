@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 
@@ -48,6 +49,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     return Response.json(product);
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return Response.json(
+        { message: "Produto não encontrado" },
+        { status: 404 }
+      );
+    }
     console.error("[PATCH /api/admin/products/:id]", error);
     return Response.json({ message: "Erro interno" }, { status: 500 });
   }
@@ -65,6 +75,15 @@ export async function DELETE(_req: Request, { params }: Params) {
 
     return Response.json(product);
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return Response.json(
+        { message: "Produto não encontrado" },
+        { status: 404 }
+      );
+    }
     console.error("[DELETE /api/admin/products/:id]", error);
     return Response.json({ message: "Erro interno" }, { status: 500 });
   }

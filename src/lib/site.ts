@@ -10,6 +10,8 @@ export const CATEGORY_NAV: CategoryNavItem[] = [
   { slug: "handebol", label: "Handebol" },
   { slug: "passeio", label: "Passeio" },
   { slug: "agasalho", label: "Agasalho" },
+  { slug: "colete", label: "Colete" },
+  { slug: "acessorios", label: "Acessórios" },
 ];
 
 export const SITE_CONTACT = {
@@ -24,5 +26,10 @@ const DEFAULT_WHATSAPP_MESSAGE =
 
 export function buildWhatsAppUrl(message: string = DEFAULT_WHATSAPP_MESSAGE) {
   const number = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
+  if (!number && process.env.NODE_ENV === "development") {
+    console.warn(
+      "[buildWhatsAppUrl] NEXT_PUBLIC_WHATSAPP_NUMBER não configurado"
+    );
+  }
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 }
