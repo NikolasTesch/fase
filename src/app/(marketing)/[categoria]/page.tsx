@@ -4,11 +4,14 @@ import { notFound } from "next/navigation";
 
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { ProductGrid } from "@/components/products/ProductGrid";
+import { SimulatorCta } from "@/components/products/SimulatorCta";
 import { SubcategoryFilter } from "@/components/products/SubcategoryFilter";
 import { CategoryHero } from "@/components/sections/CategoryHero";
+import { FaqAccordion } from "@/components/sections/FaqAccordion";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
-import { buildWhatsAppUrl } from "@/lib/site";
+import { buildBreadcrumbJsonLd, buildFaqJsonLd } from "@/lib/seo";
+import { buildWhatsAppUrl, getSimulatorUrl } from "@/lib/site";
 
 interface CategoryPageProps {
   params: Promise<{ categoria: string }>;
@@ -62,6 +65,10 @@ export default async function CategoryPage({
       subcategories: {
         orderBy: { sortOrder: "asc" },
       },
+      faqs: {
+        where: { isActive: true },
+        orderBy: { sortOrder: "asc" },
+      },
       products: {
         where: {
           isActive: true,
@@ -94,6 +101,17 @@ export default async function CategoryPage({
   const whatsAppUrl = buildWhatsAppUrl(
     `Olá Fase Sport! Quero uniforme de ${category.name}.`
   );
+  const simulatorUrl = getSimulatorUrl();
+
+  const faqs = category.faqs.map((faq) => ({
+    question: faq.question,
+    answer: faq.answer,
+  }));
+
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Início", href: "/" },
+    { name: category.name },
+  ]);
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 lg:py-12">
@@ -122,6 +140,12 @@ export default async function CategoryPage({
 
       <ProductGrid products={products} />
 
+      {faqs.length > 0 ? (
+        <div className="-mx-4 lg:-mx-0">
+          <FaqAccordion faqs={faqs} />
+        </div>
+      ) : null}
+
       <section className="flex flex-col items-start gap-4 rounded-2xl bg-muted px-6 py-10 sm:items-center sm:text-center lg:px-10">
         <h2 className="font-heading text-3xl text-foreground lg:text-4xl">
           Pronto para o uniforme do seu time?
@@ -137,17 +161,27 @@ export default async function CategoryPage({
           >
             Solicitar Orçamento
           </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            render={
-              <a href={whatsAppUrl} target="_blank" rel="noopener noreferrer" />
-            }
-          >
-            Chamar no WhatsApp
-          </Button>
+          <CategoryWhatsAppCta url={whatsAppUrl} />
         </div>
+        {simulatorUrl ? (
+          <div data-testid="simulator-cta-category">
+            <SimulatorCta url={simulatorUrl} location="category" />
+          </div>
+        ) : null}
       </section>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      {faqs.length > 0 ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(buildFaqJsonLd(faqs)),
+          }}
+        />
+      ) : null}
     </div>
   );
 }

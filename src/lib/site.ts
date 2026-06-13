@@ -26,10 +26,20 @@ const DEFAULT_WHATSAPP_MESSAGE =
 
 export function buildWhatsAppUrl(message: string = DEFAULT_WHATSAPP_MESSAGE) {
   const number = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
-  if (!number && process.env.NODE_ENV === "development") {
-    console.warn(
-      "[buildWhatsAppUrl] NEXT_PUBLIC_WHATSAPP_NUMBER não configurado"
-    );
+  if (!number) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        "[buildWhatsAppUrl] NEXT_PUBLIC_WHATSAPP_NUMBER não configurado"
+      );
+      return "#";
+    }
+    return "/orcamento";
   }
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+}
+
+export function getSimulatorUrl(productUrl?: string | null): string | null {
+  if (productUrl) return productUrl;
+  const global = process.env.NEXT_PUBLIC_SIMULATOR_URL;
+  return global && global.length > 0 ? global : null;
 }

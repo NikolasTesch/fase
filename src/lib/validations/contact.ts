@@ -3,7 +3,12 @@ import { z } from "zod";
 export const ContactSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
-  phone: z.string().min(10).max(20),
+  phone: z
+    .string()
+    .transform((v) => v.replace(/\D/g, ""))
+    .refine((v) => v.length >= 10 && v.length <= 11, {
+      message: "Telefone deve ter 10 ou 11 dígitos",
+    }),
   city: z.string().max(100).optional(),
   sport: z.enum([
     "futebol",

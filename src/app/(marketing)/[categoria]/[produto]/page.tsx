@@ -5,8 +5,11 @@ import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { ProductGallery } from "@/components/products/ProductGallery";
 import { ProductWhatsAppCta } from "@/components/products/ProductWhatsAppCta";
+import { SimulatorCta } from "@/components/products/SimulatorCta";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
+import { buildBreadcrumbJsonLd, buildProductJsonLd } from "@/lib/seo";
+import { getSimulatorUrl } from "@/lib/site";
 
 interface ProductPageProps {
   params: Promise<{ categoria: string; produto: string }>;
@@ -71,6 +74,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       fabric: true,
       minQty: true,
       isActive: true,
+      simulatorUrl: true,
       seoTitle: true,
       seoDesc: true,
       images: {
@@ -91,14 +95,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const { category } = product;
   const primaryImage = product.images[0];
+  const simulatorUrl = getSimulatorUrl(product.simulatorUrl);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Início", href: "/" },
+    { name: category.name, href: `/${category.slug}` },
+    { name: product.name },
+  ]);
+  const productJsonLd = buildProductJsonLd({
     name: product.name,
     description: product.description,
     image: primaryImage?.url,
-  };
+  });
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 lg:py-12">
@@ -152,12 +160,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
               Solicitar Orçamento
             </Button>
           </div>
+
+          {simulatorUrl ? (
+            <SimulatorCta url={simulatorUrl} productSlug={product.slug} />
+          ) : null}
         </div>
       </div>
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
       />
     </div>
   );

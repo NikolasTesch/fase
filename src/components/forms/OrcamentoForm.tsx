@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ContactSchema, type ContactInput, type ContactOutput } from "@/lib/validations/contact";
+import { Check } from "lucide-react";
+import { ContactSchema, type ContactInput } from "@/lib/validations/contact";
 import { buildWhatsAppUrl } from "@/lib/site";
+import { trackEvent } from "@/lib/analytics";
+import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 const SPORTS = [
@@ -26,18 +29,31 @@ interface OrcamentoFormProps {
   defaultProductSlug?: string;
 }
 
-export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFormProps) {
+function maskPhone(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  if (d.length === 0) return "";
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+export function OrcamentoForm({
+  defaultSport,
+  defaultProductSlug,
+}: OrcamentoFormProps) {
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const {
     register,
     handleSubmit,
     trigger,
+    setValue,
     formState: { errors, isSubmitting },
-    watch,
-  } = useForm<ContactInput, unknown, ContactOutput>({
+  } = useForm<ContactInput>({
     resolver: zodResolver(ContactSchema),
     defaultValues: {
       sport: defaultSport,
@@ -45,6 +61,12 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
       source: "form",
     },
   });
+
+  useEffect(() => {
+    stepHeadingRef.current?.focus();
+  }, [step]);
+
+  const { onChange: _rhfOnChange, ...phoneReg } = register("phone");
 
   async function advance() {
     const fields: (keyof ContactInput)[][] = [
@@ -54,10 +76,16 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
     ];
 
     const valid = await trigger(fields[step]);
-    if (valid) setStep((s) => s + 1);
+    if (valid) {
+      setStep((s) => {
+        const next = s + 1;
+        trackEvent("orcamento_step", { step: next + 1 });
+        return next;
+      });
+    }
   }
 
-  async function onSubmit(data: ContactOutput) {
+  async function onSubmit(data: ContactInput) {
     setServerError(null);
     try {
       const res = await fetch("/api/contact", {
@@ -72,9 +100,12 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
         return;
       }
 
+      trackEvent("lead_submit", { sport: data.sport, source: "form" });
       setSubmitted(true);
     } catch {
-      setServerError("Erro de conexão. Verifique sua internet e tente novamente.");
+      setServerError(
+        "Erro de conexão. Verifique sua internet e tente novamente."
+      );
     }
   }
 
@@ -104,20 +135,25 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
 
   return (
     <div className="w-full max-w-lg mx-auto">
-      {/* Indicador de steps */}
       <ol className="flex gap-2 mb-8">
         {STEPS.map((label, i) => (
           <li key={label} className="flex-1 text-center text-sm">
             <span
-              className={`block w-6 h-6 rounded-full mx-auto mb-1 text-xs leading-6 font-medium ${
-                i <= step
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-              }`}
+              aria-current={i === step ? "step" : undefined}
+              className={cn(
+                "mx-auto mb-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium",
+                i < step && "bg-primary text-primary-foreground",
+                i === step && "bg-background text-primary ring-2 ring-primary",
+                i > step && "bg-muted text-muted-foreground opacity-50"
+              )}
             >
-              {i + 1}
+              {i < step ? <Check size={12} aria-hidden="true" /> : i + 1}
             </span>
-            <span className={i <= step ? "text-foreground" : "text-muted-foreground"}>
+            <span
+              className={
+                i <= step ? "text-foreground" : "text-muted-foreground"
+              }
+            >
               {label}
             </span>
           </li>
@@ -125,9 +161,15 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
       </ol>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        {/* Step 1 */}
         {step === 0 && (
           <div className="space-y-4">
+            <h2
+              ref={stepHeadingRef}
+              tabIndex={-1}
+              className="text-xl font-semibold outline-none"
+            >
+              Modalidade
+            </h2>
             <div>
               <label htmlFor="sport" className="block text-sm font-medium mb-1">
                 Modalidade *
@@ -135,7 +177,12 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
               <select
                 id="sport"
                 {...register("sport")}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                aria-invalid={errors.sport ? "true" : undefined}
+                aria-describedby={errors.sport ? "sport-error" : undefined}
+                className={cn(
+                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                  errors.sport ? "border-destructive" : "border-border"
+                )}
               >
                 <option value="">Selecione...</option>
                 {SPORTS.map((s) => (
@@ -145,12 +192,21 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
                 ))}
               </select>
               {errors.sport && (
-                <p className="text-destructive text-xs mt-1">{errors.sport.message}</p>
+                <p
+                  id="sport-error"
+                  role="alert"
+                  className="text-destructive text-xs mt-1"
+                >
+                  {errors.sport.message}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="quantity" className="block text-sm font-medium mb-1">
+              <label
+                htmlFor="quantity"
+                className="block text-sm font-medium mb-1"
+              >
                 Quantidade aproximada
               </label>
               <input
@@ -158,40 +214,79 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
                 type="number"
                 min={1}
                 {...register("quantity", { valueAsNumber: true })}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                aria-invalid={errors.quantity ? "true" : undefined}
+                aria-describedby={
+                  errors.quantity ? "quantity-error" : undefined
+                }
+                className={cn(
+                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                  errors.quantity ? "border-destructive" : "border-border"
+                )}
                 placeholder="Ex: 20"
               />
               {errors.quantity && (
-                <p className="text-destructive text-xs mt-1">{errors.quantity.message}</p>
+                <p
+                  id="quantity-error"
+                  role="alert"
+                  className="text-destructive text-xs mt-1"
+                >
+                  {errors.quantity.message}
+                </p>
               )}
             </div>
           </div>
         )}
 
-        {/* Step 2 */}
         {step === 1 && (
           <div className="space-y-4">
+            <h2
+              ref={stepHeadingRef}
+              tabIndex={-1}
+              className="text-xl font-semibold outline-none"
+            >
+              Personalização
+            </h2>
             <div>
-              <label htmlFor="details" className="block text-sm font-medium mb-1">
+              <label
+                htmlFor="details"
+                className="block text-sm font-medium mb-1"
+              >
                 Detalhes da personalização
               </label>
               <textarea
                 id="details"
                 {...register("details")}
                 rows={5}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                aria-invalid={errors.details ? "true" : undefined}
+                aria-describedby={errors.details ? "details-error" : undefined}
+                className={cn(
+                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none",
+                  errors.details ? "border-destructive" : "border-border"
+                )}
                 placeholder="Descreva cores, estampas, número de jogadores, modelo de interesse..."
               />
               {errors.details && (
-                <p className="text-destructive text-xs mt-1">{errors.details.message}</p>
+                <p
+                  id="details-error"
+                  role="alert"
+                  className="text-destructive text-xs mt-1"
+                >
+                  {errors.details.message}
+                </p>
               )}
             </div>
           </div>
         )}
 
-        {/* Step 3 */}
         {step === 2 && (
           <div className="space-y-4">
+            <h2
+              ref={stepHeadingRef}
+              tabIndex={-1}
+              className="text-xl font-semibold outline-none"
+            >
+              Contato
+            </h2>
             <div>
               <label htmlFor="name" className="block text-sm font-medium mb-1">
                 Nome *
@@ -199,11 +294,22 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
               <input
                 id="name"
                 {...register("name")}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                aria-invalid={errors.name ? "true" : undefined}
+                aria-describedby={errors.name ? "name-error" : undefined}
+                className={cn(
+                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                  errors.name ? "border-destructive" : "border-border"
+                )}
                 placeholder="Seu nome completo"
               />
               {errors.name && (
-                <p className="text-destructive text-xs mt-1">{errors.name.message}</p>
+                <p
+                  id="name-error"
+                  role="alert"
+                  className="text-destructive text-xs mt-1"
+                >
+                  {errors.name.message}
+                </p>
               )}
             </div>
 
@@ -215,11 +321,22 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
                 id="email"
                 type="email"
                 {...register("email")}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                aria-invalid={errors.email ? "true" : undefined}
+                aria-describedby={errors.email ? "email-error" : undefined}
+                className={cn(
+                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                  errors.email ? "border-destructive" : "border-border"
+                )}
                 placeholder="seu@email.com"
               />
               {errors.email && (
-                <p className="text-destructive text-xs mt-1">{errors.email.message}</p>
+                <p
+                  id="email-error"
+                  role="alert"
+                  className="text-destructive text-xs mt-1"
+                >
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
@@ -230,12 +347,27 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
               <input
                 id="phone"
                 type="tel"
-                {...register("phone")}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                {...phoneReg}
+                onChange={(e) => {
+                  const masked = maskPhone(e.target.value);
+                  setValue("phone", masked, { shouldValidate: true });
+                }}
+                aria-invalid={errors.phone ? "true" : undefined}
+                aria-describedby={errors.phone ? "phone-error" : undefined}
+                className={cn(
+                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                  errors.phone ? "border-destructive" : "border-border"
+                )}
                 placeholder="(27) 99999-9999"
               />
               {errors.phone && (
-                <p className="text-destructive text-xs mt-1">{errors.phone.message}</p>
+                <p
+                  id="phone-error"
+                  role="alert"
+                  className="text-destructive text-xs mt-1"
+                >
+                  {errors.phone.message}
+                </p>
               )}
             </div>
 
@@ -246,21 +378,40 @@ export function OrcamentoForm({ defaultSport, defaultProductSlug }: OrcamentoFor
               <input
                 id="city"
                 {...register("city")}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                aria-invalid={errors.city ? "true" : undefined}
+                aria-describedby={errors.city ? "city-error" : undefined}
+                className={cn(
+                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                  errors.city ? "border-destructive" : "border-border"
+                )}
                 placeholder="Sua cidade"
               />
+              {errors.city && (
+                <p
+                  id="city-error"
+                  role="alert"
+                  className="text-destructive text-xs mt-1"
+                >
+                  {errors.city.message}
+                </p>
+              )}
             </div>
 
             {serverError && (
-              <p className="text-destructive text-sm">{serverError}</p>
+              <p role="alert" className="text-destructive text-sm">
+                {serverError}
+              </p>
             )}
           </div>
         )}
 
-        {/* Navegação */}
         <div className="flex justify-between mt-8">
           {step > 0 && (
-            <Button type="button" variant="outline" onClick={() => setStep((s) => s - 1)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setStep((s) => s - 1)}
+            >
               Voltar
             </Button>
           )}

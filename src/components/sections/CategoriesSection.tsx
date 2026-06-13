@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { CategoryCard } from "@/components/categories/CategoryCard";
 import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
 import { StaggerContainer, StaggerItem } from "@/components/ui/AnimatedSection";
@@ -7,7 +9,20 @@ interface CategoriesSectionProps {
 }
 
 export function CategoriesSection({ categories }: CategoriesSectionProps) {
-  if (categories.length === 0) return null;
+  if (categories.length === 0) {
+    return (
+      <section id="categorias" className="bg-background py-16 lg:py-24">
+        <div className="mx-auto w-full max-w-7xl px-4 text-center">
+          <p className="text-muted-foreground">
+            Catálogo em breve.{" "}
+            <Link href="/orcamento" className="text-primary hover:underline">
+              Solicite um orçamento personalizado.
+            </Link>
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="categorias" className="bg-background py-16 lg:py-24">
