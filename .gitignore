@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# product images — armazenadas no Cloudflare R2, não no repositório
+/public/images/products/
