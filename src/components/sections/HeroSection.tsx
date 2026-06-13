@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
+import { trackEvent } from "@/lib/analytics";
 import { buildWhatsAppUrl } from "@/lib/site";
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -53,6 +54,9 @@ export function HeroSection() {
                 href={buildWhatsAppUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  trackEvent("whatsapp_click", { location: "hero" })
+                }
               />
             }
           >

@@ -1,6 +1,9 @@
+"use client";
+
 import { MessageCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { trackEvent } from "@/lib/analytics";
 import { buildWhatsAppUrl } from "@/lib/site";
 
 interface ProductWhatsAppCtaProps {
@@ -19,7 +22,14 @@ export function ProductWhatsAppCta({
     <Button
       size="lg"
       data-testid="product-whatsapp-cta"
-      render={<a href={href} target="_blank" rel="noopener noreferrer" />}
+      render={
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackEvent("whatsapp_click", { location: "product" })}
+        />
+      }
     >
       <MessageCircle aria-hidden="true" />
       Chamar no WhatsApp

@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { CATEGORY_NAV, SITE_CONTACT, buildWhatsAppUrl } from "@/lib/site";
+import { FooterWhatsAppLink } from "@/components/layout/FooterWhatsAppLink";
+import { CATEGORY_NAV, SITE_CONTACT } from "@/lib/site";
 
 const USEFUL_LINKS = [
   { href: "/como-funciona", label: "Como Funciona" },
@@ -68,14 +69,7 @@ export function Footer() {
             </h3>
             <ul className="mt-4 space-y-2 text-sm text-primary-foreground/80">
               <li>
-                <a
-                  href={buildWhatsAppUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-primary-foreground"
-                >
-                  WhatsApp
-                </a>
+                <FooterWhatsAppLink />
               </li>
               <li>
                 <a

@@ -2,6 +2,7 @@
 
 import { MessageCircle } from "lucide-react";
 
+import { trackEvent } from "@/lib/analytics";
 import { buildWhatsAppUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +12,7 @@ export function WhatsAppFab() {
       href={buildWhatsAppUrl()}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => trackEvent("whatsapp_click", { location: "fab" })}
       aria-label="Falar no WhatsApp"
       data-testid="whatsapp-fab"
       className={cn(

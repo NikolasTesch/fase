@@ -16,7 +16,7 @@ interface EventParams {
 
 declare global {
   interface Window {
-    dataLayer: unknown[];
+    dataLayer?: object[];
   }
 }
 

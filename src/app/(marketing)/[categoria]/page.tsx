@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
+import { CategoryWhatsAppCta } from "@/components/products/CategoryWhatsAppCta";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { SimulatorCta } from "@/components/products/SimulatorCta";
 import { SubcategoryFilter } from "@/components/products/SubcategoryFilter";
