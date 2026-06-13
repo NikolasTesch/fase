@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,18 +15,6 @@ import { getSimulatorUrl } from "@/lib/site";
 
 interface ProductPageProps {
   params: Promise<{ categoria: string; produto: string }>;
-}
-
-export async function generateStaticParams() {
-  const products = await prisma.product.findMany({
-    where: { isActive: true },
-    select: { slug: true, category: { select: { slug: true } } },
-  });
-
-  return products.map((product) => ({
-    categoria: product.category.slug,
-    produto: product.slug,
-  }));
 }
 
 export async function generateMetadata({

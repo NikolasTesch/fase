@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -17,15 +19,6 @@ import { buildWhatsAppUrl, getSimulatorUrl } from "@/lib/site";
 interface CategoryPageProps {
   params: Promise<{ categoria: string }>;
   searchParams: Promise<{ sub?: string }>;
-}
-
-export async function generateStaticParams() {
-  const categories = await prisma.category.findMany({
-    where: { isActive: true },
-    select: { slug: true },
-  });
-
-  return categories.map((category) => ({ categoria: category.slug }));
 }
 
 export async function generateMetadata({
