@@ -6,7 +6,8 @@ export async function GET(req: NextRequest) {
   try {
     const statusParam = req.nextUrl.searchParams.get("status");
 
-    if (statusParam !== null && !(statusParam in LeadStatus)) {
+    const validStatuses = Object.values(LeadStatus) as string[];
+    if (statusParam !== null && !validStatuses.includes(statusParam)) {
       return Response.json(
         { message: "Status inválido" },
         { status: 400 }

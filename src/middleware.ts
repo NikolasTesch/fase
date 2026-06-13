@@ -11,8 +11,9 @@ export async function middleware(req: NextRequest) {
 
   if (!isProtected) return NextResponse.next();
 
-  // Login page é pública dentro de /admin
-  if (req.nextUrl.pathname === "/admin/login") return NextResponse.next();
+  // Login page e endpoint de auth são públicos
+  const PUBLIC_PATHS = ["/admin/login", "/api/admin/auth/login"];
+  if (PUBLIC_PATHS.includes(req.nextUrl.pathname)) return NextResponse.next();
 
   const token = req.cookies.get("admin_token")?.value;
 
