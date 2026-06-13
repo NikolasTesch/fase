@@ -1,9 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
+import { Plus, Package } from "lucide-react";
+import { AnimatedTableRows } from "./_components/AnimatedTableRows";
 
 export const metadata: Metadata = { title: "Produtos — Admin" };
 
@@ -19,57 +22,50 @@ export default async function ProdutosPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl">Produtos</h1>
-        <Button render={<Link href="/admin/produtos/novo" />}>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Produtos</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            {products.length} produto{products.length !== 1 ? "s" : ""} cadastrado
+            {products.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <Button render={<Link href="/admin/produtos/novo" />} className="gap-2">
+          <Plus size={16} />
           Novo produto
         </Button>
       </div>
 
-      <div className="rounded-xl border border-border overflow-hidden">
+      <div className="rounded-2xl border border-border overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50">
+          <thead className="bg-muted/50 border-b border-border">
             <tr>
-              <th className="text-left px-4 py-3 font-medium">Nome</th>
-              <th className="text-left px-4 py-3 font-medium">Categoria</th>
-              <th className="text-left px-4 py-3 font-medium">Destaque</th>
-              <th className="text-left px-4 py-3 font-medium">Ativo</th>
-              <th className="text-left px-4 py-3 font-medium"></th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider w-12" />
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                Nome
+              </th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                Categoria
+              </th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                Destaque
+              </th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                Status
+              </th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider" />
             </tr>
           </thead>
-          <tbody>
-            {products.map((p) => (
-              <tr key={p.id} className="border-t border-border">
-                <td className="px-4 py-3 font-medium">{p.name}</td>
-                <td className="px-4 py-3 text-muted-foreground">{p.category.name}</td>
-                <td className="px-4 py-3">{p.isFeatured ? "Sim" : "—"}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${
-                      p.isActive ? "bg-brand-tint text-brand-dark" : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {p.isActive ? "Ativo" : "Inativo"}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/admin/produtos/${p.id}`}
-                    className="text-xs text-primary hover:underline"
-                  >
-                    Editar
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {products.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                  Nenhum produto cadastrado.
-                </td>
-              </tr>
-            )}
-          </tbody>
+          <AnimatedTableRows products={products} />
         </table>
+
+        {products.length === 0 && (
+          <div className="px-4 py-16 text-center">
+            <div className="flex flex-col items-center gap-3 text-muted-foreground">
+              <Package size={32} className="opacity-30" />
+              <p className="text-sm">Nenhum produto cadastrado.</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { TestimonialToggle } from "./_components/TestimonialToggle";
+import { Plus, MessageSquare, Star } from "lucide-react";
+import { AnimatedTestimonialRows } from "./_components/AnimatedTestimonialRows";
 
 export const metadata: Metadata = { title: "Depoimentos — Admin" };
 
@@ -16,51 +18,51 @@ export default async function DepoimentosPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl">Depoimentos</h1>
-        <Button render={<Link href="#" />}>Novo depoimento</Button>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Depoimentos</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            {testimonials.length} depoimento{testimonials.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <Button render={<Link href="#" />} className="gap-2">
+          <Plus size={16} />
+          Novo depoimento
+        </Button>
       </div>
 
-      <div className="rounded-xl border border-border overflow-hidden">
+      <div className="rounded-2xl border border-border overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50">
+          <thead className="bg-muted/50 border-b border-border">
             <tr>
-              <th className="text-left px-4 py-3 font-medium">Cliente</th>
-              <th className="text-left px-4 py-3 font-medium">Time</th>
-              <th className="text-left px-4 py-3 font-medium">Nota</th>
-              <th className="text-left px-4 py-3 font-medium">Ordem</th>
-              <th className="text-left px-4 py-3 font-medium">Ativo</th>
-              <th className="text-left px-4 py-3 font-medium"></th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                Cliente
+              </th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                Time
+              </th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                Nota
+              </th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                Ordem
+              </th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                Ativo
+              </th>
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground text-xs uppercase tracking-wider" />
             </tr>
           </thead>
-          <tbody>
-            {testimonials.map((t) => (
-              <tr key={t.id} className="border-t border-border">
-                <td className="px-4 py-3 font-medium">{t.clientName}</td>
-                <td className="px-4 py-3 text-muted-foreground">{t.teamName ?? "—"}</td>
-                <td className="px-4 py-3">{t.rating}/5</td>
-                <td className="px-4 py-3">{t.sortOrder}</td>
-                <td className="px-4 py-3">
-                  <TestimonialToggle id={t.id} isActive={t.isActive} />
-                </td>
-                <td className="px-4 py-3">
-                  <Link
-                    href="#"
-                    className="text-xs text-primary hover:underline"
-                  >
-                    Editar
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {testimonials.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                  Nenhum depoimento cadastrado.
-                </td>
-              </tr>
-            )}
-          </tbody>
+          <AnimatedTestimonialRows testimonials={testimonials} />
         </table>
+
+        {testimonials.length === 0 && (
+          <div className="px-4 py-16 text-center">
+            <div className="flex flex-col items-center gap-3 text-muted-foreground">
+              <MessageSquare size={32} className="opacity-30" />
+              <p className="text-sm">Nenhum depoimento cadastrado.</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

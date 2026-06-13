@@ -53,16 +53,10 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "https://placehold.co/800x800/CD3438/ffffff?text=Kit+Campo",
+              url: "/images/products/kit-futebol-campo.png",
               altText: "Kit futebol campo Fase Sport",
               isPrimary: true,
               sortOrder: 0,
-            },
-            {
-              url: "https://placehold.co/800x800/1a1a1a/ffffff?text=Detalhe+Campo",
-              altText: "Detalhe do kit futebol campo",
-              isPrimary: false,
-              sortOrder: 1,
             },
           ],
         },
@@ -77,7 +71,7 @@ async function main() {
           sortOrder: 2,
           images: [
             {
-              url: "https://placehold.co/800x800/CD3438/ffffff?text=Kit+Society",
+              url: "/images/products/kit-futebol-society.png",
               altText: "Kit futebol society Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -95,7 +89,7 @@ async function main() {
           sortOrder: 3,
           images: [
             {
-              url: "https://placehold.co/800x800/CD3438/ffffff?text=Camisa+Premium",
+              url: "/images/products/camisa-futebol-premium.png",
               altText: "Camisa futebol premium Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -113,7 +107,7 @@ async function main() {
           sortOrder: 4,
           images: [
             {
-              url: "https://placehold.co/800x800/333333/ffffff?text=Uniforme+Goleiro",
+              url: "/images/products/uniforme-goleiro.png",
               altText: "Uniforme de goleiro Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -167,7 +161,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "https://placehold.co/800x800/CD3438/ffffff?text=Kit+Vôlei",
+              url: "/images/products/kit-volei-quadra.png",
               altText: "Kit vôlei de quadra Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -185,7 +179,7 @@ async function main() {
           sortOrder: 2,
           images: [
             {
-              url: "https://placehold.co/800x800/CD3438/ffffff?text=Bermuda+Praia",
+              url: "/images/products/bermuda-volei-praia.png",
               altText: "Bermuda vôlei de praia Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -224,7 +218,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "https://placehold.co/800x800/CD3438/ffffff?text=Kit+Basquete",
+              url: "/images/products/kit-basquete.png",
               altText: "Kit basquete Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -242,7 +236,7 @@ async function main() {
           sortOrder: 2,
           images: [
             {
-              url: "https://placehold.co/800x800/CD3438/ffffff?text=Regata",
+              url: "/images/products/regata-basquete.png",
               altText: "Regata basquete Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -274,7 +268,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "https://placehold.co/800x800/CD3438/ffffff?text=Kit+Handebol",
+              url: "/images/products/kit-handebol.png",
               altText: "Kit handebol Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -306,7 +300,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "https://placehold.co/800x800/CD3438/ffffff?text=Polo+Comissão",
+              url: "/images/products/camisa-polo-comissao.png",
               altText: "Camisa polo comissão Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -324,7 +318,7 @@ async function main() {
           sortOrder: 2,
           images: [
             {
-              url: "https://placehold.co/800x800/CD3438/ffffff?text=Camisa+Passeio",
+              url: "/images/products/camisa-passeio-delegacao.png",
               altText: "Camisa passeio delegação Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -356,7 +350,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "https://placehold.co/800x800/1a1a1a/ffffff?text=Agasalho",
+              url: "/images/products/agasalho-esportivo.png",
               altText: "Agasalho esportivo Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -374,7 +368,7 @@ async function main() {
           sortOrder: 2,
           images: [
             {
-              url: "https://placehold.co/800x800/1a1a1a/ffffff?text=Corta-Vento",
+              url: "/images/products/jaqueta-corta-vento.png",
               altText: "Jaqueta corta-vento Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -406,7 +400,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "https://placehold.co/800x800/CD3438/ffffff?text=Colete+Treino",
+              url: "/images/products/colete-treino.png",
               altText: "Colete treino Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -438,7 +432,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "https://placehold.co/800x800/CD3438/ffffff?text=Meião",
+              url: "/images/products/meiao-esportivo.png",
               altText: "Meião esportivo Fase Sport",
               isPrimary: true,
               sortOrder: 0,
