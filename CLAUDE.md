@@ -91,5 +91,27 @@ Definidas no `layout.tsx` raiz via `next/font/google`:
 
 ## Estado atual (Junho 2026)
 
-Ver `spec.md` §18 — Progresso de Implementação.
+**V1 completa (28 specs finalizadas).** Todo o código de produção está implementado.
+
+### O que está pronto
+
+- **Backend/API:** todas as rotas públicas e admin, auth JWT, rate limiting, Resend, R2
+- **CMS Admin:** login, dashboard (métricas de leads), produtos (CRUD + upload), categorias, depoimentos, FAQs, leads com filtro de status
+- **Frontend público:** homepage (Hero, Categorias, Destaques, Como Funciona, Por que a Fase, Depoimentos, Contato+Mapa, CTA Banner), páginas de categoria (SSG, filtro subcategoria, FAQ, CTA simulador), páginas de produto (galeria, WhatsApp CTA, simulador), orçamento (form multi-step 3 passos, maskPhone, a11y), como-funciona, busca, privacidade
+- **SEO:** sitemap dinâmico, robots, JSON-LD (LocalBusiness, Product, BreadcrumbList, FAQPage), OG/Twitter cards, OG images dinâmicas por categoria e produto
+- **Analytics:** GA4 + GTM via `@next/third-parties`, banner LGPD, eventos rastreados (whatsapp_click, simulator_click, orcamento_step, lead_submit)
+- **Testes:** Vitest unit tests (`src/__tests__/`) + Playwright E2E (Fluxos A e B + admin auth) + CI/CD GitHub Actions
+- **Segurança:** headers (vercel.json), middleware JWT, rate limit, guard WhatsApp URL
+
+### Bloqueadores para lançamento (não-código)
+
+1. Imagens reais de produtos no R2 (ALTA)
+2. Variáveis de ambiente de produção configuradas no Vercel (BLOQUEANTE)
+3. Conteúdo real: depoimentos, FAQ, informações de contato
+
+### Próxima fase — melhorias (specs em `specs/pendentes/`)
+
+Animações Framer Motion, carrossel de depoimentos com foto do material, seção Instagram, hero com imagens reais por categoria, carrossel de destaques, landing empresarial.
+
+Ver `spec.md` §18 para a lista completa.
 

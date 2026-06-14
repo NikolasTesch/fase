@@ -1052,7 +1052,7 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 
 ## 18. Progresso de Implementação
 
-> **Atualizado:** 2026-06-13 — plataforma V1 completa (21 specs finalizadas)
+> **Atualizado:** 2026-06-14 — plataforma V1 completa (28 specs finalizadas). Aguardando: conteúdo real + configuração de produção. Specs de melhorias (fase 2) em `specs/pendentes/`.
 
 ### 18.1 Concluído
 
@@ -1176,6 +1176,14 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 - [x] `src/components/products/SimulatorCta.tsx` — renderização condicional com `getSimulatorUrl`
 - [x] `buildWhatsAppUrl` com guard (validação do número)
 
+#### Testes unitários Vitest
+- [x] `src/__tests__/setup.ts` — jsdom + @testing-library
+- [x] `src/__tests__/lib/site.test.ts` — funções utilitárias de site (buildWhatsAppUrl, getSimulatorUrl)
+- [x] `src/__tests__/lib/site-guard.test.ts` — guard de WhatsApp número vazio
+- [x] `src/__tests__/validations/auth.test.ts` — LoginSchema Zod
+- [x] `src/__tests__/validations/contact.test.ts` — ContactSchema Zod
+- [x] `src/__tests__/components/OrcamentoForm.test.tsx` — form multi-step steps + validação
+
 #### Testes E2E (Playwright)
 - [x] `tests/e2e/conversion-flows.spec.ts` — Fluxo A (homepage → categoria → produto → WhatsApp), Fluxo B (orçamento 3 steps), responsividade mobile
 - [x] `tests/e2e/admin-auth.spec.ts` — login admin
@@ -1184,19 +1192,45 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 - [x] `.github/workflows/ci.yml` — type-check, lint, unit tests, next build em PRs e pushes para main
 - [x] `vercel.json` — headers de segurança (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
 
+#### Email e notificações
+- [x] `src/emails/LeadNotificationEmail.tsx` — template React Email com branding FASE, dados do lead, botão WhatsApp e link admin
+
+#### Admin — Dashboard de Métricas
+- [x] `src/app/(admin)/admin/dashboard/_components/LeadMetrics.tsx` — leads por modalidade, funil de status, volume ao longo do tempo (Prisma `groupBy`)
+
+#### OG Images dinâmicas
+- [x] `src/app/(marketing)/[categoria]/opengraph-image.tsx` — OG image gerada por categoria
+- [x] `src/app/(marketing)/[categoria]/[produto]/opengraph-image.tsx` — OG image por produto
+
+#### Páginas legais
+- [x] `src/app/(marketing)/privacidade/page.tsx` — política de privacidade / LGPD
+
 ---
 
-### 18.2 Pendente — gaps antes do lançamento
+### 18.2 Pendente antes do lançamento
 
 | Item | Tipo | Prioridade |
 |---|---|---|
-| Testes unitários Vitest (`tests/unit/`) | Código — `vitest.config.ts` existe, sem arquivos de teste | ALTA — CI já roda `npm run test:unit` |
-| Audit de acessibilidade WCAG AA manual | QA | MÉDIA |
 | Imagens reais de produtos cadastradas no R2 | Conteúdo | ALTA |
 | Depoimentos reais de clientes cadastrados | Conteúdo | MÉDIA |
 | FAQ respondida com informações reais (prazo, qtd. mínima, pagamento) | Conteúdo | MÉDIA |
 | Variáveis de ambiente de produção configuradas no Vercel | Config | BLOQUEANTE para deploy |
 | Google Search Console + sitemap enviado | Config | Pós-deploy |
+
+### 18.3 Próxima fase — specs pendentes (melhorias)
+
+| Spec | ID |
+|---|---|
+| Animações e fluidez (Framer Motion micro-interações) | `2026-06-13-animacoes-fluidez` |
+| Carrossel de depoimentos com foto do material | `2026-06-14-homepage-depoimentos-carousel` |
+| Seção Instagram na homepage | `2026-06-14-instagram-section` |
+| Hero com imagens reais por categoria | `2026-06-13-hero-categorias` |
+| Carrossel de destaques na homepage | `2026-06-13-destaques-carrossel` |
+| Personalização e carrinho (simulador embed) | `2026-06-13-personalizacao-e-carrossel` |
+| Reformulação das páginas de modalidade | `2026-06-13-reformulacao-modalidades` |
+| Detalhes de produto — linhas de coleção | `2026-06-13-detalhe-produto-linhas` |
+| Como Funciona — vetores animados | `2026-06-13-como-funciona-vetores` |
+| Categoria Empresarial — landing dedicada | `2026-06-13-categoria-empresarial` |
 
 ---
 
