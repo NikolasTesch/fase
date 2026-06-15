@@ -34,20 +34,24 @@ export function WhySection() {
   return (
     <section className="bg-muted py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4">
-        <RevealOnScroll className="mb-10 max-w-2xl">
-          <h2 className="font-heading text-4xl text-foreground lg:text-5xl">
-            Por que a Fase?
+        <RevealOnScroll className="mb-12 text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest text-primary">
+            Por que escolher a Fase?
+          </p>
+          <h2 className="mt-2 font-heading text-5xl text-foreground lg:text-6xl">
+            O que faz a diferença
           </h2>
-          <p className="mt-3 text-muted-foreground">
-            O que faz do seu uniforme um diferencial dentro e fora de campo.
+          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+            Do tecido ao acabamento, cada detalhe é pensado para o seu time
+            entrar em campo com confiança e estilo.
           </p>
         </RevealOnScroll>
         <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {DIFFERENTIALS.map((item) => (
             <StaggerItem key={item.title}>
-              <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-card p-6 text-card-foreground">
-                <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <item.icon className="size-6" aria-hidden="true" />
+              <div className="flex h-full flex-col gap-4 rounded-xl border border-border bg-card p-8 text-card-foreground">
+                <span className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <item.icon className="size-7" aria-hidden="true" />
                 </span>
                 <h3 className="font-heading text-2xl">{item.title}</h3>
                 <p className="text-muted-foreground">{item.description}</p>

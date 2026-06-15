@@ -7,6 +7,8 @@ import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { ProductGallery } from "@/components/products/ProductGallery";
 import { ProductWhatsAppCta } from "@/components/products/ProductWhatsAppCta";
+import { ProductSpecifications } from "@/components/products/ProductSpecifications";
+import { LinesAndProcessSection } from "@/components/products/LinesAndProcessSection";
 import { SimulatorCta } from "@/components/products/SimulatorCta";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
@@ -142,8 +144,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
           {simulatorUrl ? (
             <SimulatorCta url={simulatorUrl} productSlug={product.slug} />
           ) : null}
+
+          <ProductSpecifications
+            categorySlug={category.slug}
+            fabric={product.fabric}
+            minQty={product.minQty}
+          />
         </div>
       </div>
+
+      <LinesAndProcessSection />
 
       <script
         type="application/ld+json"

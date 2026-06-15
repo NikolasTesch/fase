@@ -500,6 +500,7 @@ async function main() {
       text: "Excelente qualidade! Encomendamos 22 kits completos para nosso time e ficaram perfeitos. Entrega no prazo e as cores ficaram exatamente como pedimos.",
       rating: 5,
       sortOrder: 1,
+      materialImageUrl: null,
     },
     {
       clientName: "Fernanda Lima",
@@ -508,6 +509,7 @@ async function main() {
       text: "Atendimento incrível e produto de qualidade. Os uniformes de vôlei ficaram lindos, tecido leve e confortável. Toda a equipe adorou!",
       rating: 5,
       sortOrder: 2,
+      materialImageUrl: null,
     },
     {
       clientName: "Ricardo Souza",
@@ -516,6 +518,7 @@ async function main() {
       text: "Já é a terceira vez que fazemos uniformes na Fase Sport. Qualidade constante, preço justo e equipe muito atenciosa. Recomendo sem dúvida.",
       rating: 5,
       sortOrder: 3,
+      materialImageUrl: null,
     },
     {
       clientName: "Patrícia Rocha",
@@ -524,6 +527,7 @@ async function main() {
       text: "Fizemos os kits para os jogos estudantis e ficaram incríveis. As crianças amaram! Prazo cumprido e arte aprovada rapidamente.",
       rating: 5,
       sortOrder: 4,
+      materialImageUrl: null,
     },
     {
       clientName: "André Martinelli",
@@ -532,6 +536,7 @@ async function main() {
       text: "Pedimos para nosso grupo de friends e o resultado superou as expectativas. Material de qualidade, pessoal muito prestativo no WhatsApp.",
       rating: 5,
       sortOrder: 5,
+      materialImageUrl: null,
     },
   ];
 
@@ -588,6 +593,80 @@ async function main() {
     }
   }
   console.log(`✓ ${globalFaqs.length} FAQs globais`);
+
+  // ─── Categoria Empresarial ────────────────────────────────────────────────
+  const empresarialCategory = await prisma.category.upsert({
+    where: { slug: "empresarial" },
+    update: {},
+    create: {
+      slug: "empresarial",
+      name: "Empresarial",
+      sortOrder: 9,
+      description:
+        "Uniformes corporativos e profissionais para empresas, equipes administrativas e eventos. Confecção personalizada com bordado, silk ou sublimação.",
+      seoTitle: "Uniformes Empresariais Personalizados | Fase Sport",
+      seoDesc:
+        "Uniformes corporativos sob medida para empresas em Teixeira de Freitas-BA. Polos, camisas sociais e operacionais personalizados.",
+      subcategories: {
+        create: [
+          { slug: "social", name: "Administrativo / Social", sortOrder: 1 },
+          { slug: "polo", name: "Polo Profissional", sortOrder: 2 },
+          { slug: "operacional", name: "Operacional / Oficinas", sortOrder: 3 },
+          { slug: "promocional", name: "Eventos / Promocional", sortOrder: 4 },
+        ],
+      },
+    },
+    include: { subcategories: true },
+  });
+
+  const socialSub = empresarialCategory.subcategories.find(
+    (s) => s.slug === "social"
+  );
+  const poloSub = empresarialCategory.subcategories.find(
+    (s) => s.slug === "polo"
+  );
+
+  const empresarialProducts = [
+    {
+      slug: "camisa-social-administrativa",
+      name: "Camisa Social Administrativa",
+      description:
+        "Camisa social de botão personalizada com logomarca bordada ou sublimada para equipe administrativa e staff. Tecido resistente e confortável para o dia a dia corporativo.",
+      fabric: "Microfibra premium com elastano",
+      minQty: 10,
+      isFeatured: false,
+      sortOrder: 1,
+      subcategoryId: socialSub?.id,
+      images: [{ url: "/images/products/camisa-social.png", altText: "Camisa social administrativa Fase Sport", isPrimary: true, sortOrder: 0 }],
+    },
+    {
+      slug: "camisa-polo-profissional",
+      name: "Camisa Polo Profissional",
+      description:
+        "Polo corporativa de alta qualidade com bordado de logomarca e número identificador. Ideal para equipes de atendimento, vendas e suporte técnico.",
+      fabric: "Piquet 100% algodão",
+      minQty: 10,
+      isFeatured: false,
+      sortOrder: 2,
+      subcategoryId: poloSub?.id,
+      images: [{ url: "/images/products/polo-profissional.png", altText: "Polo profissional Fase Sport", isPrimary: true, sortOrder: 0 }],
+    },
+  ];
+
+  for (const p of empresarialProducts) {
+    const exists = await prisma.product.findUnique({ where: { slug: p.slug } });
+    if (!exists) {
+      const { images, ...productData } = p;
+      await prisma.product.create({
+        data: {
+          ...productData,
+          categoryId: empresarialCategory.id,
+          images: { create: images },
+        },
+      });
+    }
+  }
+  console.log(`✓ Categoria: Empresarial (${empresarialProducts.length} produtos)`);
 
   console.log("\n✅ Seed concluído com sucesso!");
 }

@@ -4,30 +4,25 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronRight } from "lucide-react";
 
-import { CATEGORY_NAV } from "@/lib/site";
+import { CATEGORY_NAV, CORPORATE_NAV } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
+  const [corporateOpen, setCorporateOpen] = useState(false);
   const [lastPathname, setLastPathname] = useState<string | null>(null);
   const pathname = usePathname();
   const reducedMotion = useReducedMotion();
 
   if (pathname !== lastPathname) {
     setLastPathname(pathname);
-    if (open) {
-      setOpen(false);
-    }
+    if (open) setOpen(false);
   }
 
   const panelMotion = reducedMotion
-    ? {
-        initial: { opacity: 1 },
-        animate: { opacity: 1 },
-        exit: { opacity: 1 },
-      }
+    ? { initial: { opacity: 1 }, animate: { opacity: 1 }, exit: { opacity: 1 } }
     : {
         initial: { opacity: 0, y: -8 },
         animate: { opacity: 1, y: 0 },
@@ -42,7 +37,7 @@ export function MobileMenu() {
         data-testid="mobile-menu-button"
         aria-label={open ? "Fechar menu" : "Abrir menu"}
         aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => setOpen((v) => !v)}
         className={cn(
           "inline-flex size-10 items-center justify-center rounded-lg text-foreground",
           "transition-colors hover:bg-muted focus-visible:outline-none",
@@ -75,6 +70,43 @@ export function MobileMenu() {
                   {item.label}
                 </Link>
               ))}
+
+              {/* Empresarial accordion */}
+              <button
+                type="button"
+                onClick={() => setCorporateOpen((v) => !v)}
+                className="flex items-center justify-between rounded-lg px-4 py-3 text-base font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                {CORPORATE_NAV.label}
+                <ChevronRight
+                  className={cn(
+                    "size-4 text-muted-foreground transition-transform duration-200",
+                    corporateOpen && "rotate-90"
+                  )}
+                />
+              </button>
+
+              <AnimatePresence>
+                {corporateOpen && (
+                  <motion.div
+                    initial={reducedMotion ? { opacity: 1 } : { height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={reducedMotion ? { opacity: 1 } : { height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="overflow-hidden"
+                  >
+                    {CORPORATE_NAV.subcategories.map((sub) => (
+                      <Link
+                        key={sub.slug}
+                        href={`/${CORPORATE_NAV.slug}?sub=${sub.slug}`}
+                        className="flex items-center rounded-lg py-2 pl-8 pr-4 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                      >
+                        {sub.label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </nav>
           </motion.div>
         )}

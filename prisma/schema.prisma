@@ -92,16 +92,34 @@ enum LeadStatus {
 }
 
 model Testimonial {
-  id         String  @id @default(cuid())
-  clientName String
-  teamName   String?
-  sport      String?
-  text       String
-  photoUrl   String?
-  logoUrl    String?
-  rating     Int     @default(5)
-  isActive   Boolean @default(true)
-  sortOrder  Int     @default(0)
+  id               String  @id @default(cuid())
+  clientName       String
+  teamName         String?
+  sport            String?
+  text             String
+  photoUrl         String?
+  logoUrl          String?
+  materialImageUrl String?
+  rating           Int     @default(5)
+  isActive         Boolean @default(true)
+  sortOrder        Int     @default(0)
+}
+
+model InstagramPost {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  linkUrl   String
+  caption   String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 model Faq {

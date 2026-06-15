@@ -11,6 +11,7 @@ import {
   HelpCircle,
   LogOut,
   Zap,
+  Camera,
 } from "lucide-react";
 import { AdminSidebarClient } from "./_components/AdminSidebarClient";
 
@@ -23,6 +24,7 @@ const NAV = [
   { href: "/admin/leads", label: "Leads", icon: Users },
   { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
   { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
+  { href: "/admin/instagram", label: "Instagram", icon: Camera },
 ];
 
 export default async function AdminLayout({

@@ -14,6 +14,22 @@ export const CATEGORY_NAV: CategoryNavItem[] = [
   { slug: "acessorios", label: "Acessórios" },
 ];
 
+export interface CorporateSubNavItem {
+  slug: string;
+  label: string;
+}
+
+export const CORPORATE_NAV = {
+  label: "Empresarial",
+  slug: "empresarial",
+  subcategories: [
+    { slug: "social", label: "Administrativo / Social" },
+    { slug: "polo", label: "Polo Profissional" },
+    { slug: "operacional", label: "Operacional / Oficinas" },
+    { slug: "promocional", label: "Eventos / Promocional" },
+  ] as CorporateSubNavItem[],
+};
+
 export const SITE_CONTACT = {
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "",
   email: "contato@fasesport.com.br",

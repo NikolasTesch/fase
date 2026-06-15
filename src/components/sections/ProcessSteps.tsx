@@ -1,67 +1,150 @@
-import { Search, Palette, ClipboardCheck, Truck } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
+import {
+  PhoneChatIcon,
+  JerseyIcon,
+  PaymentIcon,
+  SewingMachineIcon,
+  CalendarCheckIcon,
+  DeliveryTruckIcon,
+} from "@/components/ui/icons";
+import { buildWhatsAppUrl, getSimulatorUrl } from "@/lib/site";
 
-const STEPS = [
+interface StepItem {
+  stepNumber: string;
+  title: string;
+  description: string;
+  link?: string;
+  actionText?: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+}
+
+const PROCESS_STEPS: StepItem[] = [
   {
-    icon: Search,
-    title: "Escolha o Modelo",
+    stepNumber: "01",
+    title: "Solicite o Atendimento",
     description:
-      "Navegue pelo catálogo e encontre o uniforme ideal para a sua modalidade.",
+      "Inicie o contato com nossa equipe comercial pelo WhatsApp para tirar dúvidas e alinhar seu pedido.",
+    link: "whatsapp",
+    actionText: "Falar no WhatsApp",
+    icon: PhoneChatIcon,
   },
   {
-    icon: Palette,
-    title: "Personalize",
+    stepNumber: "02",
+    title: "Personalize seu Uniforme",
     description:
-      "Defina cores, escudo, nomes e numeração do jeito que o seu time precisa.",
+      "Escolha as cores, insira o escudo do seu time, patrocínios, nomes e números de forma personalizada.",
+    link: "simulator",
+    actionText: "Ir para o Simulador",
+    icon: JerseyIcon,
   },
   {
-    icon: ClipboardCheck,
-    title: "Confirme o Pedido",
+    stepNumber: "03",
+    title: "Escolha a Forma de Pagamento",
     description:
-      "Aprovamos juntos o layout, a quantidade e o prazo antes de iniciar a produção.",
+      "Facilitamos o pagamento com opções flexíveis de sinal + saldo na entrega ou parcelamento.",
+    icon: PaymentIcon,
   },
   {
-    icon: Truck,
-    title: "Receba",
+    stepNumber: "04",
+    title: "Autorize o Início da Produção",
     description:
-      "Produzimos com qualidade e entregamos o seu uniforme dentro do prazo combinado.",
+      "Após aprovar o layout final em 3D e confirmar os tamanhos, iniciamos a confecção dos mantos.",
+    icon: SewingMachineIcon,
+  },
+  {
+    stepNumber: "05",
+    title: "Espere os Prazos Estipulados",
+    description:
+      "Nossa fábrica trabalha com cronograma rígido para entregar seus uniformes dentro do prazo acordado.",
+    icon: CalendarCheckIcon,
+  },
+  {
+    stepNumber: "06",
+    title: "O Produto Chegará em seu Destino",
+    description:
+      "Enviamos para todo o Brasil com segurança ou disponibilizamos retirada física em Teixeira de Freitas-BA.",
+    icon: DeliveryTruckIcon,
   },
 ];
 
 export function ProcessSteps() {
+  const whatsappUrl = buildWhatsAppUrl(
+    "Olá Fase Sport! Gostaria de solicitar um orçamento."
+  );
+  const simulatorUrl = getSimulatorUrl();
+
+  function resolveLink(step: StepItem): string | null {
+    if (!step.link) return null;
+    if (step.link === "whatsapp") return whatsappUrl;
+    if (step.link === "simulator") return simulatorUrl;
+    return step.link;
+  }
+
   return (
     <section className="py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4">
-        <RevealOnScroll className="mb-10 max-w-2xl">
+        <RevealOnScroll className="mb-12 max-w-2xl">
           <h2 className="font-heading text-4xl text-foreground lg:text-5xl">
             Como funciona o pedido
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Do modelo à entrega, são quatro etapas simples para o seu time
-            vestir a camisa.
+            Do primeiro contato à entrega em 6 etapas simples.
           </p>
         </RevealOnScroll>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((step, index) => (
-            <RevealOnScroll key={step.title} delay={index * 0.05}>
-              <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-card p-6 text-card-foreground">
-                <div className="flex items-center justify-between">
-                  <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <step.icon className="size-6" aria-hidden="true" />
-                  </span>
-                  <span
-                    className="font-heading text-4xl text-muted-foreground/40"
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {PROCESS_STEPS.map((step, i) => {
+            const href = resolveLink(step);
+            const isLast = i === PROCESS_STEPS.length - 1;
+
+            return (
+              <RevealOnScroll key={step.stepNumber} delay={i * 0.05} className="relative">
+                <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-card p-6 text-card-foreground">
+                  <div className="flex items-center justify-between">
+                    <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <step.icon className="size-6" />
+                    </span>
+                    <span
+                      className="font-heading text-3xl text-muted-foreground/30"
+                      aria-hidden="true"
+                    >
+                      {step.stepNumber}
+                    </span>
+                  </div>
+                  <h3 className="font-heading text-lg leading-tight">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {step.description}
+                  </p>
+                  {href && step.actionText ? (
+                    <Link
+                      href={href}
+                      target={step.link === "whatsapp" ? "_blank" : undefined}
+                      rel={step.link === "whatsapp" ? "noopener noreferrer" : undefined}
+                      className="mt-auto inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                    >
+                      {step.actionText}
+                      <ArrowRight className="size-3.5" />
+                    </Link>
+                  ) : null}
+                </div>
+
+                {/* Arrow between steps (desktop) */}
+                {!isLast ? (
+                  <div
+                    className="absolute -right-3 top-1/2 hidden -translate-y-1/2 text-primary/40 xl:block"
                     aria-hidden="true"
                   >
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
-                <h3 className="font-heading text-2xl">{step.title}</h3>
-                <p className="text-muted-foreground">{step.description}</p>
-              </div>
-            </RevealOnScroll>
-          ))}
+                    ▶
+                  </div>
+                ) : null}
+              </RevealOnScroll>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -8,32 +8,29 @@ interface CategoryHeroProps {
 
 export function CategoryHero({ name, description, imageUrl }: CategoryHeroProps) {
   return (
-    <section className="relative isolate overflow-hidden rounded-2xl bg-primary text-primary-foreground">
+    <section className="relative isolate min-h-[380px] lg:min-h-[450px] flex items-center overflow-hidden rounded-3xl bg-red-950 text-white shadow-xl">
       {imageUrl ? (
-        <>
-          <Image
-            src={imageUrl}
-            alt={name}
-            fill
-            priority
-            sizes="100vw"
-            className="-z-10 object-cover"
-          />
-          <div
-            className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/90 to-primary/40"
-            aria-hidden="true"
-          />
-        </>
-      ) : (
-        <div
-          className="absolute inset-0 -z-10 bg-gradient-to-br from-primary to-brand-dark"
-          aria-hidden="true"
+        <Image
+          src={imageUrl}
+          alt={name}
+          fill
+          priority
+          sizes="100vw"
+          className="-z-20 object-cover object-center"
         />
-      )}
-      <div className="flex flex-col gap-3 px-6 py-12 lg:px-10 lg:py-16">
-        <h1 className="font-heading text-5xl leading-none lg:text-6xl">{name}</h1>
+      ) : null}
+
+      <div
+        className="absolute inset-0 -z-10 bg-gradient-to-r from-red-950 via-red-950/80 to-red-900/20 lg:from-red-950 lg:via-red-950/85 lg:to-transparent"
+        aria-hidden="true"
+      />
+
+      <div className="w-full max-w-3xl px-6 py-16 lg:px-12 lg:py-24">
+        <h1 className="font-heading text-5xl leading-none text-white font-extrabold uppercase tracking-tight md:text-6xl lg:text-7xl">
+          {name}
+        </h1>
         {description ? (
-          <p className="max-w-2xl text-base text-primary-foreground/90 lg:text-lg">
+          <p className="mt-4 max-w-xl text-lg font-medium leading-relaxed text-zinc-100/90 md:text-xl">
             {description}
           </p>
         ) : null}

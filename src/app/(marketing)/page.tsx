@@ -5,57 +5,63 @@ import { HeroSection } from "@/components/sections/HeroSection";
 import { CategoriesSection } from "@/components/sections/CategoriesSection";
 import { FeaturedSection } from "@/components/sections/FeaturedSection";
 import { HowItWorksSection } from "@/components/sections/HowItWorksSection";
-import { TestimonialsSection } from "@/components/sections/TestimonialsSection";
 import { WhySection } from "@/components/sections/WhySection";
+import { TestimonialsCarousel } from "@/components/sections/TestimonialsCarousel";
+import { CustomizationCtaSection } from "@/components/sections/CustomizationCtaSection";
+import { UniformsCarouselSection } from "@/components/sections/UniformsCarouselSection";
 import { ContactSection } from "@/components/sections/ContactSection";
 import { CtaBannerSection } from "@/components/sections/CtaBannerSection";
-
+import { InstagramSection } from "@/components/sections/InstagramSection";
 
 async function getHomepageData() {
   try {
-    const [categories, featuredProducts, testimonials] = await Promise.all([
-      prisma.category.findMany({
-        where: { isActive: true },
-        orderBy: { sortOrder: "asc" },
-      }),
-      prisma.product.findMany({
-        where: { isActive: true, isFeatured: true },
-        take: 4,
-        orderBy: { sortOrder: "asc" },
-        select: {
-          slug: true,
-          name: true,
-          fabric: true,
-          images: {
-            where: { isPrimary: true },
-            take: 1,
-            select: { url: true, altText: true },
+    const [featuredProducts, testimonials, instagramPosts, heroVideoSetting] =
+      await Promise.all([
+        prisma.product.findMany({
+          where: { isActive: true, isFeatured: true },
+          take: 16,
+          orderBy: { sortOrder: "asc" },
+          select: {
+            slug: true,
+            name: true,
+            fabric: true,
+            images: {
+              where: { isPrimary: true },
+              take: 1,
+              select: { url: true, altText: true },
+            },
+            category: { select: { slug: true, name: true } },
           },
-          category: { select: { slug: true, name: true } },
-        },
-      }),
-      prisma.testimonial.findMany({
-        where: { isActive: true },
-        orderBy: { sortOrder: "asc" },
-      }),
-    ]);
+        }),
+        prisma.testimonial.findMany({
+          where: { isActive: true },
+          orderBy: { sortOrder: "asc" },
+        }),
+        prisma.instagramPost.findMany({
+          where: { isActive: true },
+          orderBy: { sortOrder: "asc" },
+          take: 6,
+        }),
+        prisma.siteSetting.findUnique({
+          where: { key: "instagram_hero_video_url" },
+        }),
+      ]);
 
-    return { categories, featuredProducts, testimonials };
+    return { featuredProducts, testimonials, instagramPosts, heroVideoSetting };
   } catch (error) {
     console.error("[GET /]", error);
-    return { categories: [], featuredProducts: [], testimonials: [] };
+    return {
+      featuredProducts: [],
+      testimonials: [],
+      instagramPosts: [],
+      heroVideoSetting: null,
+    };
   }
 }
 
 export default async function HomePage() {
-  const { categories, featuredProducts, testimonials } =
+  const { featuredProducts, testimonials, instagramPosts, heroVideoSetting } =
     await getHomepageData();
-
-  const categoryItems = categories.map((category) => ({
-    slug: category.slug,
-    name: category.name,
-    imageUrl: category.imageUrl,
-  }));
 
   const featuredItems = featuredProducts.map((product) => ({
     slug: product.slug,
@@ -72,18 +78,34 @@ export default async function HomePage() {
     role: testimonial.teamName ?? testimonial.sport,
     content: testimonial.text,
     rating: testimonial.rating,
+    materialImageUrl: testimonial.materialImageUrl,
   }));
+
+  const instagramItems = instagramPosts.map((post) => ({
+    id: post.id,
+    imageUrl: post.imageUrl,
+    linkUrl: post.linkUrl,
+    caption: post.caption,
+  }));
+
+  const videoUrl = heroVideoSetting?.value ?? null;
 
   return (
     <>
       <HeroSection />
-      <CategoriesSection categories={categoryItems} />
+      <CategoriesSection />
       <FeaturedSection products={featuredItems} />
       <HowItWorksSection />
-      <TestimonialsSection testimonials={testimonialItems} />
       <WhySection />
+      <TestimonialsCarousel testimonials={testimonialItems} />
+      <CustomizationCtaSection />
+      <UniformsCarouselSection />
       <ContactSection />
       <CtaBannerSection />
+      <InstagramSection
+        posts={instagramItems}
+        videoUrl={videoUrl}
+      />
     </>
   );
 }

@@ -107,6 +107,9 @@ export default async function CategoryPage({
     { name: category.name },
   ]);
 
+  const heroImageUrl =
+    category.imageUrl || `/images/categories/${category.slug}-hero.jpg`;
+
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 lg:py-12">
       <Breadcrumb
@@ -119,7 +122,7 @@ export default async function CategoryPage({
       <CategoryHero
         name={category.name}
         description={category.description}
-        imageUrl={category.imageUrl}
+        imageUrl={heroImageUrl}
       />
 
       {category.subcategories.length > 0 ? (
