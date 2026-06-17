@@ -3,15 +3,7 @@ export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import {
-  Package,
-  Users,
-  MessageSquare,
-  HelpCircle,
-  Tag,
-  ArrowRight,
-  Plus,
-} from "lucide-react";
+import { ArrowRight, Plus, Users, HelpCircle, Tag } from "lucide-react";
 import { DashboardCards } from "./_components/DashboardCards";
 import { LeadMetrics } from "./_components/LeadMetrics";
 
@@ -26,49 +18,6 @@ export default async function DashboardPage() {
       prisma.faq.count({ where: { isActive: true } }),
       prisma.category.count(),
     ]);
-
-  const cards = [
-    {
-      label: "Produtos ativos",
-      value: totalProducts,
-      href: "/admin/produtos",
-      icon: Package,
-      color: "blue" as const,
-      description: "uniformes no catálogo",
-    },
-    {
-      label: "Leads novos",
-      value: newLeads,
-      href: "/admin/leads",
-      icon: Users,
-      color: "amber" as const,
-      description: "aguardando contato",
-    },
-    {
-      label: "Depoimentos ativos",
-      value: activeTestimonials,
-      href: "/admin/depoimentos",
-      icon: MessageSquare,
-      color: "green" as const,
-      description: "exibidos no site",
-    },
-    {
-      label: "FAQs ativas",
-      value: activeFaqs,
-      href: "/admin/faqs",
-      icon: HelpCircle,
-      color: "purple" as const,
-      description: "perguntas publicadas",
-    },
-    {
-      label: "Categorias",
-      value: totalCategories,
-      href: "/admin/categorias",
-      icon: Tag,
-      color: "brand" as const,
-      description: "esportes disponíveis",
-    },
-  ];
 
   const shortcuts = [
     { href: "/admin/produtos/novo", label: "Novo produto", icon: Plus },
@@ -88,7 +37,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Cards de métricas */}
-      <DashboardCards cards={cards} />
+      <DashboardCards counts={{ products: totalProducts, leads: newLeads, testimonials: activeTestimonials, faqs: activeFaqs, categories: totalCategories }} />
 
       <LeadMetrics />
 

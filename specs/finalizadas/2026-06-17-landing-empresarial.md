@@ -1,6 +1,6 @@
 # Landing Page Dedicada — Segmento Empresarial
 
-> **Status:** `pendente`
+> **Status:** `finalizada`
 > **ID:** `2026-06-17-landing-empresarial`
 > **Criada em:** 2026-06-17
 > **Agente:** arquiteto

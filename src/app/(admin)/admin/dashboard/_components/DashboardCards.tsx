@@ -2,18 +2,17 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { LucideIcon } from "lucide-react";
+import { Package, Users, MessageSquare, HelpCircle, Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type CardColor = "blue" | "amber" | "green" | "purple" | "brand";
 
-type Card = {
-  label: string;
-  value: number;
-  href: string;
-  icon: LucideIcon;
-  color: CardColor;
-  description: string;
+type CardValues = {
+  products: number;
+  leads: number;
+  testimonials: number;
+  faqs: number;
+  categories: number;
 };
 
 const colorMap: Record<
@@ -71,7 +70,50 @@ const item = {
   },
 };
 
-export function DashboardCards({ cards }: { cards: Card[] }) {
+export function DashboardCards({ counts }: { counts: CardValues }) {
+  const cards = [
+    {
+      label: "Produtos ativos",
+      value: counts.products,
+      href: "/admin/produtos",
+      icon: Package,
+      color: "blue" as CardColor,
+      description: "uniformes no catálogo",
+    },
+    {
+      label: "Leads novos",
+      value: counts.leads,
+      href: "/admin/leads",
+      icon: Users,
+      color: "amber" as CardColor,
+      description: "aguardando contato",
+    },
+    {
+      label: "Depoimentos ativos",
+      value: counts.testimonials,
+      href: "/admin/depoimentos",
+      icon: MessageSquare,
+      color: "green" as CardColor,
+      description: "exibidos no site",
+    },
+    {
+      label: "FAQs ativas",
+      value: counts.faqs,
+      href: "/admin/faqs",
+      icon: HelpCircle,
+      color: "purple" as CardColor,
+      description: "perguntas publicadas",
+    },
+    {
+      label: "Categorias",
+      value: counts.categories,
+      href: "/admin/categorias",
+      icon: Tag,
+      color: "brand" as CardColor,
+      description: "esportes disponíveis",
+    },
+  ];
+
   return (
     <motion.div
       variants={container}
