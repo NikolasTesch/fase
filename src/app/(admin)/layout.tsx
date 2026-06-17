@@ -1,31 +1,10 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
-import {
-  LayoutDashboard,
-  Package,
-  Tag,
-  Users,
-  MessageSquare,
-  HelpCircle,
-  LogOut,
-  Zap,
-  Camera,
-} from "lucide-react";
+import { LogOut, Zap } from "lucide-react";
 import { AdminSidebarClient } from "./_components/AdminSidebarClient";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-
-const NAV = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/produtos", label: "Produtos", icon: Package },
-  { href: "/admin/categorias", label: "Categorias", icon: Tag },
-  { href: "/admin/leads", label: "Leads", icon: Users },
-  { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
-  { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
-  { href: "/admin/instagram", label: "Instagram", icon: Camera },
-];
 
 export default async function AdminLayout({
   children,
@@ -65,7 +44,7 @@ export default async function AdminLayout({
 
         {/* Nav */}
         <nav className="flex-1 py-4 px-3">
-          <AdminSidebarClient nav={NAV} />
+          <AdminSidebarClient />
         </nav>
 
         {/* Footer / Logout */}

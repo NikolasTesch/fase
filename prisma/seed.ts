@@ -625,6 +625,12 @@ async function main() {
   const poloSub = empresarialCategory.subcategories.find(
     (s) => s.slug === "polo"
   );
+  const operacionalSub = empresarialCategory.subcategories.find(
+    (s) => s.slug === "operacional"
+  );
+  const promocionalSub = empresarialCategory.subcategories.find(
+    (s) => s.slug === "promocional"
+  );
 
   const empresarialProducts = [
     {
@@ -650,6 +656,54 @@ async function main() {
       sortOrder: 2,
       subcategoryId: poloSub?.id,
       images: [{ url: "/images/products/polo-profissional.png", altText: "Polo profissional Fase Sport", isPrimary: true, sortOrder: 0 }],
+    },
+    {
+      slug: "jaleco-operacional",
+      name: "Jaleco Operacional",
+      description:
+        "Jaleco personalizado com bordado ou silk para equipes de campo, técnicos e profissionais de saúde. Tecido resistente com bolsos funcionais.",
+      fabric: "Brim 100% algodão",
+      minQty: 10,
+      isFeatured: false,
+      sortOrder: 3,
+      subcategoryId: operacionalSub?.id,
+      images: [{ url: "/images/products/jaleco-operacional.png", altText: "Jaleco operacional Fase Sport", isPrimary: true, sortOrder: 0 }],
+    },
+    {
+      slug: "uniforme-brim-pesado",
+      name: "Uniforme Brim Pesado",
+      description:
+        "Conjunto calça + camisa em brim pesado para ambientes industriais e oficinas. Alta durabilidade com logomarca bordada ou silk.",
+      fabric: "Brim pesado com tratamento anti-chama opcional",
+      minQty: 10,
+      isFeatured: false,
+      sortOrder: 4,
+      subcategoryId: operacionalSub?.id,
+      images: [{ url: "/images/products/uniforme-brim.png", altText: "Uniforme brim pesado Fase Sport", isPrimary: true, sortOrder: 0 }],
+    },
+    {
+      slug: "camiseta-promocional-dry-fit",
+      name: "Camiseta Promocional Dry-Fit",
+      description:
+        "Camiseta dry-fit personalizada com sublimação total para eventos corporativos, confraternizações e campanhas de marketing. Disponível em qualquer cor.",
+      fabric: "Dry-fit 100% poliéster",
+      minQty: 20,
+      isFeatured: false,
+      sortOrder: 5,
+      subcategoryId: promocionalSub?.id,
+      images: [{ url: "/images/products/camiseta-promocional.png", altText: "Camiseta promocional dry-fit Fase Sport", isPrimary: true, sortOrder: 0 }],
+    },
+    {
+      slug: "kit-evento-corporativo",
+      name: "Kit Evento Corporativo",
+      description:
+        "Kit completo para eventos: camiseta, boné e ecobag personalizados com identidade visual da empresa. Pedido mínimo para grupos a partir de 20 kits.",
+      fabric: "Dry-fit + algodão + não-tecido",
+      minQty: 20,
+      isFeatured: false,
+      sortOrder: 6,
+      subcategoryId: promocionalSub?.id,
+      images: [{ url: "/images/products/kit-evento.png", altText: "Kit evento corporativo Fase Sport", isPrimary: true, sortOrder: 0 }],
     },
   ];
 

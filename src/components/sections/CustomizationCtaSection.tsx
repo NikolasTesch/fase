@@ -15,12 +15,12 @@ export function CustomizationCtaSection() {
       <div className="mx-auto w-full max-w-7xl px-4">
         <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
           {/* Placeholder visual até imagem real ser adicionada ao R2 */}
-          <RevealOnScroll className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-border bg-primary/5 shadow-lg flex items-center justify-center">
+          <RevealOnScroll className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-border bg-primary/5 shadow-lg flex items-center justify-center lg:order-last">
             <span className="font-heading text-8xl font-bold text-primary/20 select-none">FASE</span>
           </RevealOnScroll>
 
           {/* Text */}
-          <RevealOnScroll className="flex flex-col gap-6">
+          <RevealOnScroll className="flex flex-col gap-6 lg:order-first">
             <p className="text-sm font-semibold uppercase tracking-widest text-primary">
               Personalização total
             </p>

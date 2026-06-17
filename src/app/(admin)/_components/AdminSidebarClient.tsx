@@ -3,21 +3,33 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LucideIcon } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  Tag,
+  Users,
+  MessageSquare,
+  HelpCircle,
+  Camera,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type NavItem = {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-};
+const NAV = [
+  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/produtos", label: "Produtos", icon: Package },
+  { href: "/admin/categorias", label: "Categorias", icon: Tag },
+  { href: "/admin/leads", label: "Leads", icon: Users },
+  { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
+  { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
+  { href: "/admin/instagram", label: "Instagram", icon: Camera },
+];
 
-export function AdminSidebarClient({ nav }: { nav: NavItem[] }) {
+export function AdminSidebarClient() {
   const pathname = usePathname();
 
   return (
     <ul className="space-y-0.5">
-      {nav.map(({ href, label, icon: Icon }, i) => {
+      {NAV.map(({ href, label, icon: Icon }, i) => {
         const isActive = pathname === href || pathname.startsWith(href + "/");
 
         return (
