@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 import { prisma } from "@/lib/db";
 import { HeroSection } from "@/components/sections/HeroSection";
@@ -99,7 +99,7 @@ export default async function HomePage() {
       <WhySection />
       <TestimonialsCarousel testimonials={testimonialItems} />
       <CustomizationCtaSection />
-      <UniformsCarouselSection />
+      <UniformsCarouselSection uniforms={featuredItems} />
       <ContactSection />
       <CtaBannerSection />
       <InstagramSection

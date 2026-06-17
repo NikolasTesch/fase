@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { unstable_cache } from "next/cache";
 
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { CategoryWhatsAppCta } from "@/components/products/CategoryWhatsAppCta";
@@ -15,6 +16,31 @@ import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
 import { buildBreadcrumbJsonLd, buildFaqJsonLd } from "@/lib/seo";
 import { buildWhatsAppUrl, getSimulatorUrl } from "@/lib/site";
+
+const getCategoryData = (categoria: string, sub?: string) =>
+  unstable_cache(
+    () =>
+      prisma.category.findUnique({
+        where: { slug: categoria },
+        include: {
+          subcategories: { orderBy: { sortOrder: "asc" } },
+          faqs: {
+            where: { isActive: true },
+            orderBy: { sortOrder: "asc" },
+          },
+          products: {
+            where: {
+              isActive: true,
+              ...(sub ? { subcategory: { slug: sub } } : {}),
+            },
+            include: { images: { where: { isPrimary: true }, take: 1 } },
+            orderBy: { sortOrder: "asc" },
+          },
+        },
+      }),
+    [`category-${categoria}-${sub ?? "all"}`],
+    { revalidate: 3600, tags: [`category-${categoria}`] }
+  )();
 
 interface CategoryPageProps {
   params: Promise<{ categoria: string }>;
@@ -53,28 +79,7 @@ export default async function CategoryPage({
   const { categoria } = await params;
   const { sub } = await searchParams;
 
-  const category = await prisma.category.findUnique({
-    where: { slug: categoria },
-    include: {
-      subcategories: {
-        orderBy: { sortOrder: "asc" },
-      },
-      faqs: {
-        where: { isActive: true },
-        orderBy: { sortOrder: "asc" },
-      },
-      products: {
-        where: {
-          isActive: true,
-          ...(sub ? { subcategory: { slug: sub } } : {}),
-        },
-        include: {
-          images: { where: { isPrimary: true }, take: 1 },
-        },
-        orderBy: { sortOrder: "asc" },
-      },
-    },
-  });
+  const category = await getCategoryData(categoria, sub);
 
   if (!category || !category.isActive) {
     notFound();

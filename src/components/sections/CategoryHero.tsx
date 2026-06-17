@@ -8,7 +8,7 @@ interface CategoryHeroProps {
 
 export function CategoryHero({ name, description, imageUrl }: CategoryHeroProps) {
   return (
-    <section className="relative isolate min-h-[380px] lg:min-h-[450px] flex items-center overflow-hidden rounded-3xl bg-red-950 text-white shadow-xl">
+    <section className="relative isolate min-h-[380px] lg:min-h-[450px] flex items-center overflow-hidden rounded-3xl bg-brand-dark text-white shadow-xl">
       {imageUrl ? (
         <Image
           src={imageUrl}
@@ -21,7 +21,7 @@ export function CategoryHero({ name, description, imageUrl }: CategoryHeroProps)
       ) : null}
 
       <div
-        className="absolute inset-0 -z-10 bg-gradient-to-r from-red-950 via-red-950/80 to-red-900/20 lg:from-red-950 lg:via-red-950/85 lg:to-transparent"
+        className="absolute inset-0 -z-10 bg-gradient-to-r from-brand-dark via-brand-dark/80 to-brand/20 lg:from-brand-dark lg:via-brand-dark/85 lg:to-transparent"
         aria-hidden="true"
       />
 

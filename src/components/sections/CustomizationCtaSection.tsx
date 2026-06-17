@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -15,19 +14,9 @@ export function CustomizationCtaSection() {
     <section className="bg-background py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4">
         <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-          {/* Image */}
-          <RevealOnScroll className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-border bg-muted shadow-lg">
-            <div className="absolute inset-0 flex items-center justify-center bg-primary/10">
-              <span className="font-heading text-6xl font-bold text-primary/30">FASE</span>
-            </div>
-            <Image
-              src="/images/customization-cta.jpg"
-              alt="Uniforme personalizado Fase Sport"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-              loading="lazy"
-            />
+          {/* Placeholder visual até imagem real ser adicionada ao R2 */}
+          <RevealOnScroll className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-border bg-primary/5 shadow-lg flex items-center justify-center">
+            <span className="font-heading text-8xl font-bold text-primary/20 select-none">FASE</span>
           </RevealOnScroll>
 
           {/* Text */}
@@ -65,7 +54,7 @@ export function CustomizationCtaSection() {
               <Button
                 size="lg"
                 variant="outline"
-                render={<Link href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}
+                render={<a href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}
               >
                 Chamar no WhatsApp
               </Button>

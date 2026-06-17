@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
 import { HeroVideo } from "@/components/sections/HeroVideo";
@@ -38,7 +37,7 @@ export function InstagramSection({ posts, videoUrl }: InstagramSectionProps) {
               fora de campo. Faça parte da família Fase Sport.
             </p>
             <div className="mt-8">
-              <Button size="lg" render={<Link href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}>
+              <Button size="lg" render={<a href={whatsappUrl} target="_blank" rel="noopener noreferrer" />}>
                 Falar no WhatsApp
               </Button>
             </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, useReducedMotion, type PanInfo } from "framer-motion";
 
 import { ProductCard } from "@/components/products/ProductCard";
 import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
@@ -42,9 +43,19 @@ export function FeaturedSection({ products }: FeaturedSectionProps) {
   const [paused, setPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const shouldReduce = useReducedMotion();
+
   const goTo = useCallback(
     (next: number) => setPage((next + totalPages) % totalPages),
     [totalPages]
+  );
+
+  const handleDragEnd = useCallback(
+    (_: unknown, info: PanInfo) => {
+      if (info.offset.x < -60) goTo(page + 1);
+      else if (info.offset.x > 60) goTo(page - 1);
+    },
+    [goTo, page]
   );
 
   useEffect(() => {
@@ -79,7 +90,13 @@ export function FeaturedSection({ products }: FeaturedSectionProps) {
         </RevealOnScroll>
 
         <div className="relative">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <motion.div
+            className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
+            drag={shouldReduce || totalPages <= 1 ? false : "x"}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.1}
+            onDragEnd={handleDragEnd}
+          >
             {visible.map((product) => (
               <ProductCard
                 key={product.slug}
@@ -91,7 +108,7 @@ export function FeaturedSection({ products }: FeaturedSectionProps) {
                 imageAlt={product.imageAlt}
               />
             ))}
-          </div>
+          </motion.div>
 
           {showControls ? (
             <>
