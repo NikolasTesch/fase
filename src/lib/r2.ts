@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import {
   S3Client,
   PutObjectCommand,
@@ -15,6 +16,20 @@ export const r2 = new S3Client({
 
 export const BUCKET = process.env.R2_BUCKET_NAME ?? "fasesport-media";
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+export const WEBP_QUALITY = 80;
+
+export async function convertToWebP(
+  buffer: Buffer,
+  mimeType: string
+): Promise<{ buffer: Buffer; mimeType: string }> {
+  if (mimeType === "image/webp") {
+    return { buffer, mimeType };
+  }
+
+  const webp = await sharp(buffer).webp({ quality: WEBP_QUALITY }).toBuffer();
+  return { buffer: webp, mimeType: "image/webp" };
+}
 
 export async function uploadToR2(
   key: string,

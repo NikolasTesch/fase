@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { uploadToR2, MAX_FILE_SIZE } from "@/lib/r2";
+import { uploadToR2, convertToWebP, MAX_FILE_SIZE } from "@/lib/r2";
 import { prisma } from "@/lib/db";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -31,17 +31,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const ext = file.type.split("/")[1];
+    const raw = Buffer.from(await file.arrayBuffer());
+    const { buffer, mimeType } = await convertToWebP(raw, file.type);
+
     const timestamp = Date.now();
-    let key = `uploads/${timestamp}.${ext}`;
+    let key = `uploads/${timestamp}.webp`;
     if (productId) {
-      key = `products/${productId}/${timestamp}.${ext}`;
+      key = `products/${productId}/${timestamp}.webp`;
     } else if (categoryId) {
-      key = `categories/${categoryId}/${timestamp}.${ext}`;
+      key = `categories/${categoryId}/${timestamp}.webp`;
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const url = await uploadToR2(key, buffer, file.type);
+    const url = await uploadToR2(key, buffer, mimeType);
 
     if (productId) {
       const image = await prisma.productImage.create({
