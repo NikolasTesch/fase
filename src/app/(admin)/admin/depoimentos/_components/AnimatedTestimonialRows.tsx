@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Star } from "lucide-react";
+import { Star, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TestimonialToggle } from "./TestimonialToggle";
 
@@ -60,9 +60,10 @@ export function AnimatedTestimonialRows({
           </td>
           <td className="px-4 py-3.5">
             <Link
-              href="#"
-              className="text-xs text-primary hover:underline underline-offset-2"
+              href={`/admin/depoimentos/${t.id}`}
+              className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
             >
+              <Pencil size={12} />
               Editar
             </Link>
           </td>

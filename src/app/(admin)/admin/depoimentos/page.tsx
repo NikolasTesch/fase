@@ -24,10 +24,12 @@ export default async function DepoimentosPage() {
             {testimonials.length} depoimento{testimonials.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button render={<Link href="#" />} className="gap-2">
-          <Plus size={16} />
-          Novo depoimento
-        </Button>
+        <Link href="/admin/depoimentos/novo">
+          <Button className="gap-2">
+            <Plus size={16} />
+            Novo depoimento
+          </Button>
+        </Link>
       </div>
 
       <div className="rounded-2xl border border-border overflow-hidden">

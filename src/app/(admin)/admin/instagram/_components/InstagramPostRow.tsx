@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
-import { Trash2, Save } from "lucide-react";
+import { Trash2, Save, Upload, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface Post {
@@ -20,6 +20,7 @@ interface InstagramPostRowProps {
 
 export function InstagramPostRow({ post }: InstagramPostRowProps) {
   const router = useRouter();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     imageUrl: post.imageUrl,
     linkUrl: post.linkUrl,
@@ -28,6 +29,27 @@ export function InstagramPostRow({ post }: InstagramPostRowProps) {
     isActive: post.isActive,
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+
+    try {
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      if (res.ok) {
+        const data = await res.json();
+        setForm((f) => ({ ...f, imageUrl: data.url }));
+      }
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
 
   const update = async () => {
     setSaving(true);
@@ -56,15 +78,37 @@ export function InstagramPostRow({ post }: InstagramPostRowProps) {
     <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 sm:flex-row sm:items-start">
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted">
         <Image src={form.imageUrl} alt="Post" fill className="object-cover" />
+        {uploading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+            <Loader2 className="size-5 animate-spin text-primary" />
+          </div>
+        )}
       </div>
       <div className="flex flex-1 flex-col gap-2">
-        <input
-          type="url"
-          value={form.imageUrl}
-          onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-          placeholder="URL da imagem"
-          className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        />
+        <div className="flex gap-2">
+          <input
+            type="url"
+            value={form.imageUrl}
+            onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+            placeholder="URL da imagem"
+            className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted transition-colors shrink-0">
+            {uploading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Upload className="size-4" />
+            )}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleFileUpload}
+              disabled={uploading}
+            />
+          </label>
+        </div>
         <input
           type="url"
           value={form.linkUrl}

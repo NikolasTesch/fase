@@ -9,6 +9,7 @@ const TestimonialSchema = z.object({
   text: z.string().min(1).max(2000),
   photoUrl: z.string().url().optional().or(z.literal("")),
   logoUrl: z.string().url().optional().or(z.literal("")),
+  materialImageUrl: z.string().url().optional().or(z.literal("")),
   rating: z.number().int().min(1).max(5).default(5),
   isActive: z.boolean().default(true),
   sortOrder: z.number().int().default(0),
@@ -39,13 +40,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { photoUrl, logoUrl, ...data } = validated.data;
+    const { photoUrl, logoUrl, materialImageUrl, ...data } = validated.data;
 
     const testimonial = await prisma.testimonial.create({
       data: {
         ...data,
         photoUrl: photoUrl || null,
         logoUrl: logoUrl || null,
+        materialImageUrl: materialImageUrl || null,
       },
     });
 

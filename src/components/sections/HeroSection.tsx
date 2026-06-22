@@ -19,12 +19,12 @@ export function HeroSection() {
     <section className="relative isolate overflow-hidden bg-primary text-primary-foreground">
       <div className="absolute inset-0 -z-10">
         <Image
-          src="/images/hero-bg.png"
+          src="/images/hero-bg.jpg"
           alt="Uniformes esportivos personalizados da Fase Sport"
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-20"
+          className="object-cover opacity-35"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-primary/80 to-brand-dark/95" />
       </div>

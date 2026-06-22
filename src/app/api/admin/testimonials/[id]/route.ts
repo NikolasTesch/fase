@@ -13,6 +13,7 @@ const UpdateSchema = z.object({
   text: z.string().min(1).max(2000).optional(),
   photoUrl: z.string().url().optional().or(z.literal("")).nullable(),
   logoUrl: z.string().url().optional().or(z.literal("")).nullable(),
+  materialImageUrl: z.string().url().optional().or(z.literal("")).nullable(),
   rating: z.number().int().min(1).max(5).optional(),
   isActive: z.boolean().optional(),
   sortOrder: z.number().int().optional(),

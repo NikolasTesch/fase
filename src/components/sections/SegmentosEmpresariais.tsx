@@ -1,29 +1,35 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
 import { Briefcase, HardHat, Megaphone, Shirt } from "lucide-react";
 
 const SEGMENTOS = [
   {
     slug: "social",
     label: "Administrativo / Social",
-    description: "Camisas sociais e alfaiataria corporativa com bordado ou silk para equipes administrativas e staff.",
+    description:
+      "Camisas sociais e alfaiataria corporativa com bordado ou silk para equipes administrativas e staff.",
     Icon: Briefcase,
   },
   {
     slug: "polo",
     label: "Polo Profissional",
-    description: "Polos corporativas de alta qualidade com logomarca bordada para atendimento, vendas e suporte.",
+    description:
+      "Polos corporativas de alta qualidade com logomarca bordada para atendimento, vendas e suporte.",
     Icon: Shirt,
   },
   {
     slug: "operacional",
     label: "Operacional / Oficinas",
-    description: "Jalecos, brim pesado e uniformes operacionais para equipes de campo, oficinas e fábricas.",
+    description:
+      "Jalecos, brim pesado e uniformes operacionais para equipes de campo, oficinas e fábricas.",
     Icon: HardHat,
   },
   {
     slug: "promocional",
     label: "Eventos / Promocional",
-    description: "Camisetas dry-fit e kits completos para campanhas, eventos corporativos e confraternizações.",
+    description:
+      "Camisetas dry-fit e kits completos para campanhas, eventos corporativos e confraternizações.",
     Icon: Megaphone,
   },
 ];
@@ -33,6 +39,13 @@ interface SegmentosEmpresariaisProps {
 }
 
 export function SegmentosEmpresariais({ activeSub }: SegmentosEmpresariaisProps) {
+  const router = useRouter();
+
+  function select(slug: string) {
+    const next = activeSub === slug ? "/empresarial" : `/empresarial?sub=${slug}`;
+    router.push(next, { scroll: false });
+  }
+
   return (
     <section>
       <h2 className="font-heading text-3xl font-extrabold uppercase tracking-tight text-foreground lg:text-4xl">
@@ -46,10 +59,11 @@ export function SegmentosEmpresariais({ activeSub }: SegmentosEmpresariaisProps)
         {SEGMENTOS.map(({ slug, label, description, Icon }) => {
           const isActive = activeSub === slug;
           return (
-            <Link
+            <button
               key={slug}
-              href={`/empresarial?sub=${slug}`}
-              className={`group flex flex-col gap-3 rounded-2xl border p-6 transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+              type="button"
+              onClick={() => select(slug)}
+              className={`group flex flex-col gap-3 rounded-2xl border p-6 text-left transition-colors hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 isActive
                   ? "border-primary bg-primary/5"
                   : "border-border bg-background"
@@ -70,7 +84,7 @@ export function SegmentosEmpresariais({ activeSub }: SegmentosEmpresariaisProps)
                   {description}
                 </p>
               </div>
-            </Link>
+            </button>
           );
         })}
       </div>

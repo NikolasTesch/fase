@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import { useState, useRef } from "react";
+import Image from "next/image";
+import { Plus, Upload, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function AddInstagramPost() {
   const router = useRouter();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ imageUrl: "", linkUrl: "", caption: "" });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const submit = async () => {
     if (!form.imageUrl || !form.linkUrl) return;
@@ -31,6 +34,26 @@ export function AddInstagramPost() {
     }
   };
 
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+
+    try {
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      if (res.ok) {
+        const data = await res.json();
+        setForm((f) => ({ ...f, imageUrl: data.url }));
+      }
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
   if (!open) {
     return (
       <button
@@ -45,14 +68,46 @@ export function AddInstagramPost() {
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4">
-      <input
-        type="url"
-        value={form.imageUrl}
-        onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-        placeholder="URL da imagem *"
-        className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-      />
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
+      {/* Upload / URL da imagem */}
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <input
+            type="url"
+            value={form.imageUrl}
+            onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+            placeholder="URL da imagem *"
+            className="mb-2 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted transition-colors">
+            {uploading ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Enviando...
+              </>
+            ) : (
+              <>
+                <Upload className="size-4" />
+                Fazer upload
+              </>
+            )}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleFileUpload}
+              disabled={uploading}
+            />
+          </label>
+        </div>
+        {form.imageUrl && (
+          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
+            <Image src={form.imageUrl} alt="Preview" fill className="object-cover" />
+          </div>
+        )}
+      </div>
+
       <input
         type="url"
         value={form.linkUrl}

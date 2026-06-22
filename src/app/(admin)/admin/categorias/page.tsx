@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
 import { CategoryRow } from "./_components/CategoryRow";
+import { AddCategoryButton } from "./_components/AddCategoryButton";
 import { Tag } from "lucide-react";
 
 export const metadata: Metadata = { title: "Categorias — Admin" };
@@ -15,11 +16,14 @@ export default async function CategoriasPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Categorias</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          {categories.length} categoria{categories.length !== 1 ? "s" : ""} de esporte
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Categorias</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            {categories.length} categoria{categories.length !== 1 ? "s" : ""} de esporte
+          </p>
+        </div>
+        <AddCategoryButton />
       </div>
 
       <div className="rounded-2xl border border-border overflow-hidden">
