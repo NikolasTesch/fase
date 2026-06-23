@@ -144,7 +144,7 @@ export function FeaturedSection({ products }: FeaturedSectionProps) {
                 className={cn(
                   "h-2 rounded-full transition-all duration-300",
                   i === page
-                    ? "w-6 bg-primary"
+                    ? "w-6 bg-accent"
                     : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
                 )}
               />

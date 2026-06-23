@@ -46,6 +46,13 @@
   --color-brand-light: var(--brand-light);
   --color-brand-tint: var(--brand-tint);
 
+  /* Expanded palette */
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-sport-blue: var(--sport-blue);
+  --color-sport-green: var(--sport-green);
+  --color-surface-alt: var(--surface-alt);
+
   /* Radius scale */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -103,6 +110,13 @@
   --input: oklch(0.91 0 0);
   --ring: oklch(0.535 0.210 26.5);
 
+  /* Expanded palette — accent gold, sport blue/green */
+  --accent: oklch(0.72 0.175 78.5);                      /* #E8B500 – dourado FASE */
+  --accent-foreground: oklch(0.15 0.02 78.5);
+  --sport-blue: oklch(0.35 0.085 265);                   /* azul escuro esportivo */
+  --sport-green: oklch(0.55 0.12 155);                   /* verde campo */
+  --surface-alt: oklch(0.985 0.005 78.5);                /* tom quente alternativo */
+
   /* Charts seguindo paleta brand */
   --chart-1: oklch(0.535 0.210 26.5);
   --chart-2: oklch(0.375 0.165 24.5);
@@ -158,6 +172,13 @@
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.65 0.21 26.5);
 
+  /* Dark mode — expanded palette */
+  --accent: oklch(0.72 0.175 78.5);
+  --accent-foreground: oklch(0.15 0.02 78.5);
+  --sport-blue: oklch(0.65 0.085 265);
+  --sport-green: oklch(0.65 0.12 155);
+  --surface-alt: oklch(0.18 0.01 78.5);
+
   --chart-1: oklch(0.65 0.21 26.5);
   --chart-2: oklch(0.78 0.18 26.5);
   --chart-3: oklch(0.535 0.210 26.5);
@@ -172,6 +193,46 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.65 0.21 26.5);
+}
+
+/* ─── Shimmer / Skeleton ─── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--brand-tint) 25%,
+    color-mix(in oklch, var(--brand-tint), var(--brand) 15%) 50%,
+    var(--brand-tint) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer {
+    animation: none;
+  }
+}
+
+/* ─── Pulse WhatsApp ─── */
+@keyframes pulse-whatsapp {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--brand), transparent 60%); }
+  50% { box-shadow: 0 0 0 14px color-mix(in oklch, var(--brand), transparent 100%); }
+}
+
+/* ─── Scrollbar customizada ─── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--muted); }
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--brand), transparent 40%);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand);
 }
 
 /* ─── Marquee / Carousel infinito ─── */

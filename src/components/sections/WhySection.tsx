@@ -49,8 +49,8 @@ export function WhySection() {
         <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {DIFFERENTIALS.map((item) => (
             <StaggerItem key={item.title}>
-              <div className="flex h-full flex-col gap-4 rounded-xl border border-border bg-card p-8 text-card-foreground">
-                <span className="flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <div className="flex h-full flex-col gap-4 rounded-2xl border border-border/60 bg-card p-8 text-card-foreground shadow-sm ring-1 ring-black/[0.02] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-accent/20">
+                <span className="flex size-14 items-center justify-center rounded-full bg-gradient-to-br from-accent/10 to-accent/5 text-accent ring-1 ring-accent/20">
                   <item.icon className="size-7" aria-hidden="true" />
                 </span>
                 <h3 className="font-heading text-2xl">{item.title}</h3>

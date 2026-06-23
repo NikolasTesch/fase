@@ -1,6 +1,10 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { validateCsrf } from "@/lib/csrf";
+import { getClientIp } from "@/lib/ip";
+import { adminRatelimit } from "@/lib/ratelimit";
+import { formatZodError, errorResponse } from "@/lib/errors";
 
 const TestimonialSchema = z.object({
   clientName: z.string().min(1).max(100),
@@ -31,13 +35,20 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+
+    // CSRF check
+    const csrf = validateCsrf(req);
+    if (!csrf.valid) return errorResponse(csrf.reason ?? "Requisição rejeitada", 400);
+
+    // Rate limit
+    const ip = getClientIp(req);
+    const { success: allowed } = await adminRatelimit.limit(`admin:${ip}`);
+    if (!allowed) return errorResponse("Muitas requisições. Tente novamente.", 429);
+
     const validated = TestimonialSchema.safeParse(body);
 
     if (!validated.success) {
-      return Response.json(
-        { message: "Dados inválidos", errors: validated.error.issues },
-        { status: 400 }
-      );
+      return formatZodError(validated.error);
     }
 
     const { photoUrl, logoUrl, materialImageUrl, ...data } = validated.data;

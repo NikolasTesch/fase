@@ -2,6 +2,10 @@ import { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
 import { uploadToR2, convertToWebP, MAX_FILE_SIZE } from "@/lib/r2";
 import { prisma } from "@/lib/db";
+import { validateCsrf } from "@/lib/csrf";
+import { getClientIp } from "@/lib/ip";
+import { adminRatelimit } from "@/lib/ratelimit";
+import { errorResponse } from "@/lib/errors";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
@@ -10,6 +14,15 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     const categoryId = formData.get("categoryId") as string | null;
+
+    // CSRF check
+    const csrf = validateCsrf(req);
+    if (!csrf.valid) return errorResponse(csrf.reason ?? "Requisição rejeitada", 400);
+
+    // Rate limit
+    const ip = getClientIp(req);
+    const { success: allowed } = await adminRatelimit.limit(`admin:${ip}`);
+    if (!allowed) return errorResponse("Muitas requisições. Tente novamente.", 429);
 
     if (!file || !categoryId) {
       return Response.json(

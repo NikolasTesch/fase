@@ -25,12 +25,12 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-background">
-      <aside className="w-60 shrink-0 border-r border-border bg-card flex flex-col shadow-sm">
+      <aside className="w-60 shrink-0 border-r border-border/60 bg-gradient-to-b from-background to-muted/30 flex flex-col shadow-sm">
         {/* Logo */}
-        <div className="px-5 py-5 border-b border-border">
+        <div className="px-5 py-5 border-b border-border/60">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-              <Zap size={16} className="text-primary-foreground" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center shrink-0">
+              <Zap size={16} className="text-accent-foreground" />
             </div>
             <div>
               <p className="font-bold text-sm leading-none tracking-tight text-foreground">
@@ -49,7 +49,7 @@ export default async function AdminLayout({
         </nav>
 
         {/* Footer / Logout */}
-        <div className="p-3 border-t border-border">
+        <div className="p-3 border-t border-border/60">
           <LogoutButton />
         </div>
       </aside>

@@ -1,13 +1,22 @@
 import { NextRequest } from "next/server";
+import { validateCsrf } from "@/lib/csrf";
 import { prisma } from "@/lib/db";
+import { formatZodError } from "@/lib/errors";
+import { getClientIp } from "@/lib/ip";
 import { ratelimit } from "@/lib/ratelimit";
 import { sendLeadNotification } from "@/lib/resend";
 import { ContactSchema } from "@/lib/validations/contact";
 
 export async function POST(req: NextRequest) {
   try {
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "anonymous";
+    const ip = getClientIp(req);
+    const { valid: csrfValid } = validateCsrf(req);
+    if (!csrfValid) {
+      return Response.json(
+        { success: false, message: "Requisição rejeitada" },
+        { status: 400 }
+      );
+    }
     const { success } = await ratelimit.limit(ip);
 
     if (!success) {
@@ -24,10 +33,7 @@ export async function POST(req: NextRequest) {
     const validated = ContactSchema.safeParse(body);
 
     if (!validated.success) {
-      return Response.json(
-        { success: false, errors: validated.error.issues },
-        { status: 400 }
-      );
+      return formatZodError(validated.error);
     }
 
     const lead = await prisma.lead.create({ data: validated.data });

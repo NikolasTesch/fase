@@ -95,7 +95,7 @@ export function AddCategoryButton() {
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder="Ex: Futebol"
-            className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 transition-colors duration-200"
             disabled={saving}
             autoFocus
           />
@@ -107,7 +107,7 @@ export function AddCategoryButton() {
             value={slug}
             onChange={(e) => handleSlugChange(e.target.value)}
             placeholder="Ex: futebol"
-            className="w-full rounded-md border border-input bg-background px-3 py-1.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full rounded-md border border-border bg-background px-3 py-1.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 transition-colors duration-200"
             disabled={saving}
           />
         </div>

@@ -44,7 +44,7 @@ export function UniformsCarouselSection({ uniforms = [] }: UniformsCarouselSecti
                 key={i}
                 className="relative h-64 w-64 shrink-0 overflow-hidden rounded-xl bg-muted transition-transform duration-300 hover:scale-105"
               >
-                <div className="absolute inset-0 flex items-center justify-center bg-primary/10">
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-brand-dark/15">
                   <span className="font-heading text-3xl font-bold text-primary/30">FASE</span>
                 </div>
                 {uniform.imageUrl ? (

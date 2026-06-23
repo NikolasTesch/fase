@@ -102,13 +102,13 @@ export function ProcessSteps() {
 
             return (
               <RevealOnScroll key={step.stepNumber} delay={i * 0.05} className="relative">
-                <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-card p-6 text-card-foreground">
+                <div className="flex h-full flex-col gap-3 rounded-2xl border border-border/60 bg-card p-6 text-card-foreground shadow-sm ring-1 ring-black/[0.02] transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-accent/20">
                   <div className="flex items-center justify-between">
-                    <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <span className="flex size-12 items-center justify-center rounded-full bg-accent/10 text-accent">
                       <step.icon className="size-6" />
                     </span>
                     <span
-                      className="font-heading text-3xl text-muted-foreground/30"
+                      className="font-heading text-3xl text-accent/20"
                       aria-hidden="true"
                     >
                       {step.stepNumber}
@@ -133,13 +133,15 @@ export function ProcessSteps() {
                   ) : null}
                 </div>
 
-                {/* Arrow between steps (desktop) */}
+                {/* SVG connector between steps (desktop) */}
                 {!isLast ? (
                   <div
-                    className="absolute -right-3 top-1/2 hidden -translate-y-1/2 text-primary/40 xl:block"
+                    className="absolute -right-3 top-1/2 hidden -translate-y-1/2 xl:block"
                     aria-hidden="true"
                   >
-                    ▶
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="text-accent/40">
+                      <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </div>
                 ) : null}
               </RevealOnScroll>

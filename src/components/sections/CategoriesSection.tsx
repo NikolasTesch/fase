@@ -56,7 +56,7 @@ function ModalitySectionBlock({ section }: ModalitySectionBlockProps) {
         <div className="flex gap-2">
           {section.lines.map((line, i) => (
             <button key={line.id} type="button" onClick={() => setActiveIdx(i)} aria-label={`Ver ${line.name}`}
-              className={`h-2 rounded-full transition-all duration-300 ${i === activeIdx ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"}`}
+              className={`h-2 rounded-full transition-all duration-300 ${i === activeIdx ? "w-6 bg-accent" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"}`}
             />
           ))}
         </div>
@@ -64,7 +64,7 @@ function ModalitySectionBlock({ section }: ModalitySectionBlockProps) {
           <div className="flex flex-wrap gap-2">
             {catalogLinks.map((link) => (
               <Link key={link.href} href={link.href}
-                className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="rounded-lg border border-accent/30 px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-accent/10 hover:text-accent"
               >{link.label}</Link>
             ))}
           </div>

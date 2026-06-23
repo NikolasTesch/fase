@@ -5,7 +5,15 @@ import { buildWhatsAppUrl } from "@/lib/site";
 
 export function CtaBannerSection() {
   return (
-    <section className="bg-primary text-primary-foreground">
+    <section className="relative isolate overflow-hidden bg-gradient-to-br from-primary via-primary to-brand-dark text-primary-foreground">
+      {/* Padrão diagonal esportivo */}
+      <div
+        className="absolute inset-0 -z-10 opacity-[0.04]"
+        style={{
+          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(255,255,255,0.5) 40px, rgba(255,255,255,0.5) 41px)`,
+        }}
+        aria-hidden="true"
+      />
       <div className="mx-auto flex w-full max-w-7xl flex-col items-start gap-6 px-4 py-16 lg:flex-row lg:items-center lg:justify-between lg:py-20">
         <div className="max-w-2xl space-y-3">
           <h2 className="font-heading text-4xl lg:text-5xl">
@@ -19,7 +27,7 @@ export function CtaBannerSection() {
         <div className="flex flex-col gap-3 sm:flex-row">
           <Button
             size="lg"
-            variant="secondary"
+            variant="accent"
             render={<Link href="/orcamento" />}
           >
             Solicitar Orçamento

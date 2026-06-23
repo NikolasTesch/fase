@@ -38,9 +38,9 @@ export function ContactSection() {
                 </p>
               </div>
 
-              <div className="space-y-5">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <div className="space-y-4">
+                <div className="group flex items-start gap-4 rounded-xl p-3 transition-colors duration-200 hover:bg-accent/5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-brand-dark text-primary-foreground shadow-sm transition-transform duration-200 group-hover:scale-110">
                     <MapPin size={20} aria-hidden="true" />
                   </div>
                   <div>
@@ -51,8 +51,8 @@ export function ContactSection() {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="group flex items-start gap-4 rounded-xl p-3 transition-colors duration-200 hover:bg-accent/5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-brand-dark text-primary-foreground shadow-sm transition-transform duration-200 group-hover:scale-110">
                     <Phone size={20} aria-hidden="true" />
                   </div>
                   <div>
@@ -65,8 +65,8 @@ export function ContactSection() {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <div className="group flex items-start gap-4 rounded-xl p-3 transition-colors duration-200 hover:bg-accent/5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-brand-dark text-primary-foreground shadow-sm transition-transform duration-200 group-hover:scale-110">
                     <Mail size={20} aria-hidden="true" />
                   </div>
                   <div>

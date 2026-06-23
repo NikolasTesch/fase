@@ -29,7 +29,7 @@ export default async function ProdutosPage() {
             {products.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button render={<Link href="/admin/produtos/novo" />} className="gap-2">
+        <Button variant="accent" render={<Link href="/admin/produtos/novo" />} className="gap-2">
           <Plus size={16} />
           Novo produto
         </Button>

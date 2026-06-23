@@ -40,7 +40,7 @@ export function Navbar() {
       initial={shouldReduce ? false : { y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className={`sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 transition-shadow duration-300 ${scrolled ? "shadow-md" : ""}`}
+      className={`sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 transition-shadow duration-300 ${scrolled ? "shadow-md border-b border-border" : "border-b border-transparent"}`}
     >
       <div
         className={`mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 transition-all duration-300 ${scrolled ? "h-14" : "h-16"}`}
@@ -66,10 +66,10 @@ export function Navbar() {
               className="relative rounded-lg px-3 py-2 text-sm font-medium text-foreground"
             >
               <span className="relative z-10">{item.label}</span>
-              {hoveredSlug === item.slug && !shouldReduce ? (
+                {hoveredSlug === item.slug && !shouldReduce ? (
                 <motion.span
                   layoutId="nav-hover-pill"
-                  className="absolute inset-0 -z-10 rounded-lg bg-muted"
+                  className="absolute inset-0 -z-10 rounded-lg bg-accent/10"
                   transition={{ type: "spring", stiffness: 350, damping: 30 }}
                 />
               ) : null}
@@ -122,6 +122,7 @@ export function Navbar() {
           <SearchForm />
           <Button
             size="lg"
+            variant="accent"
             className="hidden md:inline-flex"
             render={<Link href="/orcamento" />}
           >

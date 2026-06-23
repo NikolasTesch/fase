@@ -2,6 +2,7 @@ import { SignJWT } from "jose";
 import bcrypt from "bcryptjs";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
+import { getClientIp } from "@/lib/ip";
 import { loginRatelimit } from "@/lib/ratelimit";
 import { LoginSchema } from "@/lib/validations/auth";
 
@@ -9,8 +10,7 @@ const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function POST(req: NextRequest) {
   try {
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "anonymous";
+    const ip = getClientIp(req);
     const { success } = await loginRatelimit.limit(`login:${ip}`);
 
     if (!success) {

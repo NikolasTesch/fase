@@ -109,7 +109,7 @@ export function CategoryRow({ category, index }: CategoryRowProps) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.25, ease: "easeOut" }}
-      className="border-t border-border hover:bg-muted/30 transition-colors duration-150"
+      className="border-t border-border hover:bg-accent/5 transition-colors duration-150"
     >
       <td className="px-4 py-3.5">
         <div
@@ -177,7 +177,7 @@ export function CategoryRow({ category, index }: CategoryRowProps) {
           onChange={(e) => setSortOrder(Number(e.target.value))}
           onBlur={() => save({ sortOrder })}
           disabled={saving}
-          className="w-16 rounded-lg border border-border px-2 py-1.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+          className="w-16 rounded-lg border border-border px-2 py-1.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 transition-colors"
         />
       </td>
       <td className="px-4 py-3.5">

@@ -89,12 +89,12 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 aria-selected={isActive}
                 aria-label={`Ver imagem ${index + 1} de ${productName}`}
                 onClick={() => goTo(index)}
-                className={cn(
-                  "relative aspect-square w-20 shrink-0 overflow-hidden rounded-lg border bg-muted transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
-                  isActive
-                    ? "border-primary"
-                    : "border-border hover:border-primary/60"
-                )}
+                  className={cn(
+                    "relative aspect-square w-20 shrink-0 overflow-hidden rounded-lg border-2 bg-muted transition-all duration-200 focus-visible:ring-3 focus-visible:ring-accent/50 focus-visible:outline-none",
+                    isActive
+                      ? "border-accent shadow-sm"
+                      : "border-border/60 hover:border-accent/40 hover:shadow-sm"
+                  )}
               >
                 <Image
                   src={image.url}

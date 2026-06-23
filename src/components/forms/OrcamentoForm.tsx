@@ -148,30 +148,44 @@ export function OrcamentoForm({
 
   return (
     <div className="w-full max-w-lg mx-auto">
-      <ol className="flex gap-2 mb-8">
+      {/* Pill steps */}
+      <div className="mb-8 flex items-center gap-0">
         {STEPS.map((label, i) => (
-          <li key={label} className="flex-1 text-center text-sm">
-            <span
-              aria-current={i === step ? "step" : undefined}
-              className={cn(
-                "mx-auto mb-1 flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium",
-                i < step && "bg-primary text-primary-foreground",
-                i === step && "bg-background text-primary ring-2 ring-primary",
-                i > step && "bg-muted text-muted-foreground opacity-50"
-              )}
-            >
-              {i < step ? <Check size={12} aria-hidden="true" /> : i + 1}
-            </span>
-            <span
-              className={
-                i <= step ? "text-foreground" : "text-muted-foreground"
-              }
-            >
-              {label}
-            </span>
-          </li>
+          <div key={label} className="flex flex-1 items-center">
+            <div className="flex flex-col items-center gap-1.5">
+              <span
+                aria-current={i === step ? "step" : undefined}
+                className={cn(
+                  "flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all duration-300",
+                  i < step && "bg-accent text-accent-foreground",
+                  i === step && "bg-background text-accent ring-2 ring-accent",
+                  i > step && "bg-muted text-muted-foreground"
+                )}
+              >
+                {i < step ? <Check size={13} aria-hidden="true" /> : i + 1}
+              </span>
+              <span
+                className={cn(
+                  "text-[11px] font-medium transition-colors duration-300",
+                  i <= step ? "text-foreground" : "text-muted-foreground"
+                )}
+              >
+                {label}
+              </span>
+            </div>
+            {/* Conector entre steps */}
+            {i < STEPS.length - 1 ? (
+              <div
+                className={cn(
+                  "mx-2 mt-[-1.25rem] h-px flex-1 transition-colors duration-500",
+                  i < step ? "bg-accent" : "bg-border"
+                )}
+                aria-hidden="true"
+              />
+            ) : null}
+          </div>
         ))}
-      </ol>
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         {step === 0 && (
@@ -192,10 +206,10 @@ export function OrcamentoForm({
                 {...register("sport")}
                 aria-invalid={errors.sport ? "true" : undefined}
                 aria-describedby={errors.sport ? "sport-error" : undefined}
-                className={cn(
-                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
-                  errors.sport ? "border-destructive" : "border-border"
-                )}
+                  className={cn(
+                    "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 transition-colors duration-200",
+                    errors.sport ? "border-destructive" : "border-border"
+                  )}
               >
                 <option value="">Selecione...</option>
                 {SPORTS.map((s) => (
@@ -232,7 +246,7 @@ export function OrcamentoForm({
                   errors.quantity ? "quantity-error" : undefined
                 }
                 className={cn(
-                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 transition-colors duration-200",
                   errors.quantity ? "border-destructive" : "border-border"
                 )}
                 placeholder="Ex: 20"
@@ -310,7 +324,7 @@ export function OrcamentoForm({
                 aria-invalid={errors.name ? "true" : undefined}
                 aria-describedby={errors.name ? "name-error" : undefined}
                 className={cn(
-                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 transition-colors duration-200",
                   errors.name ? "border-destructive" : "border-border"
                 )}
                 placeholder="Seu nome completo"
@@ -341,7 +355,7 @@ export function OrcamentoForm({
                 aria-invalid={errors.phone ? "true" : undefined}
                 aria-describedby={errors.phone ? "phone-error" : undefined}
                 className={cn(
-                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 transition-colors duration-200",
                   errors.phone ? "border-destructive" : "border-border"
                 )}
                 placeholder="(27) 99999-9999"
@@ -367,7 +381,7 @@ export function OrcamentoForm({
                 aria-invalid={errors.city ? "true" : undefined}
                 aria-describedby={errors.city ? "city-error" : undefined}
                 className={cn(
-                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                  "w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/60 transition-colors duration-200",
                   errors.city ? "border-destructive" : "border-border"
                 )}
                 placeholder="Sua cidade"
@@ -402,6 +416,7 @@ export function OrcamentoForm({
               type="button"
               data-testid="next-step"
               onClick={advance}
+              variant="accent"
               className="ml-auto"
             >
               Próximo
@@ -410,6 +425,7 @@ export function OrcamentoForm({
             <Button
               type="submit"
               data-testid="submit-form"
+              variant="accent"
               className="ml-auto"
             >
               Solicitar orçamento no WhatsApp

@@ -27,14 +27,14 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                 </Link>
               ) : (
                 <span
-                  className={isLast ? "text-foreground" : undefined}
+                  className={isLast ? "font-semibold text-accent" : "text-muted-foreground"}
                   aria-current={isLast ? "page" : undefined}
                 >
                   {item.label}
                 </span>
               )}
               {!isLast ? (
-                <ChevronRight className="size-4" aria-hidden="true" />
+                <ChevronRight className="size-3.5 text-muted-foreground/50" aria-hidden="true" />
               ) : null}
             </li>
           );

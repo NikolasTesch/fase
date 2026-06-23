@@ -10,7 +10,7 @@ export function FooterWhatsAppLink() {
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => trackEvent("whatsapp_click", { location: "footer" })}
-      className="transition-colors hover:text-primary-foreground"
+      className="transition-colors hover:text-accent"
     >
       WhatsApp
     </a>

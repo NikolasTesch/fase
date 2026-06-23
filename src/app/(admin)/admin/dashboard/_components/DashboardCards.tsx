@@ -44,10 +44,10 @@ const colorMap: Record<
     text: "text-purple-600 dark:text-purple-400",
   },
   brand: {
-    bg: "bg-primary/10",
-    icon: "text-primary",
-    ring: "ring-primary/20",
-    text: "text-primary",
+    bg: "bg-accent/10",
+    icon: "text-accent",
+    ring: "ring-accent/20",
+    text: "text-accent",
   },
 };
 

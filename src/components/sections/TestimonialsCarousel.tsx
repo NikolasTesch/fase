@@ -135,7 +135,7 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
               <div className="flex flex-col gap-5">
                 {typeof current.rating === "number" ? (
                   <div
-                    className="flex gap-0.5 text-primary"
+                    className="flex gap-0.5 text-accent"
                     aria-label={`Avaliação ${current.rating} de 5`}
                   >
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -205,7 +205,7 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
                 className={cn(
                   "h-2 rounded-full transition-all duration-300",
                   i === index
-                    ? "w-6 bg-primary"
+                    ? "w-6 bg-accent"
                     : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/60"
                 )}
               />
