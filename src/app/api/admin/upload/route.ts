@@ -32,7 +32,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const raw = Buffer.from(new Uint8Array(await file.arrayBuffer()));
+    const chunks: Uint8Array[] = [];
+    const reader = file.stream().getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+    }
+    const raw = Buffer.concat(chunks);
     const { buffer, mimeType } = await convertToWebP(raw, file.type);
 
     const timestamp = Date.now();
