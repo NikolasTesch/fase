@@ -15,7 +15,7 @@ import { InstagramSection } from "@/components/sections/InstagramSection";
 
 async function getHomepageData() {
   try {
-      const [featuredProducts, testimonials, instagramPosts, heroVideoSetting] =
+      const [featuredProducts, testimonials, instagramPosts, heroVideoSetting, modalityItems] =
         await Promise.all([
           prisma.product.findMany({
             where: { isActive: true, isFeatured: true },
@@ -45,9 +45,13 @@ async function getHomepageData() {
           prisma.siteSetting.findUnique({
             where: { key: "instagram_hero_video_url" },
           }),
+          prisma.modalityItem.findMany({
+            where: { isActive: true },
+            orderBy: [{ sectionOrder: "asc" }, { sortOrder: "asc" }],
+          }),
         ]);
 
-      return { featuredProducts, testimonials, instagramPosts, heroVideoSetting };
+      return { featuredProducts, testimonials, instagramPosts, heroVideoSetting, modalityItems };
   } catch (error) {
     console.error("[GET /]", error);
     return {
@@ -55,13 +59,27 @@ async function getHomepageData() {
       testimonials: [],
       instagramPosts: [],
       heroVideoSetting: null,
+      modalityItems: [],
     };
   }
 }
 
 export default async function HomePage() {
-  const { featuredProducts, testimonials, instagramPosts, heroVideoSetting } =
+  const { featuredProducts, testimonials, instagramPosts, heroVideoSetting, modalityItems } =
     await getHomepageData();
+
+  type RawItem = (typeof modalityItems)[number];
+  const modalitySections = modalityItems.reduce<
+    { title: string; subtitle: string | null; order: number; lines: RawItem[] }[]
+  >((acc, item) => {
+    const existing = acc.find((s) => s.title === item.sectionTitle);
+    if (existing) {
+      existing.lines.push(item);
+    } else {
+      acc.push({ title: item.sectionTitle, subtitle: item.sectionSubtitle, order: item.sectionOrder, lines: [item] });
+    }
+    return acc;
+  }, []).sort((a, b) => a.order - b.order);
 
   const featuredItems = featuredProducts.map((product) => ({
     slug: product.slug,
@@ -93,7 +111,7 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection />
-      <CategoriesSection />
+      <CategoriesSection sections={modalitySections} />
       <FeaturedSection products={featuredItems} />
       <HowItWorksSection />
       <WhySection />
