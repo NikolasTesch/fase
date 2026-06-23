@@ -750,6 +750,28 @@ async function main() {
   }
   console.log(`✓ ${modalitySeed.length} modalidades`);
 
+  // ─── Tabelas de Medidas ─────────────────────────────────────────────────
+
+  const sizeChartSeed = [
+    { type: "camisa", title: "Camisa", columns: ["Peito (cm)", "Cintura (cm)", "Comprimento (cm)", "Manga (cm)"], rows: [{ label: "P", values: ["64", "54", "70", "20"] }, { label: "M", values: ["68", "58", "74", "21"] }, { label: "G", values: ["72", "62", "78", "22"] }, { label: "GG", values: ["76", "66", "82", "23"] }] },
+    { type: "short-masc", title: "Short Masculino", columns: ["Cintura (cm)", "Comprimento (cm)"], rows: [{ label: "P", values: ["40", "42"] }, { label: "M", values: ["44", "44"] }, { label: "G", values: ["48", "46"] }, { label: "GG", values: ["52", "48"] }] },
+    { type: "short-fem", title: "Short Feminino", columns: ["Cintura (cm)", "Quadril (cm)", "Comprimento (cm)"], rows: [{ label: "P", values: ["36", "46", "38"] }, { label: "M", values: ["38", "48", "40"] }, { label: "G", values: ["40", "52", "42"] }, { label: "GG", values: ["44", "56", "44"] }] },
+    { type: "short-suplex", title: "Short Suplex", columns: ["Cintura (cm)", "Comprimento (cm)"], rows: [{ label: "P", values: ["38", "40"] }, { label: "M", values: ["42", "42"] }, { label: "G", values: ["46", "44"] }, { label: "GG", values: ["50", "46"] }] },
+    { type: "regata", title: "Regata", columns: ["Peito (cm)", "Cintura (cm)", "Comprimento (cm)"], rows: [{ label: "P", values: ["62", "52", "68"] }, { label: "M", values: ["66", "56", "72"] }, { label: "G", values: ["70", "60", "76"] }, { label: "GG", values: ["74", "64", "80"] }] },
+    { type: "bermuda", title: "Bermuda", columns: ["Cintura (cm)", "Comprimento (cm)", "Barra (cm)"], rows: [{ label: "P", values: ["40", "48", "28"] }, { label: "M", values: ["44", "50", "30"] }, { label: "G", values: ["48", "52", "32"] }] },
+    { type: "agasalho", title: "Agasalho", columns: ["Peito (cm)", "Cintura (cm)", "Comprimento (cm)", "Manga (cm)"], rows: [{ label: "P", values: ["66", "56", "72", "21"] }, { label: "M", values: ["70", "60", "76", "22"] }, { label: "G", values: ["74", "64", "80", "23"] }, { label: "GG", values: ["78", "68", "84", "24"] }] },
+    { type: "colete", title: "Colete", columns: ["Peito (cm)", "Cintura (cm)", "Comprimento (cm)"], rows: [{ label: "P", values: ["60", "50", "66"] }, { label: "M", values: ["64", "54", "70"] }, { label: "G", values: ["68", "58", "74"] }, { label: "GG", values: ["72", "62", "78"] }] },
+  ];
+
+  for (const item of sizeChartSeed) {
+    await prisma.sizeChart.upsert({
+      where: { type: item.type },
+      update: { title: item.title, columns: item.columns, rows: item.rows },
+      create: item,
+    });
+  }
+  console.log(`✓ ${sizeChartSeed.length} tabelas de medidas`);
+
   console.log("\n✅ Seed concluído com sucesso!");
 }
 

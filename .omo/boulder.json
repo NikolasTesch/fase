@@ -1,0 +1,35 @@
+{
+  "schema_version": 2,
+  "active_work_id": "admin-imagens-medidas-b0c5f6ca",
+  "works": {
+    "admin-imagens-medidas-b0c5f6ca": {
+      "work_id": "admin-imagens-medidas-b0c5f6ca",
+      "active_plan": "C:\\PASTA IMPORTANTE\\TESCH_DEV\\fase\\.omo\\plans\\admin-imagens-medidas.md",
+      "plan_name": "admin-imagens-medidas",
+      "status": "active",
+      "started_at": "2026-06-23T14:22:26.303Z",
+      "updated_at": "2026-06-23T14:22:26.303Z",
+      "session_ids": [
+        "opencode:ses_10b428c79ffeveNKeMvdRthDbP"
+      ],
+      "session_origins": {
+        "opencode:ses_10b428c79ffeveNKeMvdRthDbP": "direct"
+      },
+      "agent": "atlas",
+      "task_sessions": {}
+    }
+  },
+  "active_plan": "C:\\PASTA IMPORTANTE\\TESCH_DEV\\fase\\.omo\\plans\\admin-imagens-medidas.md",
+  "started_at": "2026-06-23T14:22:26.303Z",
+  "status": "active",
+  "updated_at": "2026-06-23T14:22:26.303Z",
+  "session_ids": [
+    "opencode:ses_10b428c79ffeveNKeMvdRthDbP"
+  ],
+  "session_origins": {
+    "opencode:ses_10b428c79ffeveNKeMvdRthDbP": "direct"
+  },
+  "plan_name": "admin-imagens-medidas",
+  "task_sessions": {},
+  "agent": "atlas"
+}

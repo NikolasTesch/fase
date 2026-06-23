@@ -73,6 +73,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  const allCharts = await prisma.sizeChart.findMany();
+  const chartByType = new Map(
+    allCharts.map((sc) => [sc.type, { columns: sc.columns as string[], rows: sc.rows as { label: string; values: string[] }[] }])
+  );
+
   const { category } = product;
   const primaryImage = product.images[0];
   const simulatorUrl = getSimulatorUrl(product.simulatorUrl);
@@ -149,6 +154,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             categorySlug={category.slug}
             fabric={product.fabric}
             minQty={product.minQty}
+            chartByType={chartByType}
           />
         </div>
       </div>

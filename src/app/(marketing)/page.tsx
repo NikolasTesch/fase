@@ -15,43 +15,39 @@ import { InstagramSection } from "@/components/sections/InstagramSection";
 
 async function getHomepageData() {
   try {
-    const [featuredProducts, testimonials, instagramPosts, heroVideoSetting, modalityItems] =
-      await Promise.all([
-        prisma.product.findMany({
-          where: { isActive: true, isFeatured: true },
-          take: 16,
-          orderBy: { sortOrder: "asc" },
-          select: {
-            slug: true,
-            name: true,
-            fabric: true,
-            images: {
-              where: { isPrimary: true },
-              take: 1,
-              select: { url: true, altText: true },
+      const [featuredProducts, testimonials, instagramPosts, heroVideoSetting] =
+        await Promise.all([
+          prisma.product.findMany({
+            where: { isActive: true, isFeatured: true },
+            take: 16,
+            orderBy: { sortOrder: "asc" },
+            select: {
+              slug: true,
+              name: true,
+              fabric: true,
+              images: {
+                where: { isPrimary: true },
+                take: 1,
+                select: { url: true, altText: true },
+              },
+              category: { select: { slug: true, name: true } },
             },
-            category: { select: { slug: true, name: true } },
-          },
-        }),
-        prisma.testimonial.findMany({
-          where: { isActive: true },
-          orderBy: { sortOrder: "asc" },
-        }),
-        prisma.instagramPost.findMany({
-          where: { isActive: true },
-          orderBy: { sortOrder: "asc" },
-          take: 6,
-        }),
-        prisma.siteSetting.findUnique({
-          where: { key: "instagram_hero_video_url" },
-        }),
-        prisma.modalityItem.findMany({
-          where: { isActive: true },
-          orderBy: [{ sectionOrder: "asc" }, { sortOrder: "asc" }],
-        }),
-      ]);
+          }),
+          prisma.testimonial.findMany({
+            where: { isActive: true },
+            orderBy: { sortOrder: "asc" },
+          }),
+          prisma.instagramPost.findMany({
+            where: { isActive: true },
+            orderBy: { sortOrder: "asc" },
+            take: 6,
+          }),
+          prisma.siteSetting.findUnique({
+            where: { key: "instagram_hero_video_url" },
+          }),
+        ]);
 
-    return { featuredProducts, testimonials, instagramPosts, heroVideoSetting, modalityItems };
+      return { featuredProducts, testimonials, instagramPosts, heroVideoSetting };
   } catch (error) {
     console.error("[GET /]", error);
     return {
@@ -59,13 +55,12 @@ async function getHomepageData() {
       testimonials: [],
       instagramPosts: [],
       heroVideoSetting: null,
-      modalityItems: [],
     };
   }
 }
 
 export default async function HomePage() {
-  const { featuredProducts, testimonials, instagramPosts, heroVideoSetting, modalityItems } =
+  const { featuredProducts, testimonials, instagramPosts, heroVideoSetting } =
     await getHomepageData();
 
   const featuredItems = featuredProducts.map((product) => ({
@@ -98,7 +93,7 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection />
-      <CategoriesSection items={modalityItems} />
+      <CategoriesSection />
       <FeaturedSection products={featuredItems} />
       <HowItWorksSection />
       <WhySection />

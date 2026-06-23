@@ -157,3 +157,13 @@ model ModalityItem {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
+
+model SizeChart {
+  id        String   @id @default(cuid())
+  type      String   @unique
+  title     String
+  columns   Json
+  rows      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

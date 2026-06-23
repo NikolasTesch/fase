@@ -134,12 +134,14 @@ interface ProductSpecificationsProps {
   categorySlug: string;
   fabric?: string | null;
   minQty?: number | null;
+  chartByType?: Map<string, { columns: string[]; rows: { label: string; values: string[] }[] }>;
 }
 
 export function ProductSpecifications({
   categorySlug,
   fabric,
   minQty,
+  chartByType,
 }: ProductSpecificationsProps) {
   const parts =
     SPORT_SPECS_MAPPING[categorySlug] ?? GENERIC_SPEC(fabric, minQty);
@@ -167,6 +169,7 @@ export function ProductSpecifications({
                   key={guide.imageKey}
                   label={guide.label}
                   imageKey={guide.imageKey}
+                  chartData={chartByType?.get(guide.imageKey) ?? null}
                 />
               ))}
             </div>
