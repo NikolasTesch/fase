@@ -70,7 +70,13 @@ export function TestimonialForm({ testimonial }: TestimonialFormProps) {
       if (res.ok) {
         const data = await res.json();
         setForm((f) => ({ ...f, [field]: data.url }));
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.message ?? "Erro ao enviar imagem");
       }
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao enviar imagem");
     } finally {
       setUploading(null);
       if (fileRefs[field].current) fileRefs[field].current.value = "";

@@ -93,7 +93,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...payload,
-        simulatorUrl: payload.simulatorUrl || null,
+        simulatorUrl: payload.simulatorUrl || undefined,
         subcategoryId: payload.subcategoryId || null,
         minQty: Number(payload.minQty),
         sortOrder: Number(payload.sortOrder),
