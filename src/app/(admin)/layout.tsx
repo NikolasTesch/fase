@@ -4,6 +4,7 @@ import { jwtVerify } from "jose";
 import { Zap } from "lucide-react";
 import { AdminSidebarClient } from "./_components/AdminSidebarClient";
 import { LogoutButton } from "./_components/LogoutButton";
+import { ThemeToggle } from "./_components/ThemeToggle";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -49,7 +50,8 @@ export default async function AdminLayout({
         </nav>
 
         {/* Footer / Logout */}
-        <div className="p-3 border-t border-border/60">
+        <div className="p-3 border-t border-border/60 space-y-0.5">
+          <ThemeToggle />
           <LogoutButton />
         </div>
       </aside>
