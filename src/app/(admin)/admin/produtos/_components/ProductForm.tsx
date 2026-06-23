@@ -66,6 +66,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [images, setImages] = useState<ProductImage[]>(product?.images ?? []);
 
@@ -118,7 +119,12 @@ export function ProductForm({ categories, product }: ProductFormProps) {
 
   async function handleDelete() {
     if (!confirm("Desativar este produto?")) return;
-    await fetch(`/api/admin/products/${product!.id}`, { method: "DELETE" });
+    const res = await fetch(`/api/admin/products/${product!.id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.message ?? "Erro ao desativar produto");
+      return;
+    }
     router.push("/admin/produtos");
   }
 
@@ -150,12 +156,14 @@ export function ProductForm({ categories, product }: ProductFormProps) {
   }
 
   async function handleRemoveImage(imageId: string) {
-    await fetch(`/api/admin/products/${product!.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
+    const res = await fetch(`/api/admin/products/images/${imageId}`, {
+      method: "DELETE",
     });
-    // Apenas remove da exibição — a imagem continua no banco até limpeza manual
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.message ?? "Erro ao remover imagem");
+      return;
+    }
     setImages((prev) => prev.filter((i) => i.id !== imageId));
   }
 
@@ -170,7 +178,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
             value={form.name}
             onChange={(e) => {
               set("name", e.target.value);
-              if (!isEditing) {
+              if (!isEditing && !slugManuallyEdited) {
                 set("slug", e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""));
               }
             }}
@@ -181,9 +189,13 @@ export function ProductForm({ categories, product }: ProductFormProps) {
           <label className="block text-sm font-medium mb-1">Slug *</label>
           <input
             value={form.slug}
-            onChange={(e) => set("slug", e.target.value)}
+            onChange={(e) => { set("slug", e.target.value); setSlugManuallyEdited(true); }}
             className={field}
+            disabled={isEditing}
           />
+          {isEditing && (
+            <p className="text-xs text-muted-foreground mt-1">Slug definido na criação e não pode ser alterado.</p>
+          )}
         </div>
       </div>
 

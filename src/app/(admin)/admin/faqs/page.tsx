@@ -30,9 +30,9 @@ export default function FaqsPage() {
 
   useEffect(() => {
     fetch("/api/admin/categories")
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : []))
       .then(setCategories)
-      .catch(console.error);
+      .catch(() => setCategories([]));
   }, []);
 
   useEffect(() => {
@@ -41,9 +41,9 @@ export default function FaqsPage() {
         ? "/api/admin/faqs"
         : `/api/admin/faqs?categoryId=${selectedCategory}`;
     fetch(url)
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : []))
       .then(setFaqs)
-      .catch(console.error);
+      .catch(() => setFaqs([]));
   }, [selectedCategory]);
 
   function startEdit(faq: Faq) {
@@ -58,38 +58,55 @@ export default function FaqsPage() {
 
   async function saveEdit(id: string) {
     setSaving(true);
-    await fetch(`/api/admin/faqs/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    setFaqs((prev) => prev.map((f) => (f.id === id ? { ...f, ...form } : f)));
-    setEditingId(null);
-    setSaving(false);
+    try {
+      const res = await fetch(`/api/admin/faqs/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error("Erro ao salvar");
+      setFaqs((prev) => prev.map((f) => (f.id === id ? { ...f, ...form } : f)));
+      setEditingId(null);
+    } catch (err) {
+      console.error("[saveEdit]", err);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function deleteFaq(id: string) {
     if (!confirm("Remover esta pergunta?")) return;
-    await fetch(`/api/admin/faqs/${id}`, { method: "DELETE" });
-    setFaqs((prev) => prev.filter((f) => f.id !== id));
+    try {
+      const res = await fetch(`/api/admin/faqs/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Erro ao remover");
+      setFaqs((prev) => prev.filter((f) => f.id !== id));
+    } catch (err) {
+      console.error("[deleteFaq]", err);
+    }
   }
 
   async function addFaq() {
     setSaving(true);
-    const res = await fetch("/api/admin/faqs", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...newForm,
-        categoryId: selectedCategory === "global" ? null : selectedCategory,
-        sortOrder: faqs.length,
-      }),
-    });
-    const created = await res.json();
-    setFaqs((prev) => [...prev, created]);
-    setNewForm({ question: "", answer: "" });
-    setAdding(false);
-    setSaving(false);
+    try {
+      const res = await fetch("/api/admin/faqs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...newForm,
+          categoryId: selectedCategory === "global" ? null : selectedCategory,
+          sortOrder: faqs.length,
+        }),
+      });
+      if (!res.ok) throw new Error("Erro ao criar FAQ");
+      const created = await res.json();
+      setFaqs((prev) => [...prev, created]);
+      setNewForm({ question: "", answer: "" });
+      setAdding(false);
+    } catch (err) {
+      console.error("[addFaq]", err);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

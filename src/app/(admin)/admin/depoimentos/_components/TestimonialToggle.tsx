@@ -7,15 +7,24 @@ export function TestimonialToggle({ id, isActive }: { id: string; isActive: bool
   const [saving, setSaving] = useState(false);
 
   async function toggle() {
-    setSaving(true);
     const next = !active;
-    await fetch(`/api/admin/testimonials/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isActive: next }),
-    });
-    setActive(next);
-    setSaving(false);
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/testimonials/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: next }),
+      });
+      if (!res.ok) {
+        console.error("[TestimonialToggle] erro", await res.json().catch(() => ({})));
+        return;
+      }
+      setActive(next);
+    } catch (err) {
+      console.error("[TestimonialToggle] exceção", err);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

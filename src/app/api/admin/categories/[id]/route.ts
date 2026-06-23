@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 
@@ -9,7 +10,7 @@ interface Params {
 const UpdateSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   description: z.string().optional(),
-  imageUrl: z.string().url().optional().or(z.literal("")),
+  imageUrl: z.url().optional().or(z.literal("")),
   iconUrl: z.string().optional(),
   sortOrder: z.number().int().optional(),
   isActive: z.boolean().optional(),
@@ -42,6 +43,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     return Response.json(category);
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return Response.json(
+        { message: "Categoria não encontrada" },
+        { status: 404 }
+      );
+    }
     console.error("[PATCH /api/admin/categories/:id]", error);
     return Response.json({ message: "Erro interno" }, { status: 500 });
   }

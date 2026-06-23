@@ -15,7 +15,7 @@ export function HeroVideoUploader({ currentUrl }: HeroVideoUploaderProps) {
   const save = async () => {
     setSaving(true);
     try {
-      await fetch("/api/admin/site-setting", {
+      const res = await fetch("/api/admin/site-setting", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -23,8 +23,16 @@ export function HeroVideoUploader({ currentUrl }: HeroVideoUploaderProps) {
           value: url,
         }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Erro ao salvar");
+        return;
+      }
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao salvar");
     } finally {
       setSaving(false);
     }

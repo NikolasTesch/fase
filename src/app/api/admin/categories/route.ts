@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 
@@ -6,7 +7,7 @@ const CategorySchema = z.object({
   slug: z.string().min(1),
   name: z.string().min(1).max(100),
   description: z.string().optional(),
-  imageUrl: z.string().url().optional().or(z.literal("")),
+  imageUrl: z.url().optional().or(z.literal("")),
   iconUrl: z.string().optional(),
   sortOrder: z.number().int().default(0),
   isActive: z.boolean().default(true),
@@ -50,6 +51,15 @@ export async function POST(req: NextRequest) {
 
     return Response.json(category, { status: 201 });
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return Response.json(
+        { message: "Já existe uma categoria com este slug." },
+        { status: 409 }
+      );
+    }
     console.error("[POST /api/admin/categories]", error);
     return Response.json({ message: "Erro interno" }, { status: 500 });
   }

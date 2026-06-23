@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 
 const patchBody = z.object({
-  imageUrl: z.string().url().optional(),
-  linkUrl: z.string().url().optional(),
+  imageUrl: z.url().optional(),
+  linkUrl: z.url().optional(),
   caption: z.string().optional(),
   sortOrder: z.number().int().optional(),
   isActive: z.boolean().optional(),
@@ -27,6 +28,12 @@ export async function PATCH(
     });
     return NextResponse.json(post);
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return NextResponse.json({ error: "Post não encontrado" }, { status: 404 });
+    }
     console.error("[PATCH /api/admin/instagram/:id]", error);
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
@@ -41,6 +48,12 @@ export async function DELETE(
     await prisma.instagramPost.delete({ where: { id } });
     return new NextResponse(null, { status: 204 });
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return NextResponse.json({ error: "Post não encontrado" }, { status: 404 });
+    }
     console.error("[DELETE /api/admin/instagram/:id]", error);
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }

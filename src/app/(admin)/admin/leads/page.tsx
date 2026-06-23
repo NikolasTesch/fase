@@ -133,27 +133,41 @@ export default function LeadsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const abortController = new AbortController();
     setLoading(true);
     const url = filter ? `/api/admin/leads?status=${filter}` : "/api/admin/leads";
-    fetch(url)
-      .then((r) => r.json())
+    fetch(url, { signal: abortController.signal })
+      .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
         setLeads(data);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        if (err.name !== "AbortError") console.error("[LeadsPage]", err);
+        setLoading(false);
+      });
+    return () => abortController.abort();
   }, [filter]);
 
   async function updateStatus(id: string, status: string) {
     setUpdating(true);
-    await fetch(`/api/admin/leads/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-    setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)));
-    if (selected?.id === id) setSelected((s) => s && { ...s, status });
-    setUpdating(false);
+    try {
+      const res = await fetch(`/api/admin/leads/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) {
+        console.error("[updateStatus] erro", await res.json().catch(() => ({})));
+        return;
+      }
+      setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)));
+      if (selected?.id === id) setSelected((s) => s && { ...s, status });
+    } catch (err) {
+      console.error("[updateStatus] exceção", err);
+    } finally {
+      setUpdating(false);
+    }
   }
 
   return (

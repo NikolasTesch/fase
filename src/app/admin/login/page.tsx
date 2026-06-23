@@ -29,8 +29,8 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/admin/dashboard");
       router.refresh();
+      router.push("/admin/dashboard");
     } catch {
       setError("Erro de conexão. Tente novamente.");
     } finally {

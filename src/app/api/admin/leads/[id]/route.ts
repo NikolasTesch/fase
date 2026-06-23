@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 
@@ -30,6 +31,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     return Response.json(lead);
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return Response.json(
+        { message: "Lead não encontrado" },
+        { status: 404 }
+      );
+    }
     console.error("[PATCH /api/admin/leads/:id]", error);
     return Response.json({ message: "Erro interno" }, { status: 500 });
   }

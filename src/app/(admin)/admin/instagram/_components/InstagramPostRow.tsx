@@ -44,7 +44,13 @@ export function InstagramPostRow({ post }: InstagramPostRowProps) {
       if (res.ok) {
         const data = await res.json();
         setForm((f) => ({ ...f, imageUrl: data.url }));
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.message || "Erro ao enviar imagem");
       }
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao enviar imagem");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -54,7 +60,7 @@ export function InstagramPostRow({ post }: InstagramPostRowProps) {
   const update = async () => {
     setSaving(true);
     try {
-      await fetch(`/api/admin/instagram/${post.id}`, {
+      const res = await fetch(`/api/admin/instagram/${post.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -62,7 +68,15 @@ export function InstagramPostRow({ post }: InstagramPostRowProps) {
           caption: form.caption || undefined,
         }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Erro ao salvar");
+        return;
+      }
       router.refresh();
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao salvar");
     } finally {
       setSaving(false);
     }
@@ -70,8 +84,18 @@ export function InstagramPostRow({ post }: InstagramPostRowProps) {
 
   const remove = async () => {
     if (!confirm("Remover este post?")) return;
-    await fetch(`/api/admin/instagram/${post.id}`, { method: "DELETE" });
-    router.refresh();
+    try {
+      const res = await fetch(`/api/admin/instagram/${post.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Erro ao remover");
+        return;
+      }
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao remover");
+    }
   };
 
   return (

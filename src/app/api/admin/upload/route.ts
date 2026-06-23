@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 import { uploadToR2, convertToWebP, MAX_FILE_SIZE } from "@/lib/r2";
 import { prisma } from "@/lib/db";
 
@@ -44,9 +45,19 @@ export async function POST(req: NextRequest) {
 
     const url = await uploadToR2(key, buffer, mimeType);
 
+    if (productId && categoryId) {
+      return Response.json(
+        { message: "Envie apenas productId ou categoryId, não ambos." },
+        { status: 400 }
+      );
+    }
+
     if (productId) {
+      const currentCount = await prisma.productImage.count({
+        where: { productId },
+      });
       const image = await prisma.productImage.create({
-        data: { url, altText, isPrimary, productId },
+        data: { url, altText, isPrimary, productId, sortOrder: currentCount },
       });
 
       return Response.json({ url, imageId: image.id }, { status: 201 });
@@ -63,6 +74,15 @@ export async function POST(req: NextRequest) {
 
     return Response.json({ url }, { status: 201 });
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      (error.code === "P2003" || error.code === "P2025")
+    ) {
+      return Response.json(
+        { message: "Produto ou categoria não encontrado" },
+        { status: 404 }
+      );
+    }
     console.error("[POST /api/admin/upload]", error);
     return Response.json({ message: "Erro interno" }, { status: 500 });
   }

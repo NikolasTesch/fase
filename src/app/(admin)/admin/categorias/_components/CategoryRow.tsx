@@ -31,12 +31,20 @@ export function CategoryRow({ category, index }: CategoryRowProps) {
 
   async function save(patch: object) {
     setSaving(true);
-    await fetch(`/api/admin/categories/${category.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(patch),
-    });
-    setSaving(false);
+    try {
+      const res = await fetch(`/api/admin/categories/${category.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      if (!res.ok) {
+        console.error("[CategoryRow.save] erro", await res.json().catch(() => ({})));
+      }
+    } catch (err) {
+      console.error("[CategoryRow.save] exceção", err);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {

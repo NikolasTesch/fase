@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 
@@ -43,6 +44,15 @@ export async function POST(req: NextRequest) {
 
     return Response.json(faq, { status: 201 });
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2003"
+    ) {
+      return Response.json(
+        { message: "Categoria não encontrada" },
+        { status: 404 }
+      );
+    }
     console.error("[POST /api/admin/faqs]", error);
     return Response.json({ message: "Erro interno" }, { status: 500 });
   }

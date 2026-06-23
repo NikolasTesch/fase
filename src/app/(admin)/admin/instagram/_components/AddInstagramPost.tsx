@@ -17,7 +17,7 @@ export function AddInstagramPost() {
     if (!form.imageUrl || !form.linkUrl) return;
     setSaving(true);
     try {
-      await fetch("/api/admin/instagram", {
+      const res = await fetch("/api/admin/instagram", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -26,9 +26,17 @@ export function AddInstagramPost() {
           caption: form.caption || undefined,
         }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Erro ao criar post");
+        return;
+      }
       setForm({ imageUrl: "", linkUrl: "", caption: "" });
       setOpen(false);
       router.refresh();
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao criar post");
     } finally {
       setSaving(false);
     }
@@ -47,7 +55,13 @@ export function AddInstagramPost() {
       if (res.ok) {
         const data = await res.json();
         setForm((f) => ({ ...f, imageUrl: data.url }));
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.message || "Erro ao enviar imagem");
       }
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao enviar imagem");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";

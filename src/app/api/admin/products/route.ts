@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 
@@ -12,10 +13,10 @@ const ProductSchema = z.object({
   isActive: z.boolean().default(true),
   seoTitle: z.string().optional(),
   seoDesc: z.string().optional(),
-  simulatorUrl: z.string().url().optional().or(z.literal("")),
+  simulatorUrl: z.url().optional().or(z.literal("")),
   sortOrder: z.number().int().default(0),
   categoryId: z.string().min(1),
-  subcategoryId: z.string().optional(),
+  subcategoryId: z.string().optional().nullable(),
 });
 
 export async function GET() {
@@ -60,6 +61,15 @@ export async function POST(req: NextRequest) {
 
     return Response.json(product, { status: 201 });
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return Response.json(
+        { message: "Já existe um produto com este slug." },
+        { status: 409 }
+      );
+    }
     console.error("[POST /api/admin/products]", error);
     return Response.json({ message: "Erro interno" }, { status: 500 });
   }

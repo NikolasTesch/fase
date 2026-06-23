@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 
@@ -11,9 +12,9 @@ const UpdateSchema = z.object({
   teamName: z.string().optional().nullable(),
   sport: z.string().optional().nullable(),
   text: z.string().min(1).max(2000).optional(),
-  photoUrl: z.string().url().optional().or(z.literal("")).nullable(),
-  logoUrl: z.string().url().optional().or(z.literal("")).nullable(),
-  materialImageUrl: z.string().url().optional().or(z.literal("")).nullable(),
+  photoUrl: z.url().optional().or(z.literal("")).nullable(),
+  logoUrl: z.url().optional().or(z.literal("")).nullable(),
+  materialImageUrl: z.url().optional().or(z.literal("")).nullable(),
   rating: z.number().int().min(1).max(5).optional(),
   isActive: z.boolean().optional(),
   sortOrder: z.number().int().optional(),
@@ -39,6 +40,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     return Response.json(testimonial);
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return Response.json(
+        { message: "Depoimento não encontrado" },
+        { status: 404 }
+      );
+    }
     console.error("[PATCH /api/admin/testimonials/:id]", error);
     return Response.json({ message: "Erro interno" }, { status: 500 });
   }
@@ -52,6 +62,15 @@ export async function DELETE(_req: Request, { params }: Params) {
 
     return Response.json({ success: true });
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return Response.json(
+        { message: "Depoimento não encontrado" },
+        { status: 404 }
+      );
+    }
     console.error("[DELETE /api/admin/testimonials/:id]", error);
     return Response.json({ message: "Erro interno" }, { status: 500 });
   }
