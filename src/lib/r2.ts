@@ -36,11 +36,13 @@ export async function uploadToR2(
   body: Buffer,
   contentType: string
 ) {
+  // O AWS SDK v3 no Vercel recebe SharedArrayBuffer ao invés de ArrayBuffer
+  // quando um Buffer Node.js é passado diretamente — Uint8Array força um ArrayBuffer regular
   await r2.send(
     new PutObjectCommand({
       Bucket: BUCKET,
       Key: key,
-      Body: body,
+      Body: new Uint8Array(body),
       ContentType: contentType,
     })
   );
