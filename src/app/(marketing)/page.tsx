@@ -1,6 +1,7 @@
 export const revalidate = 3600;
 
 import { prisma } from "@/lib/db";
+import type { ModalityItem } from "@prisma/client";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { CategoriesSection } from "@/components/sections/CategoriesSection";
 import { FeaturedSection } from "@/components/sections/FeaturedSection";
@@ -55,11 +56,11 @@ async function getHomepageData() {
   } catch (error) {
     console.error("[GET /]", error);
     return {
-      featuredProducts: [],
-      testimonials: [],
-      instagramPosts: [],
+      featuredProducts: [] as { slug: string; name: string; fabric: string | null; images: { url: string; altText: string | null }[]; category: { slug: string; name: string } }[],
+      testimonials: [] as Awaited<ReturnType<typeof prisma.testimonial.findMany>>,
+      instagramPosts: [] as Awaited<ReturnType<typeof prisma.instagramPost.findMany>>,
       heroVideoSetting: null,
-      modalityItems: [],
+      modalityItems: [] as ModalityItem[],
     };
   }
 }
@@ -68,18 +69,19 @@ export default async function HomePage() {
   const { featuredProducts, testimonials, instagramPosts, heroVideoSetting, modalityItems } =
     await getHomepageData();
 
-  type RawItem = (typeof modalityItems)[number];
-  const modalitySections = modalityItems.reduce<
-    { title: string; subtitle: string | null; order: number; lines: RawItem[] }[]
-  >((acc, item) => {
-    const existing = acc.find((s) => s.title === item.sectionTitle);
-    if (existing) {
-      existing.lines.push(item);
-    } else {
-      acc.push({ title: item.sectionTitle, subtitle: item.sectionSubtitle, order: item.sectionOrder, lines: [item] });
-    }
-    return acc;
-  }, []).sort((a, b) => a.order - b.order);
+  type ModalitySection = { title: string; subtitle: string | null; order: number; lines: ModalityItem[] };
+  const modalitySections = (modalityItems as ModalityItem[]).reduce<ModalitySection[]>(
+    (acc, item) => {
+      const existing = acc.find((s) => s.title === item.sectionTitle);
+      if (existing) {
+        existing.lines.push(item);
+      } else {
+        acc.push({ title: item.sectionTitle, subtitle: item.sectionSubtitle, order: item.sectionOrder, lines: [item] });
+      }
+      return acc;
+    },
+    []
+  ).sort((a, b) => a.order - b.order);
 
   const featuredItems = featuredProducts.map((product) => ({
     slug: product.slug,
