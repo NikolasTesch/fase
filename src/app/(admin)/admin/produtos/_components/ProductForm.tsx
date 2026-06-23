@@ -83,15 +83,19 @@ export function ProductForm({ categories, product }: ProductFormProps) {
       ? `/api/admin/products/${product!.id}`
       : "/api/admin/products";
 
+    // Ao editar, o slug é imutável — não enviá-lo evita rejeição do schema da API
+    const { slug, ...formWithoutSlug } = form;
+    const payload = isEditing ? formWithoutSlug : form;
+
     const res = await fetch(url, {
       method: isEditing ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ...form,
-        simulatorUrl: form.simulatorUrl || null,
-        subcategoryId: form.subcategoryId || null,
-        minQty: Number(form.minQty),
-        sortOrder: Number(form.sortOrder),
+        ...payload,
+        simulatorUrl: payload.simulatorUrl || null,
+        subcategoryId: payload.subcategoryId || null,
+        minQty: Number(payload.minQty),
+        sortOrder: Number(payload.sortOrder),
       }),
     });
 
