@@ -20,7 +20,6 @@ const NAV = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/produtos", label: "Produtos", icon: Package },
   { href: "/admin/categorias", label: "Categorias", icon: Tag },
-  { href: "/admin/tamanhos", label: "Tamanhos", icon: Ruler },
   { href: "/admin/medidas", label: "Medidas", icon: Ruler },
   { href: "/admin/modalidades", label: "Modalidades", icon: Shirt },
   { href: "/admin/leads", label: "Leads", icon: Users },
