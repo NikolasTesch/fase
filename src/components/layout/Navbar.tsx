@@ -8,7 +8,7 @@ import {
   motion,
   useReducedMotion,
 } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CATEGORY_NAV, CORPORATE_NAV } from "@/lib/site";
@@ -19,7 +19,17 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [corporateOpen, setCorporateOpen] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const shouldReduce = useReducedMotion();
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains("dark"));
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     let ticking = false;
@@ -47,7 +57,7 @@ export function Navbar() {
       >
         <Link href="/" aria-label="Fase Sport — início" className="shrink-0">
           <Image
-            src="/logo.svg"
+            src={isDark ? "/logo-white.svg" : "/logo.svg"}
             alt="Fase Sport"
             width={116}
             height={60}
@@ -118,7 +128,23 @@ export function Navbar() {
           </div>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          {/* Dark mode toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              const html = document.documentElement;
+              const next = !html.classList.contains("dark");
+              html.classList.toggle("dark", next);
+              localStorage.setItem("fase_theme", next ? "dark" : "light");
+              setIsDark(next);
+            }}
+            aria-label={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
+            className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            {isDark ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
+          </button>
+
           <SearchForm />
           <Button
             size="lg"

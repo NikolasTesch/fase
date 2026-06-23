@@ -36,8 +36,8 @@ export function ProductCard({
               className="object-cover transition-transform duration-500 group-hover:scale-110"
             />
             {/* Overlay no hover com CTA */}
-            <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/40 via-transparent to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-4 py-2 text-sm font-semibold text-foreground shadow-lg backdrop-blur-sm">
+            <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/60 via-black/10 to-transparent p-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground shadow-xl">
                 Ver Detalhes
                 <ArrowRight className="size-3.5" />
               </span>

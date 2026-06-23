@@ -75,7 +75,7 @@
      #9D0000 → oklch(0.375 0.165 24.5)
   */
   --brand:      oklch(0.535 0.210 26.5);  /* #CD3438 – vermelho FASE */
-  --brand-dark: oklch(0.375 0.165 24.5);  /* #9D0000 – vermelho escuro */
+  --brand-dark: oklch(0.28 0.165 24.5);   /* #6B0000 – vermelho escuro */
   --brand-light: oklch(0.68 0.175 26.5);  /* vermelho claro (hover em dark bg) */
   --brand-tint: oklch(0.97 0.018 26.5);   /* tint suave (fundos, badges) */
 

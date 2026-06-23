@@ -57,7 +57,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var m=window.matchMedia("(prefers-color-scheme:dark)");if(m.matches)document.documentElement.classList.add("dark")}catch(e){}})()`,
+            __html: `(function(){try{var s=localStorage.getItem("fase_theme");if(s==="dark"){document.documentElement.classList.add("dark")}else if(s==="light"){document.documentElement.classList.remove("dark")}else{var m=window.matchMedia("(prefers-color-scheme:dark)");if(m.matches)document.documentElement.classList.add("dark")}}catch(e){}})()`,
           }}
         />
       </head>

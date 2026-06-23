@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Shirt } from "lucide-react";
 
 import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
@@ -70,16 +71,27 @@ function ModalitySectionBlock({ section }: ModalitySectionBlockProps) {
           </div>
         ) : null}
       </div>
-      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted lg:order-2">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-primary/5 to-brand-dark/10 lg:order-2">
         <div className="relative h-full w-full">
-          <div className="absolute inset-0 flex items-center justify-center bg-primary/10">
-            <Shirt className="size-16 text-primary/30" aria-hidden="true" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Shirt className="size-16 text-accent/15" aria-hidden="true" />
           </div>
-          {active.imageUrl && (
-            <Image key={active.id} src={active.imageUrl} alt={active.name} fill
-              sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover transition-opacity duration-300"
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {active.imageUrl && (
+              <motion.div
+                key={active.id}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="absolute inset-0"
+              >
+                <Image src={active.imageUrl} alt={active.name} fill
+                  sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         {section.lines.length > 1 ? (
           <>

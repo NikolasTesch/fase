@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { Menu, X, ChevronRight, Sun, Moon } from "lucide-react";
 
 import { CATEGORY_NAV, CORPORATE_NAV } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -58,6 +58,23 @@ export function MobileMenu() {
             className="absolute inset-x-0 top-full border-b border-border bg-background shadow-lg"
           >
             <nav className="flex flex-col p-2">
+              {/* Theme toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  const html = document.documentElement;
+                  const next = !html.classList.contains("dark");
+                  html.classList.toggle("dark", next);
+                  localStorage.setItem("fase_theme", next ? "dark" : "light");
+                }}
+                className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <Sun className="size-5 hidden dark:block" />
+                <Moon className="size-5 block dark:hidden" />
+                <span className="dark:hidden">Modo escuro</span>
+                <span className="hidden dark:inline">Modo claro</span>
+              </button>
+              <div className="my-2 border-t border-border" />
               {CATEGORY_NAV.map((item) => (
                 <Link
                   key={item.slug}
