@@ -87,13 +87,13 @@ Wave 5: Frontend component + integração na página do produto
   Acceptance criteria: `npx tsc --noEmit` passa. Evidence .omo/evidence/task-3.md
   Commit: N (já implementado)
 
-- [ ] 4. Verificar página /admin/modalidades
+- [x] 4. Verificar página /admin/modalidades
   What to do / Must NOT do: Confirmar que page.tsx, ModalitySectionCard.tsx, API routes, e sidebar link estão íntegros. NÃO modificar nada.
   References: src/app/(admin)/admin/modalidades/**, src/app/api/admin/modalities/**, AdminSidebarClient.tsx
   Acceptance criteria: `npx tsc --noEmit` passa. Evidence .omo/evidence/task-4.md
   Commit: N (já implementado)
 
-- [ ] 5. Adicionar model SizeChart (global, sem categoryId) ao Prisma + seed data
+- [x] 5. Adicionar model SizeChart (global, sem categoryId) ao Prisma + seed data
   What to do:
     a. Adicionar model SizeChart ao prisma/schema.prisma. Model SEM categoryId — é global por tipo de peça:
        ```prisma
@@ -123,7 +123,7 @@ Wave 5: Frontend component + integração na página do produto
   QA scenarios: `npx prisma generate` + `npx tsc --noEmit`. Evidence .omo/evidence/task-5.md
   Commit: Y | feat(admin): add SizeChart model (global by type) and seed
 
-- [ ] 6. Criar API routes para SizeChart
+- [x] 6. Criar API routes para SizeChart
   What to do:
     a. Criar src/app/api/admin/size-charts/route.ts:
        - GET: listar TODOS size-charts (sem filtro de categoria — global), ordenado por type
@@ -139,7 +139,7 @@ Wave 5: Frontend component + integração na página do produto
   QA scenarios: `npx tsc --noEmit`. Evidence .omo/evidence/task-6.md
   Commit: Y | feat(admin): add SizeChart API routes
 
-- [ ] 7. Criar página /admin/medidas com editor de grid
+- [x] 7. Criar página /admin/medidas com editor de grid
   What to do:
     a. Server page src/app/(admin)/admin/medidas/page.tsx:
        - fetch ALL size charts via prisma (sem filtro)
@@ -160,7 +160,7 @@ Wave 5: Frontend component + integração na página do produto
   QA scenarios: `npx tsc --noEmit`. Evidence .omo/evidence/task-7.md
   Commit: Y | feat(admin): add size chart management page with grid editor
 
-- [ ] 8. Modificar SizeGuideModal.tsx para aceitar chartData e renderizar tabela
+- [x] 8. Modificar SizeGuideModal.tsx para aceitar chartData e renderizar tabela
   What to do:
     a. Modificar props de SizeGuideModal para aceitar opcionalmente `chartData: { columns: string[], rows: { label: string, values: string[] }[] } | null`:
        ```tsx
@@ -181,7 +181,7 @@ Wave 5: Frontend component + integração na página do produto
   QA scenarios: `npx tsc --noEmit`. Evidence .omo/evidence/task-8.md
   Commit: Y | feat(products): update SizeGuideModal to render chart table
 
-- [ ] 9. Integrar SizeCharts na página do produto
+- [x] 9. Integrar SizeCharts na página do produto
   What to do:
     a. Em src/app/(marketing)/[categoria]/[produto]/page.tsx:
        - No escopo da página (fora da query do product), buscar ALL sizeCharts:
@@ -217,7 +217,7 @@ Wave 5: Frontend component + integração na página do produto
   QA scenarios: `npx tsc --noEmit`. Evidence .omo/evidence/task-9.md
   Commit: Y | feat(products): integrate size charts into product page SizeGuideModal
 
-- [ ] 10. Adicionar link "Medidas" na sidebar admin
+- [x] 10. Adicionar link "Medidas" na sidebar admin
   What to do: Adicionar ao array NAV em AdminSidebarClient.tsx: `{ href: "/admin/medidas", label: "Medidas", icon: Ruler }`, entre Tamanhos e Modalidades. Importar Ruler (já importado) ou Table2.
   References: src/app/(admin)/_components/AdminSidebarClient.tsx
   Acceptance criteria: `npx tsc --noEmit` passa. Sidebar exibe Medidas com ícone.
@@ -225,10 +225,10 @@ Wave 5: Frontend component + integração na página do produto
   Commit: Y | feat(admin): add Medidas link to sidebar
 
 ## Final verification wave
-- [ ] F1. Plan compliance audit: todos os 10 itens conforme escopo
-- [ ] F2. TypeScript: `npx tsc --noEmit` passa sem erros
-- [ ] F3. Real manual QA: visitar /admin/tamanhos, /admin/modalidades, /admin/medidas; testar upload e edição
-- [ ] F4. Scope fidelity: nenhuma mudança não solicitada foi introduzida
+- [x] F1. Plan compliance audit: todos os 10 itens conforme escopo
+- [x] F2. TypeScript: `npx tsc --noEmit` passa sem erros
+- [x] F3. Real manual QA: visitar /admin/tamanhos, /admin/modalidades, /admin/medidas; testar upload e edição
+- [x] F4. Scope fidelity: nenhuma mudança não solicitada foi introduzida
 
 ## Commit strategy
 - fix(admin): revert CategoriesSection to hardcoded data

@@ -6,9 +6,9 @@
       "work_id": "admin-imagens-medidas-b0c5f6ca",
       "active_plan": "C:\\PASTA IMPORTANTE\\TESCH_DEV\\fase\\.omo\\plans\\admin-imagens-medidas.md",
       "plan_name": "admin-imagens-medidas",
-      "status": "active",
+      "status": "completed",
       "started_at": "2026-06-23T14:22:26.303Z",
-      "updated_at": "2026-06-23T14:22:26.303Z",
+      "updated_at": "2026-06-23T14:45:40.795Z",
       "session_ids": [
         "opencode:ses_10b428c79ffeveNKeMvdRthDbP"
       ],
@@ -16,13 +16,15 @@
         "opencode:ses_10b428c79ffeveNKeMvdRthDbP": "direct"
       },
       "agent": "atlas",
-      "task_sessions": {}
+      "task_sessions": {},
+      "ended_at": "2026-06-23T14:45:40.795Z",
+      "elapsed_ms": 1394492
     }
   },
   "active_plan": "C:\\PASTA IMPORTANTE\\TESCH_DEV\\fase\\.omo\\plans\\admin-imagens-medidas.md",
   "started_at": "2026-06-23T14:22:26.303Z",
-  "status": "active",
-  "updated_at": "2026-06-23T14:22:26.303Z",
+  "status": "completed",
+  "updated_at": "2026-06-23T14:45:40.795Z",
   "session_ids": [
     "opencode:ses_10b428c79ffeveNKeMvdRthDbP"
   ],
@@ -31,5 +33,7 @@
   },
   "plan_name": "admin-imagens-medidas",
   "task_sessions": {},
-  "agent": "atlas"
+  "agent": "atlas",
+  "ended_at": "2026-06-23T14:45:40.795Z",
+  "elapsed_ms": 1394492
 }
