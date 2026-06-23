@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
@@ -14,9 +15,14 @@ export function CustomizationCtaSection() {
     <section className="bg-background py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4">
         <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-          {/* Placeholder visual até imagem real ser adicionada ao R2 */}
-          <RevealOnScroll className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-border bg-primary/5 shadow-lg flex items-center justify-center lg:order-last">
-            <span className="font-heading text-8xl font-bold text-primary/20 select-none">FASE</span>
+          <RevealOnScroll className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-lg lg:order-last">
+            <Image
+              src="/images/customization-jersey.jpg"
+              alt="Atleta usando uniforme personalizado Fase Sport com número 12"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
           </RevealOnScroll>
 
           {/* Text */}

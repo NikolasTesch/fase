@@ -11,6 +11,8 @@ import {
   MessageSquare,
   HelpCircle,
   Camera,
+  Ruler,
+  Shirt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +20,8 @@ const NAV = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/produtos", label: "Produtos", icon: Package },
   { href: "/admin/categorias", label: "Categorias", icon: Tag },
+  { href: "/admin/tamanhos", label: "Tamanhos", icon: Ruler },
+  { href: "/admin/modalidades", label: "Modalidades", icon: Shirt },
   { href: "/admin/leads", label: "Leads", icon: Users },
   { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
   { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },

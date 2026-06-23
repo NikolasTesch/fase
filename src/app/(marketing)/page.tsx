@@ -15,7 +15,7 @@ import { InstagramSection } from "@/components/sections/InstagramSection";
 
 async function getHomepageData() {
   try {
-    const [featuredProducts, testimonials, instagramPosts, heroVideoSetting] =
+    const [featuredProducts, testimonials, instagramPosts, heroVideoSetting, modalityItems] =
       await Promise.all([
         prisma.product.findMany({
           where: { isActive: true, isFeatured: true },
@@ -45,9 +45,13 @@ async function getHomepageData() {
         prisma.siteSetting.findUnique({
           where: { key: "instagram_hero_video_url" },
         }),
+        prisma.modalityItem.findMany({
+          where: { isActive: true },
+          orderBy: [{ sectionOrder: "asc" }, { sortOrder: "asc" }],
+        }),
       ]);
 
-    return { featuredProducts, testimonials, instagramPosts, heroVideoSetting };
+    return { featuredProducts, testimonials, instagramPosts, heroVideoSetting, modalityItems };
   } catch (error) {
     console.error("[GET /]", error);
     return {
@@ -55,12 +59,13 @@ async function getHomepageData() {
       testimonials: [],
       instagramPosts: [],
       heroVideoSetting: null,
+      modalityItems: [],
     };
   }
 }
 
 export default async function HomePage() {
-  const { featuredProducts, testimonials, instagramPosts, heroVideoSetting } =
+  const { featuredProducts, testimonials, instagramPosts, heroVideoSetting, modalityItems } =
     await getHomepageData();
 
   const featuredItems = featuredProducts.map((product) => ({
@@ -93,7 +98,7 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection />
-      <CategoriesSection />
+      <CategoriesSection items={modalityItems} />
       <FeaturedSection products={featuredItems} />
       <HowItWorksSection />
       <WhySection />

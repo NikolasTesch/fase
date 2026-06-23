@@ -722,6 +722,34 @@ async function main() {
   }
   console.log(`✓ Categoria: Empresarial (${empresarialProducts.length} produtos)`);
 
+  // ─── Modalidades (seção da Homepage) ──────────────────────────────────────
+  const modalitySeed = [
+    { sectionTitle: "Esportes", sectionSubtitle: "Futebol, Vôlei, Handebol e Escolinha", sectionOrder: 1, lineId: "prata", name: "Linha Prata", description: "Excelente custo-benefício para times amadores com tecido dry-fit de qualidade.", imageUrl: "/images/modalities/esportes-prata.jpg", sortOrder: 1, catalogLinkLabel: "Ver Futebol", catalogLinkHref: "/futebol" },
+    { sectionTitle: "Esportes", sectionSubtitle: "Futebol, Vôlei, Handebol e Escolinha", sectionOrder: 1, lineId: "ouro", name: "Linha Ouro", description: "Sublimação total em alta definição e modelagem atlética.", imageUrl: "/images/modalities/esportes-ouro.jpg", sortOrder: 2, catalogLinkLabel: "Ver Vôlei", catalogLinkHref: "/volei" },
+    { sectionTitle: "Esportes", sectionSubtitle: "Futebol, Vôlei, Handebol e Escolinha", sectionOrder: 1, lineId: "profissional", name: "Profissional", description: "Tecidos tecnológicos combinados, gola personalizada e recortes dry.", imageUrl: "/images/modalities/esportes-profissional.jpg", sortOrder: 3, catalogLinkLabel: "Ver Handebol", catalogLinkHref: "/handebol" },
+    { sectionTitle: "Esportes", sectionSubtitle: "Futebol, Vôlei, Handebol e Escolinha", sectionOrder: 1, lineId: "escolinha", name: "Escolinha", description: "Kits duráveis com foco em mobilidade e conforto para jovens atletas.", imageUrl: "/images/modalities/esportes-escolinha.jpg", sortOrder: 4, catalogLinkLabel: "Ver Escolinha", catalogLinkHref: "/futebol?sub=infantil" },
+    { sectionTitle: "Basquete", sectionSubtitle: null, sectionOrder: 2, lineId: "basquete-prata", name: "Linha Prata", description: "Modelagem tradicional americana com tecido respirável.", imageUrl: "/images/modalities/basquete-prata.jpg", sortOrder: 1 },
+    { sectionTitle: "Basquete", sectionSubtitle: null, sectionOrder: 2, lineId: "basquete-ouro", name: "Linha Ouro", description: "Design moderno com sublimação completa, gola diferenciada.", imageUrl: "/images/modalities/basquete-ouro.jpg", sortOrder: 2 },
+    { sectionTitle: "Basquete", sectionSubtitle: null, sectionOrder: 2, lineId: "basquete-profissional", name: "Profissional", description: "Linha profissional com recortes dry, bordas elásticas e alta ventilação.", imageUrl: "/images/modalities/basquete-profissional.jpg", sortOrder: 3 },
+    { sectionTitle: "Coletes", sectionSubtitle: null, sectionOrder: 3, lineId: "colete-aberto", name: "Colete Aberto", description: "Ajuste por fitas elásticas nas laterais, alta praticidade.", imageUrl: "/images/modalities/colete-aberto.jpg", sortOrder: 1 },
+    { sectionTitle: "Coletes", sectionSubtitle: null, sectionOrder: 3, lineId: "colete-fechado", name: "Fechado Simples", description: "Fechamento clássico lateral, caimento leve para treinos.", imageUrl: "/images/modalities/colete-fechado.jpg", sortOrder: 2 },
+    { sectionTitle: "Coletes", sectionSubtitle: null, sectionOrder: 3, lineId: "colete-dupla", name: "Dupla Face", description: "Um colete com duas cores totalmente usáveis, agilidade na divisão de equipes.", imageUrl: "/images/modalities/colete-dupla.jpg", sortOrder: 3 },
+    { sectionTitle: "Passeio", sectionSubtitle: null, sectionOrder: 4, lineId: "passeio-comissao", name: "Passeio Comissão", description: "Polos e camisas de botão para staff e equipe técnica.", imageUrl: "/images/modalities/passeio-comissao.jpg", sortOrder: 1 },
+    { sectionTitle: "Passeio", sectionSubtitle: null, sectionOrder: 4, lineId: "passeio-torcida", name: "Torcida", description: "Camisetas casuais sublimadas e personalizadas para apoiadores e famílias.", imageUrl: "/images/modalities/passeio-torcida.jpg", sortOrder: 2 },
+    { sectionTitle: "Agasalhos, Calças e Acessórios", sectionSubtitle: null, sectionOrder: 5, lineId: "agasalhos", name: "Agasalhos", description: "Jaquetas corta-vento ou de helanca com zíper e bolsos.", imageUrl: "/images/modalities/agasalho.jpg", sortOrder: 1 },
+    { sectionTitle: "Agasalhos, Calças e Acessórios", sectionSubtitle: null, sectionOrder: 5, lineId: "calcas", name: "Calças", description: "Calças de treino flexíveis com ajuste elástico.", imageUrl: "/images/modalities/calca.jpg", sortOrder: 2 },
+    { sectionTitle: "Agasalhos, Calças e Acessórios", sectionSubtitle: null, sectionOrder: 5, lineId: "acessorios", name: "Acessórios", description: "Meiões, tornozeleiras e headbands para fechar o uniforme do time.", imageUrl: "/images/modalities/acessorio.jpg", sortOrder: 3 },
+  ];
+
+  for (const item of modalitySeed) {
+    await prisma.modalityItem.upsert({
+      where: { lineId: item.lineId },
+      update: { sectionTitle: item.sectionTitle, sectionSubtitle: item.sectionSubtitle, sectionOrder: item.sectionOrder, name: item.name, description: item.description, imageUrl: item.imageUrl, sortOrder: item.sortOrder, catalogLinkLabel: item.catalogLinkLabel ?? null, catalogLinkHref: item.catalogLinkHref ?? null },
+      create: item,
+    });
+  }
+  console.log(`✓ ${modalitySeed.length} modalidades`);
+
   console.log("\n✅ Seed concluído com sucesso!");
 }
 

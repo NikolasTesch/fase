@@ -12,6 +12,7 @@ const UpdateSchema = z.object({
   description: z.string().optional(),
   imageUrl: z.url().optional().or(z.literal("")),
   iconUrl: z.string().optional(),
+  sizeTableUrl: z.url().optional().or(z.literal("")),
   sortOrder: z.number().int().optional(),
   isActive: z.boolean().optional(),
   seoTitle: z.string().optional(),
@@ -31,13 +32,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       );
     }
 
-    const { imageUrl, ...rest } = validated.data;
+    const { imageUrl, sizeTableUrl, ...rest } = validated.data;
 
     const category = await prisma.category.update({
       where: { id },
       data: {
         ...rest,
         ...(imageUrl !== undefined && { imageUrl: imageUrl || null }),
+        ...(sizeTableUrl !== undefined && { sizeTableUrl: sizeTableUrl || null }),
       },
     });
 

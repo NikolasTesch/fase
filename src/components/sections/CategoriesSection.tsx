@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Shirt } from "lucide-react";
@@ -10,8 +10,8 @@ import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
 interface ModalityLineItem {
   id: string;
   name: string;
-  imageUrl: string;
-  description: string;
+  imageUrl: string | null;
+  description: string | null;
 }
 
 interface ModalitySection {
@@ -21,130 +21,82 @@ interface ModalitySection {
   catalogLinks?: { label: string; href: string }[];
 }
 
-const MODALITY_SECTIONS: ModalitySection[] = [
-  {
-    title: "Esportes",
-    subtitle: "Futebol, Vôlei, Handebol e Escolinha",
-    lines: [
-      {
-        id: "prata",
-        name: "Linha Prata",
-        imageUrl: "/images/modalities/esportes-prata.jpg",
-        description: "Excelente custo-benefício para times amadores com tecido dry-fit de qualidade.",
-      },
-      {
-        id: "ouro",
-        name: "Linha Ouro",
-        imageUrl: "/images/modalities/esportes-ouro.jpg",
-        description: "Sublimação total em alta definição e modelagem atlética.",
-      },
-      {
-        id: "profissional",
-        name: "Profissional",
-        imageUrl: "/images/modalities/esportes-profissional.jpg",
-        description: "Tecidos tecnológicos combinados, gola personalizada e recortes dry.",
-      },
-      {
-        id: "escolinha",
-        name: "Escolinha",
-        imageUrl: "/images/modalities/esportes-escolinha.jpg",
-        description: "Kits duráveis com foco em mobilidade e conforto para jovens atletas.",
-      },
-    ],
-    catalogLinks: [
-      { label: "Ver Futebol", href: "/futebol" },
-      { label: "Ver Vôlei", href: "/volei" },
-      { label: "Ver Handebol", href: "/handebol" },
-      { label: "Ver Escolinha", href: "/futebol?sub=infantil" },
-    ],
-  },
-  {
-    title: "Basquete",
-    lines: [
-      {
-        id: "basquete-prata",
-        name: "Linha Prata",
-        imageUrl: "/images/modalities/basquete-prata.jpg",
-        description: "Modelagem tradicional americana com tecido respirável.",
-      },
-      {
-        id: "basquete-ouro",
-        name: "Linha Ouro",
-        imageUrl: "/images/modalities/basquete-ouro.jpg",
-        description: "Design moderno com sublimação completa, gola diferenciada.",
-      },
-      {
-        id: "basquete-profissional",
-        name: "Profissional",
-        imageUrl: "/images/modalities/basquete-profissional.jpg",
-        description: "Linha profissional com recortes dry, bordas elásticas e alta ventilação.",
-      },
-    ],
-  },
-  {
-    title: "Coletes",
-    lines: [
-      {
-        id: "colete-aberto",
-        name: "Colete Aberto",
-        imageUrl: "/images/modalities/colete-aberto.jpg",
-        description: "Ajuste por fitas elásticas nas laterais, alta praticidade.",
-      },
-      {
-        id: "colete-fechado",
-        name: "Fechado Simples",
-        imageUrl: "/images/modalities/colete-fechado.jpg",
-        description: "Fechamento clássico lateral, caimento leve para treinos.",
-      },
-      {
-        id: "colete-dupla",
-        name: "Dupla Face",
-        imageUrl: "/images/modalities/colete-dupla.jpg",
-        description: "Um colete com duas cores totalmente usáveis, agilidade na divisão de equipes.",
-      },
-    ],
-  },
-  {
-    title: "Passeio",
-    lines: [
-      {
-        id: "passeio-comissao",
-        name: "Passeio Comissão",
-        imageUrl: "/images/modalities/passeio-comissao.jpg",
-        description: "Polos e camisas de botão para staff e equipe técnica.",
-      },
-      {
-        id: "passeio-torcida",
-        name: "Torcida",
-        imageUrl: "/images/modalities/passeio-torcida.jpg",
-        description: "Camisetas casuais sublimadas e personalizadas para apoiadores e famílias.",
-      },
-    ],
-  },
-  {
-    title: "Agasalhos, Calças e Acessórios",
-    lines: [
-      {
-        id: "agasalhos",
-        name: "Agasalhos",
-        imageUrl: "/images/modalities/agasalho.jpg",
-        description: "Jaquetas corta-vento ou de helanca com zíper e bolsos.",
-      },
-      {
-        id: "calcas",
-        name: "Calças",
-        imageUrl: "/images/modalities/calca.jpg",
-        description: "Calças de treino flexíveis com ajuste elástico.",
-      },
-      {
-        id: "acessorios",
-        name: "Acessórios",
-        imageUrl: "/images/modalities/acessorio.jpg",
-        description: "Meiões, tornozeleiras e headbands para fechar o uniforme do time.",
-      },
-    ],
-  },
-];
+interface CategoryItemData {
+  id: string;
+  lineId: string;
+  sectionTitle: string;
+  sectionSubtitle: string | null;
+  sectionOrder: number;
+  name: string;
+  description: string | null;
+  imageUrl: string | null;
+  sortOrder: number;
+  catalogLinkLabel: string | null;
+  catalogLinkHref: string | null;
+}
+
+function buildSections(items: CategoryItemData[]): ModalitySection[] {
+  const map = new Map<
+    string,
+    { title: string; subtitle?: string; order: number; lines: ModalityLineItem[] }
+  >();
+
+  for (const item of items) {
+    if (!map.has(item.sectionTitle)) {
+      map.set(item.sectionTitle, {
+        title: item.sectionTitle,
+        subtitle: item.sectionSubtitle ?? undefined,
+        order: item.sectionOrder,
+        lines: [],
+      });
+    }
+    map.get(item.sectionTitle)!.lines.push({
+      id: item.lineId,
+      name: item.name,
+      imageUrl: item.imageUrl,
+      description: item.description,
+    });
+  }
+
+  const sections: ModalitySection[] = [];
+  for (const [, value] of map) {
+    const section: ModalitySection = {
+      title: value.title,
+      subtitle: value.subtitle,
+      lines: value.lines,
+    };
+
+    const hasLinks = items.some(
+      (i) =>
+        i.sectionTitle === value.title &&
+        i.catalogLinkLabel &&
+        i.catalogLinkHref
+    );
+    if (hasLinks) {
+      section.catalogLinks = items
+        .filter(
+          (i) =>
+            i.sectionTitle === value.title &&
+            i.catalogLinkLabel &&
+            i.catalogLinkHref
+        )
+        .map((i) => ({
+          label: i.catalogLinkLabel!,
+          href: i.catalogLinkHref!,
+        }));
+    }
+
+    sections.push(section);
+  }
+
+  sections.sort((a, b) => {
+    const aOrder = items.find((i) => i.sectionTitle === a.title)?.sectionOrder ?? 0;
+    const bOrder = items.find((i) => i.sectionTitle === b.title)?.sectionOrder ?? 0;
+    return aOrder - bOrder;
+  });
+
+  return sections;
+}
 
 interface ModalitySectionBlockProps {
   section: ModalitySection;
@@ -215,14 +167,20 @@ function ModalitySectionBlock({ section }: ModalitySectionBlockProps) {
           <div className="absolute inset-0 flex items-center justify-center bg-primary/10">
             <Shirt className="size-16 text-primary/30" aria-hidden="true" />
           </div>
-          <Image
-            key={active.id}
-            src={active.imageUrl}
-            alt={active.name}
-            fill
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover transition-opacity duration-300"
-          />
+          {active.imageUrl ? (
+            <Image
+              key={active.id}
+              src={active.imageUrl}
+              alt={active.name}
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover transition-opacity duration-300"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Shirt className="size-12 text-primary/20" />
+            </div>
+          )}
         </div>
 
         {section.lines.length > 1 ? (
@@ -250,7 +208,13 @@ function ModalitySectionBlock({ section }: ModalitySectionBlockProps) {
   );
 }
 
-export function CategoriesSection() {
+interface CategoriesSectionProps {
+  items: CategoryItemData[];
+}
+
+export function CategoriesSection({ items }: CategoriesSectionProps) {
+  const sections = useMemo(() => buildSections(items), [items]);
+
   return (
     <section id="categorias" className="bg-background py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4">
@@ -265,7 +229,7 @@ export function CategoriesSection() {
         </RevealOnScroll>
 
         <div className="flex flex-col gap-6">
-          {MODALITY_SECTIONS.map((section) => (
+          {sections.map((section) => (
             <ModalitySectionBlock key={section.title} section={section} />
           ))}
         </div>

@@ -13,6 +13,7 @@ model Category {
   description   String?
   imageUrl      String?
   iconUrl       String?
+  sizeTableUrl  String?
   sortOrder     Int           @default(0)
   isActive      Boolean       @default(true)
   seoTitle      String?
@@ -138,4 +139,21 @@ model AdminUser {
   passwordHash String
   name         String
   createdAt    DateTime @default(now())
+}
+
+model ModalityItem {
+  id               String   @id @default(cuid())
+  sectionTitle     String
+  sectionSubtitle  String?
+  sectionOrder     Int      @default(0)
+  lineId           String   @unique
+  name             String
+  description      String?
+  imageUrl         String?
+  sortOrder        Int      @default(0)
+  catalogLinkLabel String?
+  catalogLinkHref  String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
