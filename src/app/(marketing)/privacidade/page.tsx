@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
-import { SITE_CONTACT } from "@/lib/site";
+import { SITE_CONTACT, formatPhoneNumber } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade — Fase Sport",
@@ -165,7 +165,7 @@ export default function PrivacidadePage() {
               href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}`}
               className="text-primary underline underline-offset-4"
             >
-              {SITE_CONTACT.whatsapp}
+              {formatPhoneNumber(SITE_CONTACT.whatsapp)}
             </a>
           </p>
         </section>

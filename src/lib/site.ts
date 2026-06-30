@@ -59,3 +59,17 @@ export function getSimulatorUrl(productUrl?: string | null): string | null {
   const global = process.env.NEXT_PUBLIC_SIMULATOR_URL;
   return global && global.length > 0 ? global : null;
 }
+
+export function formatPhoneNumber(phone: string) {
+  const clean = phone.replace(/\D/g, "");
+  if (clean.length === 13 && clean.startsWith("55")) {
+    return `+55 (${clean.slice(2, 4)}) ${clean.slice(4, 9)}-${clean.slice(9)}`;
+  }
+  if (clean.length === 12 && clean.startsWith("55")) {
+    return `+55 (${clean.slice(2, 4)}) ${clean.slice(4, 8)}-${clean.slice(8)}`;
+  }
+  if (clean.length === 11) {
+    return `(${clean.slice(0, 2)}) ${clean.slice(2, 7)}-${clean.slice(7)}`;
+  }
+  return phone;
+}

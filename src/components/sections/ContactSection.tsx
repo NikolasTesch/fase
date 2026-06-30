@@ -4,18 +4,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 
 import { OrcamentoForm } from "@/components/forms/OrcamentoForm";
 import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
-import { SITE_CONTACT } from "@/lib/site";
-
-function formatPhoneNumber(phone: string) {
-  const clean = phone.replace(/\D/g, "");
-  if (clean.length === 13 && clean.startsWith("55")) {
-    return `+55 (${clean.slice(2, 4)}) ${clean.slice(4, 9)}-${clean.slice(9)}`;
-  }
-  if (clean.length === 11) {
-    return `(${clean.slice(0, 2)}) ${clean.slice(2, 7)}-${clean.slice(7)}`;
-  }
-  return phone;
-}
+import { SITE_CONTACT, formatPhoneNumber } from "@/lib/site";
 
 export function ContactSection() {
   const mapUrl = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
