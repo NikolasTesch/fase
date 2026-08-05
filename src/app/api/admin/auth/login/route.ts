@@ -6,18 +6,23 @@ import { getClientIp } from "@/lib/ip";
 import { loginRatelimit } from "@/lib/ratelimit";
 import { LoginSchema } from "@/lib/validations/auth";
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+const jwtSecret = process.env.JWT_SECRET || "fasesport_jwt_secret_default_2026";
+const secret = new TextEncoder().encode(jwtSecret);
 
 export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
-    const { success } = await loginRatelimit.limit(`login:${ip}`);
-
-    if (!success) {
-      return Response.json(
-        { message: "Muitas tentativas. Tente novamente em 15 minutos." },
-        { status: 429 }
-      );
+    
+    try {
+      const { success } = await loginRatelimit.limit(`login:${ip}`);
+      if (!success) {
+        return Response.json(
+          { message: "Muitas tentativas. Tente novamente em 15 minutos." },
+          { status: 429 }
+        );
+      }
+    } catch (rlError) {
+      console.warn("[loginRatelimit] Warning:", rlError);
     }
 
     const body = await req.json();
