@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Package, Users, MessageSquare, HelpCircle, Tag } from "lucide-react";
+import { Package, Users, MessageSquare, HelpCircle, Tag, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type CardColor = "blue" | "amber" | "green" | "purple" | "brand";
@@ -17,37 +17,37 @@ type CardValues = {
 
 const colorMap: Record<
   CardColor,
-  { bg: string; icon: string; ring: string; text: string }
+  { bg: string; icon: string; ring: string; badge: string }
 > = {
   blue: {
-    bg: "bg-blue-500/10 dark:bg-blue-500/15",
+    bg: "bg-blue-500/10 dark:bg-blue-500/15 group-hover:bg-blue-500/20",
     icon: "text-blue-600 dark:text-blue-400",
-    ring: "ring-blue-500/20",
-    text: "text-blue-600 dark:text-blue-400",
+    ring: "ring-blue-500/20 border-blue-500/20",
+    badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
   },
   amber: {
-    bg: "bg-amber-500/10 dark:bg-amber-500/15",
+    bg: "bg-amber-500/10 dark:bg-amber-500/15 group-hover:bg-amber-500/20",
     icon: "text-amber-600 dark:text-amber-400",
-    ring: "ring-amber-500/20",
-    text: "text-amber-600 dark:text-amber-400",
+    ring: "ring-amber-500/20 border-amber-500/20",
+    badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   },
   green: {
-    bg: "bg-emerald-500/10 dark:bg-emerald-500/15",
+    bg: "bg-emerald-500/10 dark:bg-emerald-500/15 group-hover:bg-emerald-500/20",
     icon: "text-emerald-600 dark:text-emerald-400",
-    ring: "ring-emerald-500/20",
-    text: "text-emerald-600 dark:text-emerald-400",
+    ring: "ring-emerald-500/20 border-emerald-500/20",
+    badge: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   },
   purple: {
-    bg: "bg-purple-500/10 dark:bg-purple-500/15",
+    bg: "bg-purple-500/10 dark:bg-purple-500/15 group-hover:bg-purple-500/20",
     icon: "text-purple-600 dark:text-purple-400",
-    ring: "ring-purple-500/20",
-    text: "text-purple-600 dark:text-purple-400",
+    ring: "ring-purple-500/20 border-purple-500/20",
+    badge: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
   },
   brand: {
-    bg: "bg-accent/10",
+    bg: "bg-accent/10 group-hover:bg-accent/20",
     icon: "text-accent",
-    ring: "ring-accent/20",
-    text: "text-accent",
+    ring: "ring-accent/20 border-accent/20",
+    badge: "bg-accent/10 text-accent",
   },
 };
 
@@ -55,18 +55,18 @@ const container = {
   hidden: {},
   show: {
     transition: {
-      staggerChildren: 0.07,
+      staggerChildren: 0.06,
     },
   },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 20, scale: 0.97 },
+  hidden: { opacity: 0, y: 16, scale: 0.97 },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.35, ease: "easeOut" as const },
+    transition: { duration: 0.3, ease: "easeOut" as const },
   },
 };
 
@@ -78,7 +78,7 @@ export function DashboardCards({ counts }: { counts: CardValues }) {
       href: "/admin/produtos",
       icon: Package,
       color: "blue" as CardColor,
-      description: "uniformes no catálogo",
+      description: "catalogo oficial",
     },
     {
       label: "Leads novos",
@@ -86,15 +86,15 @@ export function DashboardCards({ counts }: { counts: CardValues }) {
       href: "/admin/leads",
       icon: Users,
       color: "amber" as CardColor,
-      description: "aguardando contato",
+      description: "aguardando resposta",
     },
     {
-      label: "Depoimentos ativos",
+      label: "Depoimentos",
       value: counts.testimonials,
       href: "/admin/depoimentos",
       icon: MessageSquare,
       color: "green" as CardColor,
-      description: "exibidos no site",
+      description: "publicados no site",
     },
     {
       label: "FAQs ativas",
@@ -102,7 +102,7 @@ export function DashboardCards({ counts }: { counts: CardValues }) {
       href: "/admin/faqs",
       icon: HelpCircle,
       color: "purple" as CardColor,
-      description: "perguntas publicadas",
+      description: "perguntas frequentes",
     },
     {
       label: "Categorias",
@@ -110,7 +110,7 @@ export function DashboardCards({ counts }: { counts: CardValues }) {
       href: "/admin/categorias",
       icon: Tag,
       color: "brand" as CardColor,
-      description: "esportes disponíveis",
+      description: "modalidades esportivas",
     },
   ];
 
@@ -128,29 +128,35 @@ export function DashboardCards({ counts }: { counts: CardValues }) {
           <motion.div key={href} variants={item}>
             <Link
               href={href}
-              className="group block rounded-2xl border border-border bg-card p-5 hover:border-border/80 hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
+              className="group relative block rounded-2xl border border-border/80 bg-card/80 p-5 hover:border-border hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-black/20 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
             >
-              {/* Icon badge */}
-              <div
-                className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center ring-1 mb-4",
-                  c.bg,
-                  c.ring,
-                )}
-              >
-                <Icon size={18} className={c.icon} />
+              <div className="flex items-center justify-between mb-3">
+                {/* Icon badge */}
+                <div
+                  className={cn(
+                    "w-10 h-10 rounded-xl flex items-center justify-center ring-1 transition-colors duration-200",
+                    c.bg,
+                    c.ring,
+                  )}
+                >
+                  <Icon size={19} className={c.icon} />
+                </div>
+
+                <div className="text-muted-foreground/40 group-hover:text-foreground group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200">
+                  <ArrowUpRight size={16} />
+                </div>
               </div>
 
               {/* Value */}
-              <p className="text-3xl font-bold tabular-nums tracking-tight">
+              <p className="text-3xl font-extrabold tabular-nums tracking-tight text-foreground">
                 {value}
               </p>
 
               {/* Label */}
-              <p className="text-sm font-medium mt-0.5">{label}</p>
+              <p className="text-sm font-bold text-foreground/90 mt-1">{label}</p>
 
               {/* Description */}
-              <p className="text-xs text-muted-foreground mt-1">{description}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
             </Link>
           </motion.div>
         );

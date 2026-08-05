@@ -32,43 +32,45 @@ export function AdminSidebarClient() {
   const pathname = usePathname();
 
   return (
-    <ul className="space-y-0.5">
+    <ul className="space-y-1">
       {NAV.map(({ href, label, icon: Icon }, i) => {
         const isActive = pathname === href || pathname.startsWith(href + "/");
 
         return (
           <motion.li
             key={href}
-            initial={{ opacity: 0, x: -12 }}
+            initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.05, duration: 0.25, ease: "easeOut" }}
+            transition={{ delay: i * 0.03, duration: 0.2, ease: "easeOut" }}
           >
             <Link
               href={href}
               className={cn(
-                "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                "relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200 group",
                 isActive
-                  ? "text-primary bg-primary/8"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                  ? "text-foreground font-bold"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
               )}
             >
               {isActive && (
                 <motion.span
                   layoutId="admin-nav-active"
-                  className="absolute inset-0 rounded-lg bg-accent/8 border border-accent/20"
-                  transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                  className="absolute inset-0 rounded-xl bg-accent/10 border border-accent/25 shadow-sm"
+                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
                 />
               )}
               <Icon
-                size={16}
+                size={17}
                 className={cn(
                   "shrink-0 relative z-10 transition-colors duration-200",
-                  isActive ? "text-accent" : "text-muted-foreground",
+                  isActive
+                    ? "text-accent"
+                    : "text-muted-foreground group-hover:text-foreground",
                 )}
               />
-              <span className={cn("relative z-10", isActive && "text-accent font-semibold")}>{label}</span>
+              <span className="relative z-10">{label}</span>
               {isActive && (
-                <span className="ml-auto relative z-10 w-1.5 h-1.5 rounded-full bg-accent" />
+                <span className="ml-auto relative z-10 w-1.5 h-1.5 rounded-full bg-accent shadow-sm shadow-accent" />
               )}
             </Link>
           </motion.li>
