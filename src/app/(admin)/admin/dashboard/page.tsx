@@ -30,12 +30,12 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header Banner */}
-      <div className="relative rounded-3xl border border-border/80 bg-gradient-to-r from-card via-card to-accent/5 p-6 sm:p-8 overflow-hidden shadow-sm">
-        <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative rounded-3xl border border-border/80 bg-gradient-to-r from-card via-card to-primary/5 p-6 sm:p-8 overflow-hidden shadow-sm">
+        <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-semibold uppercase tracking-wider mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider mb-3">
               <Sparkles size={13} />
               <span>Painel de Controle</span>
             </div>
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <Button variant="accent" render={<Link href="/admin/produtos/novo" />} className="gap-2 shadow-md shadow-accent/20">
+            <Button variant="default" render={<Link href="/admin/produtos/novo" />} className="gap-2 shadow-md shadow-primary/20">
               <Plus size={16} />
               Novo Produto
             </Button>
@@ -80,13 +80,13 @@ export default async function DashboardPage() {
             <Link
               key={href}
               href={href}
-              className="group flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-5 hover:border-accent/40 hover:bg-card hover:shadow-lg transition-all duration-200"
+              className="group flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-5 hover:border-primary/40 hover:bg-card hover:shadow-lg transition-all duration-200"
             >
               <div>
-                <div className="w-9 h-9 rounded-xl bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:bg-accent/10 group-hover:text-accent transition-colors duration-200 mb-3">
+                <div className="w-9 h-9 rounded-xl bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors duration-200 mb-3">
                   <Icon size={18} />
                 </div>
-                <p className="font-bold text-sm text-foreground group-hover:text-accent transition-colors duration-200">
+                <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors duration-200">
                   {label}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
@@ -94,7 +94,7 @@ export default async function DashboardPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-accent mt-4 pt-3 border-t border-border/40 opacity-80 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-primary mt-4 pt-3 border-t border-border/40 opacity-80 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200">
                 <span>Acessar</span>
                 <ArrowRight size={13} />
               </div>

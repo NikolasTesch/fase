@@ -26,20 +26,20 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-background selection:bg-accent selection:text-accent-foreground">
+    <div className="flex min-h-screen bg-background selection:bg-primary selection:text-primary-foreground">
       {/* Sidebar */}
       <aside className="w-64 shrink-0 border-r border-border/60 bg-card/50 backdrop-blur-md flex flex-col shadow-sm z-20">
         {/* Brand Header */}
         <div className="px-6 py-5 border-b border-border/60">
           <Link href="/admin/dashboard" className="flex items-center gap-3 group">
             <div className="relative">
-              <div className="absolute inset-0 bg-accent/20 rounded-xl blur-sm group-hover:bg-accent/40 transition-colors duration-300" />
-              <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center text-accent-foreground shrink-0 shadow-md shadow-accent/10">
+              <div className="absolute inset-0 bg-primary/20 rounded-xl blur-sm group-hover:bg-primary/40 transition-colors duration-300" />
+              <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-red-700 flex items-center justify-center text-primary-foreground shrink-0 shadow-md shadow-primary/10">
                 <Zap size={18} className="fill-current text-white" />
               </div>
             </div>
             <div>
-              <p className="font-extrabold text-base leading-none tracking-tight text-foreground group-hover:text-accent transition-colors duration-200">
+              <p className="font-extrabold text-base leading-none tracking-tight text-foreground group-hover:text-primary transition-colors duration-200">
                 Fase Sport
               </p>
               <p className="text-[10px] font-semibold text-muted-foreground mt-1 uppercase tracking-widest">
@@ -82,7 +82,7 @@ export default async function AdminLayout({
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-background/80 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-accent/40 transition-all duration-200"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-background/80 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-primary/40 transition-all duration-200"
             >
               <span>Ver Loja</span>
               <ExternalLink size={13} />
@@ -91,7 +91,7 @@ export default async function AdminLayout({
             <div className="h-4 w-px bg-border/60" />
 
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center text-accent">
+              <div className="w-7 h-7 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-primary">
                 <ShieldCheck size={14} />
               </div>
               <div className="text-left hidden sm:block">

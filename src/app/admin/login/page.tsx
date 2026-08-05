@@ -42,10 +42,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 bg-background overflow-hidden selection:bg-accent selection:text-accent-foreground">
+    <div className="relative min-h-screen flex items-center justify-center p-4 bg-background overflow-hidden selection:bg-primary selection:text-primary-foreground">
       {/* Background Decorator Elements */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-72 h-72 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-72 h-72 bg-red-600/10 rounded-full blur-2xl pointer-events-none" />
 
       {/* Main Card */}
       <motion.div
@@ -57,8 +57,8 @@ export default function LoginPage() {
         {/* Top Header & Logo */}
         <div className="flex flex-col items-center text-center mb-8">
           <div className="relative mb-4">
-            <div className="absolute inset-0 bg-accent/30 rounded-2xl blur-lg" />
-            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-accent via-accent to-amber-600 flex items-center justify-center text-accent-foreground shadow-lg shadow-accent/20 ring-1 ring-white/20">
+            <div className="absolute inset-0 bg-primary/30 rounded-2xl blur-lg" />
+            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-primary via-red-600 to-red-700 flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20 ring-1 ring-white/20">
               <Zap size={28} className="fill-current text-white" />
             </div>
           </div>
@@ -87,7 +87,7 @@ export default function LoginPage() {
                 placeholder="admin@fasesport.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background/60 pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
+                className="w-full rounded-xl border border-border bg-background/60 pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
               />
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background/60 pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
+                className="w-full rounded-xl border border-border bg-background/60 pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
               />
             </div>
           </div>
@@ -128,8 +128,8 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={loading}
-            variant="accent"
-            className="w-full h-11 rounded-xl text-sm font-semibold shadow-md shadow-accent/20 transition-all duration-200 hover:shadow-accent/30 mt-2"
+            variant="default"
+            className="w-full h-11 rounded-xl text-sm font-semibold shadow-md shadow-primary/20 transition-all duration-200 hover:shadow-primary/30 mt-2"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">

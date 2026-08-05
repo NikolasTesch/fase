@@ -23,7 +23,7 @@ export default async function ProdutosPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-semibold uppercase tracking-wider mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider mb-2">
             <Layers size={13} />
             <span>Gestão de Catálogo</span>
           </div>
@@ -34,7 +34,7 @@ export default async function ProdutosPage() {
             Total de <span className="font-semibold text-foreground">{products.length}</span> produto{products.length !== 1 ? "s" : ""} no catálogo
           </p>
         </div>
-        <Button variant="accent" render={<Link href="/admin/produtos/novo" />} className="gap-2 shrink-0 shadow-md shadow-accent/20">
+        <Button variant="default" render={<Link href="/admin/produtos/novo" />} className="gap-2 shrink-0 shadow-md shadow-primary/20">
           <Plus size={16} />
           Novo Produto
         </Button>
@@ -71,7 +71,7 @@ export default async function ProdutosPage() {
                 <Package size={24} className="opacity-40" />
               </div>
               <p className="text-sm font-medium">Nenhum produto cadastrado até o momento.</p>
-              <Button variant="accent" size="sm" render={<Link href="/admin/produtos/novo" />} className="gap-2 mt-1">
+              <Button variant="default" size="sm" render={<Link href="/admin/produtos/novo" />} className="gap-2 mt-1">
                 <Plus size={14} />
                 Cadastrar primeiro produto
               </Button>

@@ -44,10 +44,10 @@ const colorMap: Record<
     badge: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
   },
   brand: {
-    bg: "bg-accent/10 group-hover:bg-accent/20",
-    icon: "text-accent",
-    ring: "ring-accent/20 border-accent/20",
-    badge: "bg-accent/10 text-accent",
+    bg: "bg-primary/10 group-hover:bg-primary/20",
+    icon: "text-primary",
+    ring: "ring-primary/20 border-primary/20",
+    badge: "bg-primary/10 text-primary",
   },
 };
 

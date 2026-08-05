@@ -55,7 +55,7 @@ export function AdminSidebarClient() {
               {isActive && (
                 <motion.span
                   layoutId="admin-nav-active"
-                  className="absolute inset-0 rounded-xl bg-accent/10 border border-accent/25 shadow-sm"
+                  className="absolute inset-0 rounded-xl bg-primary/10 border border-primary/25 shadow-sm"
                   transition={{ type: "spring", stiffness: 450, damping: 35 }}
                 />
               )}
@@ -64,13 +64,13 @@ export function AdminSidebarClient() {
                 className={cn(
                   "shrink-0 relative z-10 transition-colors duration-200",
                   isActive
-                    ? "text-accent"
+                    ? "text-primary"
                     : "text-muted-foreground group-hover:text-foreground",
                 )}
               />
               <span className="relative z-10">{label}</span>
               {isActive && (
-                <span className="ml-auto relative z-10 w-1.5 h-1.5 rounded-full bg-accent shadow-sm shadow-accent" />
+                <span className="ml-auto relative z-10 w-1.5 h-1.5 rounded-full bg-primary shadow-sm shadow-primary" />
               )}
             </Link>
           </motion.li>
