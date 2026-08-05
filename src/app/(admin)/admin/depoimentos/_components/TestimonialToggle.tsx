@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +12,7 @@ export function TestimonialToggle({
   id: string;
   isActive: boolean;
 }) {
+  const router = useRouter();
   const [active, setActive] = useState(isActive);
   const [saving, setSaving] = useState(false);
 
@@ -34,6 +36,8 @@ export function TestimonialToggle({
         setActive(!next);
         const data = await res.json().catch(() => ({}));
         console.error("[TestimonialToggle] Erro ao atualizar status:", data);
+      } else {
+        router.refresh();
       }
     } catch (err) {
       // Reverte em caso de exceção de rede

@@ -4,10 +4,8 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getClientIp } from "@/lib/ip";
 import { loginRatelimit } from "@/lib/ratelimit";
+import { getJwtSecret } from "@/lib/auth-jwt";
 import { LoginSchema } from "@/lib/validations/auth";
-
-const jwtSecret = process.env.JWT_SECRET || "fasesport_jwt_secret_default_2026";
-const secret = new TextEncoder().encode(jwtSecret);
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,7 +41,7 @@ export async function POST(req: NextRequest) {
     const token = await new SignJWT({ sub: user.id, email: user.email })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("7d")
-      .sign(secret);
+      .sign(getJwtSecret());
 
     const response = Response.json({ success: true });
 

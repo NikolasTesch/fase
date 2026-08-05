@@ -7,7 +7,7 @@ import { AdminSidebarClient } from "./_components/AdminSidebarClient";
 import { LogoutButton } from "./_components/LogoutButton";
 import { ThemeToggle } from "./_components/ThemeToggle";
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET || "fasesport_jwt_secret_default_2026");
+import { getJwtSecret } from "@/lib/auth-jwt";
 
 export default async function AdminLayout({
   children,
@@ -20,7 +20,7 @@ export default async function AdminLayout({
   if (!token) redirect("/admin/login");
 
   try {
-    await jwtVerify(token, secret);
+    await jwtVerify(token, getJwtSecret());
   } catch {
     redirect("/admin/login");
   }
