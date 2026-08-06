@@ -13,8 +13,12 @@ import {
   Camera,
   Ruler,
   Shirt,
+  Images,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+type AdminRole = "T1_GERENCIA" | "T2_VENDEDOR";
 
 const NAV = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -26,14 +30,21 @@ const NAV = [
   { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
   { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
   { href: "/admin/instagram", label: "Instagram", icon: Camera },
+  { href: "/admin/conteudo", label: "Conteúdo", icon: Images },
+  { href: "/admin/usuarios", label: "Usuários", icon: UserCog },
 ];
 
-export function AdminSidebarClient() {
+export function AdminSidebarClient({ role }: { role: AdminRole }) {
   const pathname = usePathname();
+
+  const items =
+    role === "T2_VENDEDOR"
+      ? NAV.filter((item) => item.href === "/admin/conteudo")
+      : NAV;
 
   return (
     <ul className="space-y-1">
-      {NAV.map(({ href, label, icon: Icon }, i) => {
+      {items.map(({ href, label, icon: Icon }, i) => {
         const isActive = pathname === href || pathname.startsWith(href + "/");
 
         return (
