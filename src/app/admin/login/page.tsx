@@ -32,8 +32,9 @@ export default function LoginPage() {
         return;
       }
 
+      const data = await res.json();
       router.refresh();
-      router.push("/admin/dashboard");
+      router.push(data.role === "T2_VENDEDOR" ? "/admin/conteudo" : "/admin/dashboard");
     } catch {
       setError("Erro de conexão com o servidor. Tente novamente.");
     } finally {
