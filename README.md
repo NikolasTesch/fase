@@ -88,6 +88,33 @@ As artes (logotipos, escudos, arquivos vetoriais) são armazenadas em uma pasta 
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Conteúdo JSON completo da chave da conta de serviço (ex: `{"type":"service_account",...}`) |
 | `GOOGLE_DRIVE_ARTS_FOLDER_ID` | ID da pasta do Drive onde as artes são salvas (ex: `1xxxxxxxxxxxxxxxxxxxxxxxx`) |
 
+### Chat Fabi (RAG / IA)
+
+O widget de chat usa um provedor LLM para responder. Sem nenhuma chave configurada, a Fabi opera em **modo local** (motor por regras, sem IA). Escolha um provedor:
+
+| Variável | Descrição |
+|---|---|
+| `AI_PROVIDER` | `opencode-go` (padrão) · `openrouter` · `local` |
+| `OPENROUTER_API_KEY` | Chave da API do OpenRouter (para `openrouter`) |
+| `OPENROUTER_MODEL` | Modelo no OpenRouter (padrão: `meta-llama/llama-3.3-70b-instruct:free`) |
+| `OPENCODE_GO_API_KEY` | Chave para o provider opencode-go / OpenAI-compatível |
+| `OPENCODE_GO_MODEL` | Modelo do provider opencode-go (padrão: `opencode-go/deepseek-v4-flash`) |
+| `OPENCODE_GO_BASE_URL` | Base URL alternativa (padrão: `https://api.openai.com/v1`) |
+| `OPENAI_API_KEY` | Alternativa OpenAI-compatível (usada como fallback de `OPENCODE_GO_API_KEY`) |
+| `OPENAI_BASE_URL` | Base URL OpenAI (opcional) |
+| `DEEPSEEK_API_KEY` | Alternativa DeepSeek (fallback do provider opencode-go) |
+
+### Seed (usuários demo)
+
+O seed cria o admin e as tags iniciais. Para criar um vendedor (T2) além do admin, defina as variáveis abaixo antes de rodar `npx prisma db seed`:
+
+| Variável | Descrição |
+|---|---|
+| `ADMIN_SEED_EMAIL` | E-mail do usuário admin (T1) |
+| `ADMIN_SEED_PASSWORD` | Senha do admin |
+| `SELLER_SEED_EMAIL` | E-mail do vendedor demo (T2) — opcional |
+| `SELLER_SEED_PASSWORD` | Senha do vendedor demo — opcional |
+
 ## Scripts
 
 ```bash

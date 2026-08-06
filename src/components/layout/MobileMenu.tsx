@@ -57,7 +57,7 @@ export function MobileMenu() {
             {...panelMotion}
             className="absolute inset-x-0 top-full border-b border-border bg-background shadow-lg"
           >
-            <nav className="flex flex-col p-2">
+            <nav data-testid="mobile-menu-nav" className="flex flex-col p-2">
               {/* Theme toggle */}
               <button
                 type="button"

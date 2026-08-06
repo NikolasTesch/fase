@@ -66,7 +66,6 @@ test.describe("Fluxo B — Formulário de Orçamento", () => {
     await expect(page.locator("h2").filter({ hasText: "Contato" })).toBeVisible();
 
     await page.locator("input#name").fill("Teste E2E");
-    await page.locator("input#email").fill("teste@e2e.com");
     await page.locator("input#phone").fill("(27) 99999-9999");
     await page.locator("input#city").fill("Colatina");
 
@@ -89,7 +88,7 @@ test.describe("Responsividade Mobile (375px)", () => {
     await hamburger.click();
 
     // Nav do menu mobile aparece
-    const mobileNav = page.locator("nav a").first();
+    const mobileNav = page.getByTestId("mobile-menu-nav").locator("a").first();
     await expect(mobileNav).toBeVisible();
   });
 
