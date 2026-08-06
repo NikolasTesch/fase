@@ -1,6 +1,7 @@
-export const JWT_SECRET_FALLBACK = "fasesport_jwt_secret_default_2026";
-
 export function getJwtSecret(): Uint8Array {
-  const secret = process.env.JWT_SECRET || JWT_SECRET_FALLBACK;
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET não configurada");
+  }
   return new TextEncoder().encode(secret);
 }

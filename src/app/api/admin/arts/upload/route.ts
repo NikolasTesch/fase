@@ -100,11 +100,16 @@ export async function POST(req: NextRequest) {
     });
 
     const originalBuf = await fileToBuffer(original);
+    // Originais não-imagem (.cdr/.ai/.eps/.svg/.pdf) não são validáveis por magic
+    // bytes — força octet-stream em vez de confiar no MIME fornecido pelo cliente
+    const isImageExt = ["png", "jpg", "jpeg", "webp", "gif"].includes(ext);
+    const originalMime =
+      isImageExt && original.type ? original.type : "application/octet-stream";
     const previewId = await uploadArtFile(previewBuf, `${name}-preview`, file.type);
     const originalId = await uploadArtFile(
       originalBuf,
       original.name,
-      original.type || "application/octet-stream"
+      originalMime
     );
 
     try {
@@ -116,7 +121,7 @@ export async function POST(req: NextRequest) {
           previewMimeType: file.type,
           originalFileId: originalId,
           originalFileName: original.name,
-          originalMimeType: original.type || "application/octet-stream",
+          originalMimeType: originalMime,
           sizeBytes: original.size,
           createdById: user.id,
           tags: { connect: existingTags.map((t) => ({ id: t.id })) },

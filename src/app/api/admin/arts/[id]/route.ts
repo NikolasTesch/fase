@@ -60,7 +60,7 @@ export async function PATCH(
     }
 
     const updated = await prisma.artFile.update({ where: { id }, data });
-    return Response.json(updated);
+    return Response.json({ id: updated.id, name: updated.name });
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&

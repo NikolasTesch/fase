@@ -20,7 +20,11 @@ export async function POST(req: NextRequest) {
         );
       }
     } catch (rlError) {
-      console.warn("[loginRatelimit] Warning:", rlError);
+      console.error("[loginRatelimit] Error:", rlError);
+      return Response.json(
+        { message: "Serviço temporariamente indisponível. Tente novamente." },
+        { status: 503 }
+      );
     }
 
     const body = await req.json();

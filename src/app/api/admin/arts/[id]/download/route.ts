@@ -23,12 +23,16 @@ export async function GET(
 
     const art = await prisma.artFile.findUnique({ where: { id } });
     if (!art) return errorResponse("Arte não encontrada", 404);
+    if (auth.role === "T2_VENDEDOR" && art.createdById !== auth.id) {
+      return errorResponse("Você só pode acessar suas próprias artes", 403);
+    }
 
     const stream = await streamDriveFile(art.originalFileId);
     return new Response(stream as ReadableStream, {
       headers: {
         "Content-Type": art.originalMimeType,
         "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(art.originalFileName)}`,
+        "X-Content-Type-Options": "nosniff",
       },
     });
   } catch (error) {

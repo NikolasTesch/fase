@@ -12,14 +12,11 @@ function createLimiter(
   prefix?: string
 ) {
   if (!redis) {
+    // fail-closed: sem Redis configurado, nenhuma requisição passa sem erro explícito
     return {
-      limit: async () => ({
-        success: true,
-        pending: Promise.resolve(),
-        limit: 100,
-        remaining: 100,
-        reset: Date.now(),
-      }),
+      limit: async () => {
+        throw new Error("UPSTASH_REDIS_REST_URL/TOKEN não configurados");
+      },
     };
   }
 

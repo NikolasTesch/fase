@@ -22,7 +22,17 @@ export async function GET(req: NextRequest) {
         ...(q ? { name: { contains: q, mode: "insensitive" } } : {}),
         ...(tagId ? { tags: { some: { id: tagId } } } : {}),
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        previewMimeType: true,
+        originalFileName: true,
+        originalMimeType: true,
+        sizeBytes: true,
+        createdAt: true,
+        updatedAt: true,
+        createdById: true,
         tags: true,
         createdBy: { select: { name: true } },
       },
