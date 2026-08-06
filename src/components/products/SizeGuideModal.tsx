@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/dialog";
 
 const SIZE_GUIDE_IMAGES: Record<string, string> = {
-  camisa: "/images/size-guides/tabela-camisa.png",
-  "short-masc": "/images/size-guides/tabela-short-masc.png",
-  "short-fem": "/images/size-guides/tabela-short-fem.png",
-  "short-suplex": "/images/size-guides/tabela-short-suplex.png",
-  regata: "/images/size-guides/tabela-regata.png",
-  bermuda: "/images/size-guides/tabela-bermuda.png",
+  camisa: "/images/size-guides/tabela-camisa.webp",
+  "short-masc": "/images/size-guides/tabela-short-masc.webp",
+  "short-fem": "/images/size-guides/tabela-short-fem.webp",
+  "short-suplex": "/images/size-guides/tabela-short-suplex.webp",
+  regata: "/images/size-guides/tabela-regata.webp",
+  bermuda: "/images/size-guides/tabela-bermuda.webp",
 };
 
 interface SizeChartRow {

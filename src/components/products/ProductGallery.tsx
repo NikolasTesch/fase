@@ -21,6 +21,7 @@ const SWIPE_THRESHOLD = 50;
 
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
   const prefersReducedMotion = useReducedMotion();
   const x = useMotionValue(0);
 
@@ -33,6 +34,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   }
 
   const activeImage = images[activeIndex];
+  const activeHasError = activeImage ? imgErrors[activeImage.url] : false;
 
   function goTo(index: number) {
     if (index < 0 || index > images.length - 1) {
@@ -53,24 +55,31 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border bg-muted">
-        <motion.div
-          className="relative h-full w-full"
-          style={prefersReducedMotion ? undefined : { x }}
-          drag={prefersReducedMotion ? false : "x"}
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.2}
-          onDragEnd={prefersReducedMotion ? undefined : handleDragEnd}
-        >
-          <Image
-            src={activeImage.url}
-            alt={activeImage.altText ?? productName}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            priority
-            draggable={false}
-            className="object-cover"
-          />
-        </motion.div>
+        {activeHasError ? (
+          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+            <ImageIcon className="size-12 text-muted-foreground/40" aria-hidden="true" />
+          </div>
+        ) : (
+          <motion.div
+            className="relative h-full w-full"
+            style={prefersReducedMotion ? undefined : { x }}
+            drag={prefersReducedMotion ? false : "x"}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={prefersReducedMotion ? undefined : handleDragEnd}
+          >
+            <Image
+              src={activeImage.url}
+              alt={activeImage.altText ?? productName}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              priority
+              draggable={false}
+              className="object-cover"
+              onError={() => setImgErrors((prev) => ({ ...prev, [activeImage.url]: true }))}
+            />
+          </motion.div>
+        )}
       </div>
 
       {images.length > 1 ? (

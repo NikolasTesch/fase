@@ -84,7 +84,7 @@ export default async function EmpresarialPage({
     );
 
     const heroImageUrl =
-      category.imageUrl || `/images/categories/empresarial-hero.jpg`;
+      category.imageUrl || `/images/categories/empresarial-hero.webp`;
 
     return (
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-8 lg:py-12">

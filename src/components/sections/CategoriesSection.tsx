@@ -29,6 +29,7 @@ interface ModalitySectionBlockProps {
 
 function ModalitySectionBlock({ section }: ModalitySectionBlockProps) {
   const [activeIdx, setActiveIdx] = useState(0);
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
   const prev = () => setActiveIdx((i) => (i - 1 + section.lines.length) % section.lines.length);
   const next = () => setActiveIdx((i) => (i + 1) % section.lines.length);
@@ -38,6 +39,8 @@ function ModalitySectionBlock({ section }: ModalitySectionBlockProps) {
   const catalogLinks = section.lines
     .filter((l) => l.catalogLinkLabel && l.catalogLinkHref)
     .map((l) => ({ label: l.catalogLinkLabel!, href: l.catalogLinkHref! }));
+
+  const hasImageError = active?.id ? imgErrors[active.id] : false;
 
   return (
     <div className="grid gap-6 rounded-2xl border border-border bg-card p-6 lg:grid-cols-2 lg:items-center">
@@ -77,7 +80,7 @@ function ModalitySectionBlock({ section }: ModalitySectionBlockProps) {
             <Shirt className="size-16 text-accent/15" aria-hidden="true" />
           </div>
           <AnimatePresence mode="wait">
-            {active.imageUrl && (
+            {active.imageUrl && !hasImageError && (
               <motion.div
                 key={active.id}
                 initial={{ opacity: 0, scale: 1.05 }}
@@ -88,6 +91,7 @@ function ModalitySectionBlock({ section }: ModalitySectionBlockProps) {
               >
                 <Image src={active.imageUrl} alt={active.name} fill
                   sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover"
+                  onError={() => setImgErrors((prev) => ({ ...prev, [active.id]: true }))}
                 />
               </motion.div>
             )}

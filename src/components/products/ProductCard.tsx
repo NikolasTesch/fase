@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Shirt } from "lucide-react";
@@ -23,6 +26,8 @@ export function ProductCard({
   imageUrl,
   imageAlt,
 }: ProductCardProps) {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <Link
       href={`/${categorySlug}/${slug}`}
@@ -30,7 +35,7 @@ export function ProductCard({
       className="group flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card text-card-foreground shadow-sm ring-1 ring-black/[0.03] transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:border-accent/30 focus-visible:border-accent focus-visible:ring-3 focus-visible:ring-accent/50 focus-visible:outline-none"
     >
       <div className="relative aspect-square w-full overflow-hidden bg-gradient-to-br from-muted to-muted/50">
-        {imageUrl ? (
+        {imageUrl && !imgError ? (
           <>
             <Image
               src={imageUrl}
@@ -38,6 +43,7 @@ export function ProductCard({
               fill
               sizes="(max-width: 768px) 50vw, 33vw"
               className="object-cover transition-transform duration-500 group-hover:scale-110"
+              onError={() => setImgError(true)}
             />
             {/* Overlay no hover com CTA */}
             <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/60 via-black/10 to-transparent p-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100">

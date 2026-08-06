@@ -123,7 +123,7 @@ export default async function CategoryPage({
     ]);
 
     const heroImageUrl =
-      category.imageUrl || `/images/categories/${category.slug}-hero.jpg`;
+      category.imageUrl || `/images/categories/${category.slug}-hero.webp`;
 
     return (
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 lg:py-12">
