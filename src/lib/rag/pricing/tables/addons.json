@@ -1,0 +1,17 @@
+[
+  {
+    "id": "manga-longa",
+    "name": "Manga Longa",
+    "extraPrice": 10.0
+  },
+  {
+    "id": "tecido-poliamida-uv50",
+    "name": "Tecido Poliamida UV50+ Premium",
+    "extraPrice": 12.0
+  },
+  {
+    "id": "escudo-bordado",
+    "name": "Escudo Bordado / Patch 3D",
+    "extraPrice": 6.0
+  }
+]

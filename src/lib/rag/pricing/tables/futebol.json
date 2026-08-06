@@ -1,0 +1,33 @@
+{
+  "category": "Futebol",
+  "products": [
+    {
+      "id": "camisa-futebol",
+      "name": "Camisa de Futebol Sublimada",
+      "basePrice": 59.9,
+      "minQty": 10,
+      "description": "Dry Fit de alta absorção, sublimação total sem limite de cores ou escudos."
+    },
+    {
+      "id": "conjunto-futebol",
+      "name": "Conjunto Futebol (Camisa + Shorts)",
+      "basePrice": 89.9,
+      "minQty": 10,
+      "description": "Conjunto completo em sublimação total Dry Fit com ajuste anatômico."
+    },
+    {
+      "id": "short-futebol",
+      "name": "Short de Futebol Sublimado",
+      "basePrice": 34.9,
+      "minQty": 10,
+      "description": "Shorts leve em poliéster com cordão ajustável e cós reforçado."
+    },
+    {
+      "id": "kit-goleiro",
+      "name": "Kit Goleiro com Proteção",
+      "basePrice": 99.9,
+      "minQty": 10,
+      "description": "Camisa manga longa acolchoada no cotovelo + calça/short reforçado."
+    }
+  ]
+}

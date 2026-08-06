@@ -1,0 +1,26 @@
+{
+  "category": "Agasalho",
+  "products": [
+    {
+      "id": "agasalho-completo",
+      "name": "Agasalho Esportivo Completo",
+      "basePrice": 169.9,
+      "minQty": 10,
+      "description": "Jaqueta + calça em microfibra flanelada com zíper e bolsos laterais."
+    },
+    {
+      "id": "jaqueta-corta-vento",
+      "name": "Jaqueta Corta-Vento Sublimada",
+      "basePrice": 119.9,
+      "minQty": 10,
+      "description": "Tecido impermeável leve com capuz e zíper selado."
+    },
+    {
+      "id": "blusa-moletom",
+      "name": "Blusa Moletom Canguru com Capuz",
+      "basePrice": 129.9,
+      "minQty": 10,
+      "description": "Moletom PA 2 cabos peluciado interno para atléticas e times."
+    }
+  ]
+}

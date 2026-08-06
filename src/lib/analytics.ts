@@ -3,7 +3,9 @@ type EventName =
   | "simulator_click"
   | "lead_submit"
   | "orcamento_step"
-  | "page_view";
+  | "page_view"
+  | "fabi_chat_open"
+  | "fabi_chat_message_sent";
 
 interface EventParams {
   location?: "hero" | "product" | "category" | "fab" | "footer";
@@ -12,6 +14,7 @@ interface EventParams {
   sport?: string;
   source?: string;
   page_path?: string;
+  text_length?: number;
 }
 
 declare global {

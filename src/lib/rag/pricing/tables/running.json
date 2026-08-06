@@ -1,0 +1,26 @@
+{
+  "category": "Corrida",
+  "products": [
+    {
+      "id": "camisa-running",
+      "name": "Camiseta Corrida / Running",
+      "basePrice": 49.9,
+      "minQty": 10,
+      "description": "Ultra leve com proteção UV30+ e alta respirabilidade para provas e treinos."
+    },
+    {
+      "id": "regata-running",
+      "name": "Regata de Corrida Cavada",
+      "basePrice": 44.9,
+      "minQty": 10,
+      "description": "Corte machão ou regata feminina com costuras anti-atrito."
+    },
+    {
+      "id": "short-running",
+      "name": "Shorts de Corrida com Sunga Interna",
+      "basePrice": 42.9,
+      "minQty": 10,
+      "description": "Tecido microfibra super leve com bolso traseiro para chave/gel."
+    }
+  ]
+}

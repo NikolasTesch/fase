@@ -1,0 +1,26 @@
+{
+  "category": "Passeio",
+  "products": [
+    {
+      "id": "polo-empresarial",
+      "name": "Camisa Polo Empresarial / Passeio",
+      "basePrice": 69.9,
+      "minQty": 10,
+      "description": "Pique ou Dry Fit trabalhada com gola retilínea para comissão técnica ou empresas."
+    },
+    {
+      "id": "camiseta-algodao-premium",
+      "name": "Camiseta Algodão Pima / Confort Empresarial",
+      "basePrice": 49.9,
+      "minQty": 10,
+      "description": "Algodão penteado 30.1 com caimento nobre e silk de alta definição."
+    },
+    {
+      "id": "colete-treino",
+      "name": "Colete Esportivo de Treino Dual Face",
+      "basePrice": 24.9,
+      "minQty": 10,
+      "description": "Colete dupla face em dry vazado para divisão de equipes."
+    }
+  ]
+}

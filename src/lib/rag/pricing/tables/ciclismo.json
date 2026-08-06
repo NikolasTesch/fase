@@ -1,0 +1,26 @@
+{
+  "category": "Ciclismo",
+  "products": [
+    {
+      "id": "camisa-ciclismo",
+      "name": "Camisa Ciclismo / Pedal Pro",
+      "basePrice": 79.9,
+      "minQty": 10,
+      "description": "Tecido tecnológico com 3 bolsos traseiros, zíper frontal e elástico de silicone na barra."
+    },
+    {
+      "id": "brevet-ciclismo",
+      "name": "Bermuda / Breton Ciclismo com Forro",
+      "basePrice": 89.9,
+      "minQty": 10,
+      "description": "Forro de densidade anatômica para longos pedais com compressão muscular sutil."
+    },
+    {
+      "id": "macaquinho-ciclismo",
+      "name": "Macaquinho de Ciclismo Feminino / Masculino",
+      "basePrice": 149.9,
+      "minQty": 10,
+      "description": "Peça única anatômica em poliamida UV50+ com forro de gel de alta densidade."
+    }
+  ]
+}

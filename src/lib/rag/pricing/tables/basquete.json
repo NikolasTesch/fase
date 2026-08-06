@@ -1,0 +1,26 @@
+{
+  "category": "Basquete",
+  "products": [
+    {
+      "id": "regata-basquete",
+      "name": "Regata Basquete Sublimada",
+      "basePrice": 54.9,
+      "minQty": 10,
+      "description": "Modelagem ampla para basquete com gola V ou careca e furos de ventilação lateral."
+    },
+    {
+      "id": "short-basquete",
+      "name": "Bermuda de Basquete Longa",
+      "basePrice": 49.9,
+      "minQty": 10,
+      "description": "Bermuda longa estilo NBA com cós elástico reforçado e cordão."
+    },
+    {
+      "id": "kit-basquete",
+      "name": "Uniforme Completo Basquete (Regata + Bermuda)",
+      "basePrice": 94.9,
+      "minQty": 10,
+      "description": "Kit completo personalizado por sublimação total."
+    }
+  ]
+}

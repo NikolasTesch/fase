@@ -1,0 +1,21 @@
+[
+  {
+    "minQty": 10,
+    "maxQty": 19,
+    "discountPercentage": 0
+  },
+  {
+    "minQty": 20,
+    "maxQty": 49,
+    "discountPercentage": 5
+  },
+  {
+    "minQty": 50,
+    "maxQty": 99,
+    "discountPercentage": 10
+  },
+  {
+    "minQty": 100,
+    "discountPercentage": 15
+  }
+]
