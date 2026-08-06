@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { uploadToR2, convertToWebP, MAX_FILE_SIZE } from "@/lib/r2";
 import { prisma } from "@/lib/db";
@@ -7,10 +7,14 @@ import { validateCsrf } from "@/lib/csrf";
 import { getClientIp } from "@/lib/ip";
 import { uploadRatelimit } from "@/lib/ratelimit";
 import { errorResponse } from "@/lib/errors";
+import { requireT1Admin } from "@/lib/auth";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export async function POST(req: NextRequest) {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     // CSRF check
     const csrf = validateCsrf(req);

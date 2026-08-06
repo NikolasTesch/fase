@@ -1,10 +1,11 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { validateCsrf } from "@/lib/csrf";
 import { getClientIp } from "@/lib/ip";
 import { adminRatelimit } from "@/lib/ratelimit";
 import { formatZodError, errorResponse } from "@/lib/errors";
+import { requireT1Admin } from "@/lib/auth";
 
 const TestimonialSchema = z.object({
   clientName: z.string().min(1).max(100),
@@ -20,6 +21,9 @@ const TestimonialSchema = z.object({
 });
 
 export async function GET() {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const testimonials = await prisma.testimonial.findMany({
       orderBy: { sortOrder: "asc" },
@@ -33,6 +37,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = await req.json();
 

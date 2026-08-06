@@ -7,6 +7,7 @@ import { validateCsrf } from "@/lib/csrf";
 import { getClientIp } from "@/lib/ip";
 import { adminRatelimit } from "@/lib/ratelimit";
 import { formatZodError, errorResponse } from "@/lib/errors";
+import { requireT1Admin } from "@/lib/auth";
 
 const patchBody = z.object({
   imageUrl: z.url().optional(),
@@ -20,6 +21,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const { id } = await params;
 
@@ -57,6 +61,9 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const { id } = await params;
 

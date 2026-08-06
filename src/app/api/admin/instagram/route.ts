@@ -6,6 +6,7 @@ import { validateCsrf } from "@/lib/csrf";
 import { getClientIp } from "@/lib/ip";
 import { adminRatelimit } from "@/lib/ratelimit";
 import { formatZodError, errorResponse } from "@/lib/errors";
+import { requireT1Admin } from "@/lib/auth";
 
 const createBody = z.object({
   imageUrl: z.url(),
@@ -15,6 +16,9 @@ const createBody = z.object({
 });
 
 export async function GET() {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const posts = await prisma.instagramPost.findMany({
       orderBy: { sortOrder: "asc" },
@@ -27,6 +31,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     // CSRF check
     const csrf = validateCsrf(req);

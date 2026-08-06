@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
@@ -6,6 +6,7 @@ import { validateCsrf } from "@/lib/csrf";
 import { getClientIp } from "@/lib/ip";
 import { adminRatelimit } from "@/lib/ratelimit";
 import { formatZodError, errorResponse } from "@/lib/errors";
+import { requireT1Admin } from "@/lib/auth";
 
 const CategorySchema = z.object({
   slug: z.string().min(1),
@@ -20,6 +21,9 @@ const CategorySchema = z.object({
 });
 
 export async function GET() {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const categories = await prisma.category.findMany({
       orderBy: { sortOrder: "asc" },
@@ -36,6 +40,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = await req.json();
 

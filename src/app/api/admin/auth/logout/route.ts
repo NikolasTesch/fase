@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
+import { requireApiAdmin } from "@/lib/auth";
 
 export async function POST() {
+  const auth = await requireApiAdmin();
+  if (auth instanceof NextResponse) return auth;
+
   return NextResponse.json(
     { success: true },
     {

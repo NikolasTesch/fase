@@ -6,6 +6,7 @@ import { validateCsrf } from "@/lib/csrf";
 import { getClientIp } from "@/lib/ip";
 import { adminRatelimit } from "@/lib/ratelimit";
 import { formatZodError, errorResponse } from "@/lib/errors";
+import { requireT1Admin } from "@/lib/auth";
 
 const body = z.object({
   key: z.string().min(1),
@@ -13,6 +14,9 @@ const body = z.object({
 });
 
 export async function PATCH(req: NextRequest) {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     // CSRF check
     const csrf = validateCsrf(req);

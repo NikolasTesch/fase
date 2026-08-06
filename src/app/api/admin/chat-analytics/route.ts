@@ -1,7 +1,11 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requireT1Admin } from "@/lib/auth";
 
 export async function GET(_req: NextRequest) {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const totalSessions = await prisma.chatSession.count();
     const totalMessages = await prisma.chatMessage.count();

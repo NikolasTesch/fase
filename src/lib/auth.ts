@@ -39,6 +39,15 @@ export async function requireApiAdmin(): Promise<AdminUser | NextResponse> {
   return user;
 }
 
+export async function requireT1Admin(): Promise<AdminUser | NextResponse> {
+  const auth = await requireApiAdmin();
+  if (auth instanceof NextResponse) return auth;
+  if (auth.role !== "T1_GERENCIA") {
+    return NextResponse.json({ message: "Acesso negado" }, { status: 403 });
+  }
+  return auth;
+}
+
 export function canAccessRoute(role: AdminRole, pathname: string, method: string): boolean {
   if (role === "T1_GERENCIA") {
     return pathname.startsWith("/admin") || pathname.startsWith("/api/admin");

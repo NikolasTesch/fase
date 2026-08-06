@@ -1,6 +1,7 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { requireT1Admin } from "@/lib/auth";
 
 const RowSchema = z.object({
   label: z.string().min(1),
@@ -15,6 +16,9 @@ const UpsertSchema = z.object({
 });
 
 export async function GET() {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const charts = await prisma.sizeChart.findMany({
       orderBy: { type: "asc" },
@@ -27,6 +31,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = await req.json();
     const validated = UpsertSchema.safeParse(body);

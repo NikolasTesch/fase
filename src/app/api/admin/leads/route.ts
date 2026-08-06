@@ -1,8 +1,12 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { LeadStatus } from "@prisma/client";
+import { requireT1Admin } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
+  const auth = await requireT1Admin();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const statusParam = req.nextUrl.searchParams.get("status");
 
