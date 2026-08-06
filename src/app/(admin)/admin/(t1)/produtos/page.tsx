@@ -5,16 +5,22 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Plus, Package, Layers } from "lucide-react";
-import { AnimatedTableRows } from "./_components/AnimatedTableRows";
+import { ProductGridAdmin } from "./_components/ProductGridAdmin";
 
 export const metadata: Metadata = { title: "Produtos — Admin Fase Sport" };
 
 export default async function ProdutosPage() {
   const products = await prisma.product.findMany({
     orderBy: [{ category: { sortOrder: "asc" } }, { sortOrder: "asc" }],
-    include: {
+    select: {
+      id: true,
+      name: true,
+      fabric: true,
+      minQty: true,
+      isActive: true,
+      isFeatured: true,
       category: { select: { name: true } },
-      images: { where: { isPrimary: true }, take: 1 },
+      images: { where: { isPrimary: true }, take: 1, select: { url: true, altText: true } },
     },
   });
 
@@ -40,31 +46,13 @@ export default async function ProdutosPage() {
         </Button>
       </div>
 
-      {/* Table Container */}
+      {/* Grid */}
       <div className="rounded-3xl border border-border/80 bg-card/60 backdrop-blur-sm overflow-hidden shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/40 border-b border-border/80">
-            <tr>
-              <th className="text-left px-5 py-3.5 font-bold text-muted-foreground text-xs uppercase tracking-wider w-14" />
-              <th className="text-left px-4 py-3.5 font-bold text-muted-foreground text-xs uppercase tracking-wider">
-                Nome do Produto
-              </th>
-              <th className="text-left px-4 py-3.5 font-bold text-muted-foreground text-xs uppercase tracking-wider">
-                Categoria
-              </th>
-              <th className="text-left px-4 py-3.5 font-bold text-muted-foreground text-xs uppercase tracking-wider">
-                Destaque
-              </th>
-              <th className="text-left px-4 py-3.5 font-bold text-muted-foreground text-xs uppercase tracking-wider">
-                Status
-              </th>
-              <th className="text-left px-4 py-3.5 font-bold text-muted-foreground text-xs uppercase tracking-wider" />
-            </tr>
-          </thead>
-          <AnimatedTableRows products={products} />
-        </table>
-
-        {products.length === 0 && (
+        {products.length > 0 ? (
+          <div className="p-4 sm:p-5">
+            <ProductGridAdmin products={products} />
+          </div>
+        ) : (
           <div className="px-4 py-16 text-center">
             <div className="flex flex-col items-center gap-3 text-muted-foreground">
               <div className="w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center">
