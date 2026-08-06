@@ -38,12 +38,16 @@ export async function POST(req: NextRequest) {
       return Response.json({ message: "Credenciais inválidas" }, { status: 401 });
     }
 
-    const token = await new SignJWT({ sub: user.id, email: user.email })
+    if (!user.isActive) {
+      return Response.json({ message: "Usuário inativo. Fale com o administrador." }, { status: 401 });
+    }
+
+    const token = await new SignJWT({ sub: user.id, email: user.email, role: user.role, isActive: user.isActive })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("7d")
       .sign(getJwtSecret());
 
-    const response = Response.json({ success: true });
+    const response = Response.json({ success: true, role: user.role });
 
     (response.headers as Headers).append(
       "Set-Cookie",
