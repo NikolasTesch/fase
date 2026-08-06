@@ -62,7 +62,7 @@ export function HeroSection() {
           initial={reduced ? false : "hidden"}
           animate="show"
         >
-          Uniformes Esportivos que <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-amber-100 to-accent">Inspiram Vitórias</span>
+          Uniformes Esportivos que <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-red-200 to-red-500">Inspiram Vitórias</span>
         </motion.h1>
 
         <motion.p

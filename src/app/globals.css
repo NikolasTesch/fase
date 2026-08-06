@@ -110,9 +110,9 @@
   --input: oklch(0.91 0 0);
   --ring: oklch(0.535 0.210 26.5);
 
-  /* Expanded palette — accent gold, sport blue/green */
-  --accent: oklch(0.72 0.175 78.5);                      /* #E8B500 – dourado FASE */
-  --accent-foreground: oklch(0.15 0.02 78.5);
+  /* Expanded palette — accent vermelho vibrante FASE, sport blue/green */
+  --accent: oklch(0.58 0.22 26.5);                       /* #E52E35 – vermelho vibrante FASE */
+  --accent-foreground: oklch(0.985 0 0);
   --sport-blue: oklch(0.35 0.085 265);                   /* azul escuro esportivo */
   --sport-green: oklch(0.55 0.12 155);                   /* verde campo */
   --surface-alt: oklch(0.985 0.005 78.5);                /* tom quente alternativo */
@@ -162,19 +162,8 @@
   --muted: oklch(0.22 0 0);
   --muted-foreground: oklch(0.64 0 0);
 
-  --accent: oklch(0.22 0 0);
+  --accent: oklch(0.58 0.22 26.5);
   --accent-foreground: oklch(0.985 0 0);
-
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.535 0.210 26.5);
-
-  /* Dark mode — expanded palette */
-  --accent: oklch(0.72 0.175 78.5);
-  --accent-foreground: oklch(0.15 0.02 78.5);
   --sport-blue: oklch(0.65 0.085 265);
   --sport-green: oklch(0.65 0.12 155);
   --surface-alt: oklch(0.18 0.01 78.5);
