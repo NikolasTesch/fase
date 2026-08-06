@@ -6,19 +6,48 @@ import { ratelimit } from "@/lib/ratelimit";
 import { getFabiContext } from "@/lib/rag/fabi";
 import { buildFabiSystemPrompt } from "@/lib/rag/prompts";
 import { FABI_TOOLS, executeFabiTool } from "@/lib/rag/tools";
+import { fetchLLMStream } from "@/lib/rag/provider";
 
 const MessageSchema = z.object({
+  id: z.string().optional(),
   role: z.enum(["user", "assistant", "system", "tool"]),
   content: z.string().min(1).max(2000),
 });
 
 const ChatBodySchema = z.object({
+  sessionId: z.string().optional(),
   messages: z.array(MessageSchema).min(1).max(30),
 });
+
+const FeedbackSchema = z.object({
+  messageId: z.string(),
+  feedback: z.number().int().min(-1).max(1),
+});
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const json = await req.json();
+    const parsed = FeedbackSchema.safeParse(json);
+    if (!parsed.success) {
+      return Response.json({ success: false, message: "Payload inválido." }, { status: 400 });
+    }
+
+    await prisma.chatMessage.update({
+      where: { id: parsed.data.messageId },
+      data: { feedback: parsed.data.feedback },
+    });
+
+    return Response.json({ success: true, message: "Feedback registrado." });
+  } catch (error) {
+    console.error("[PATCH /api/chat/fabi]", error);
+    return Response.json({ success: false, message: "Erro ao registrar feedback." }, { status: 500 });
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
+    const userAgent = req.headers.get("user-agent") || undefined;
     const { success } = await ratelimit.limit(`fabi-chat-${ip}`);
 
     if (!success) {
@@ -38,60 +67,50 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const messages = parsed.data.messages;
+    const { messages } = parsed.data;
+    let sessionId = parsed.data.sessionId;
+
+    // Garante que existe uma ChatSession no banco para rastrear analytics
+    if (!sessionId) {
+      const session = await prisma.chatSession.create({
+        data: { userIp: ip, userAgent, status: "ACTIVE" },
+      });
+      sessionId = session.id;
+    }
+
     const lastUserMessage = [...messages].reverse().find((m) => m.role === "user")?.content || "";
+
+    if (lastUserMessage) {
+      await prisma.chatMessage.create({
+        data: {
+          sessionId,
+          role: "user",
+          content: lastUserMessage,
+        },
+      });
+    }
 
     // 1. Busca contexto RAG baseado no histórico relevante da conversa
     const ragResult = await getFabiContext(messages);
     const systemPrompt = buildFabiSystemPrompt(ragResult.contextText);
 
-    // 2. Tenta capturar Lead se a mensagem contiver dados de contato explícitos (ex: telefone/whatsapp)
-    await attemptAutoLeadCapture(lastUserMessage, messages);
+    // 2. Tenta capturar Lead se a mensagem contiver dados de contato explícitos
+    await attemptAutoLeadCapture(lastUserMessage, messages, sessionId);
 
-    // 3. Verifica credenciais para OpenCode Go ou OpenAI / DeepSeek
-    const apiKey =
-      process.env.OPENCODE_GO_API_KEY ||
-      process.env.OPENAI_API_KEY ||
-      process.env.DEEPSEEK_API_KEY;
+    // 3. Executa chamada LLM via Provedor configurado (OpenCode Go, OpenRouter ou Local)
+    const llmStream = await fetchLLMStream({
+      systemPrompt,
+      messages,
+    });
 
-    const apiBaseUrl =
-      process.env.OPENCODE_GO_BASE_URL ||
-      process.env.OPENAI_BASE_URL ||
-      "https://api.openai.com/v1";
-
-    const modelName =
-      process.env.OPENCODE_GO_MODEL ||
-      "opencode-go/deepseek-v4-flash";
-
-    if (apiKey) {
-      // Chamada real para LLM via OpenCode Go / Provider com Streaming e Function Calling
-      const response = await fetch(`${apiBaseUrl}/chat/completions`, {
-        method: "POST",
+    if (llmStream) {
+      return new Response(llmStream, {
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
         },
-        body: JSON.stringify({
-          model: modelName,
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...messages.map((m) => ({ role: m.role, content: m.content })),
-          ],
-          tools: FABI_TOOLS,
-          temperature: 0.5,
-          stream: true,
-        }),
       });
-
-      if (response.ok && response.body) {
-        return new Response(response.body, {
-          headers: {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
-            Connection: "keep-alive",
-          },
-        });
-      }
     }
 
     // 4. Fallback / Motor Inteligente RAG Local (caso sem chave LLM externa configurada)
@@ -118,7 +137,8 @@ export async function POST(req: NextRequest) {
  */
 async function attemptAutoLeadCapture(
   userMsg: string,
-  history: Array<{ role: string; content: string }>
+  history: Array<{ role: string; content: string }>,
+  sessionId?: string
 ) {
   try {
     const phoneRegex = /(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?(?:9\d{4}[-\s]?\d{4}|\d{4}[-\s]?\d{4})/;
@@ -137,6 +157,12 @@ async function attemptAutoLeadCapture(
         });
 
         if (existingRecentLead) {
+          if (sessionId && !existingRecentLead.id) {
+            await prisma.chatSession.update({
+              where: { id: sessionId },
+              data: { leadId: existingRecentLead.id },
+            });
+          }
           return;
         }
 
@@ -183,7 +209,7 @@ async function attemptAutoLeadCapture(
           }
         }
 
-        await prisma.lead.create({
+        const newLead = await prisma.lead.create({
           data: {
             name,
             phone: extractedPhone,
@@ -193,6 +219,13 @@ async function attemptAutoLeadCapture(
             source: "chat_fabi",
           },
         });
+
+        if (sessionId) {
+          await prisma.chatSession.update({
+            where: { id: sessionId },
+            data: { leadId: newLead.id },
+          });
+        }
       }
     }
   } catch (err) {

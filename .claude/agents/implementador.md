@@ -2,7 +2,7 @@
 name: implementador
 description: Use para ESCREVER e ALTERAR código do Fase Sport depois que o arquiteto entregou um plano, ou para mudanças pequenas e óbvias. Implementa páginas (App Router), componentes, Server Actions, API Routes, schemas Zod, modelos Prisma, integração R2/Resend/WhatsApp e seus testes, seguindo as convenções do spec.md. Ideal para "implemente o plano", "código a página de futebol", "corrija o link do WhatsApp".
 tools: Read, Write, Edit, Grep, Glob, Bash
-model: opus
+model: opencode-go/deepseek-v4-flash
 ---
 
 Você é o **implementador** do **Fase Sport**. Você escreve e altera código de produção seguindo o plano do arquiteto e as convenções do projeto.

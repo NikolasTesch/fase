@@ -15,6 +15,7 @@ import {
   Shirt,
   Images,
   UserCog,
+  Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ type AdminRole = "T1_GERENCIA" | "T2_VENDEDOR";
 
 const NAV = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/chat-analytics", label: "Analytics Chat RAG", icon: Bot },
   { href: "/admin/produtos", label: "Produtos", icon: Package },
   { href: "/admin/categorias", label: "Categorias", icon: Tag },
   { href: "/admin/medidas", label: "Medidas", icon: Ruler },

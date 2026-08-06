@@ -27,6 +27,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 export function FabiChatWidget({ isOpen, onClose }: FabiChatWidgetProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
 
   const handleSendMessage = async (userContent: string) => {
     const userMsg: ChatMessage = {
@@ -46,6 +47,7 @@ export function FabiChatWidget({ isOpen, onClose }: FabiChatWidgetProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          sessionId,
           messages: newHistory.map((m) => ({ role: m.role, content: m.content })),
         }),
       });
@@ -123,63 +125,72 @@ export function FabiChatWidget({ isOpen, onClose }: FabiChatWidgetProps) {
   if (!isOpen) return null;
 
   return (
-    <div
-      className={cn(
-        "fixed right-4 bottom-24 z-50 flex w-[92vw] max-w-[400px] flex-col overflow-hidden rounded-2xl border border-border/80 shadow-2xl",
-        "bg-background/95 backdrop-blur-md transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
-      )}
-    >
-      {/* Header do Widget */}
-      <div className="flex items-center justify-between border-b border-border/60 bg-gradient-to-r from-primary/10 via-background to-accent/10 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <FabiAvatar size="md" />
-          <div>
-            <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-              Fabi
-              <span className="rounded-full bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 text-[10px] font-medium border border-emerald-500/20">
-                IA Fase Sport
-              </span>
-            </h3>
-            <p className="text-[11px] text-muted-foreground">Assistente Virtual 24h</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-3 sm:p-4 animate-in fade-in duration-200">
+      <div
+        className={cn(
+          "flex w-full max-w-[460px] h-[90vh] max-h-[640px] flex-col overflow-hidden rounded-3xl border border-border/80 shadow-2xl",
+          "bg-background/95 backdrop-blur-md transition-all duration-300 animate-in zoom-in-95 slide-in-from-bottom-6"
+        )}
+      >
+        {/* Header do Modal */}
+        <div className="flex items-center justify-between border-b border-border/60 bg-gradient-to-r from-primary/15 via-background to-emerald-500/10 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <FabiAvatar size="md" />
+              <span className="absolute bottom-0 right-0 size-3 rounded-full bg-emerald-500 border-2 border-background animate-pulse" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                Fabi
+                <span className="rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[10px] font-semibold border border-emerald-500/20">
+                  Online
+                </span>
+              </h3>
+              <p className="text-xs text-muted-foreground">Especialista em Uniformes Fase Sport</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleResetChat}
+              title="Reiniciar conversa"
+              className="rounded-xl p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+            >
+              <RefreshCw className="size-4" />
+            </button>
+
+            <a
+              href={buildWhatsAppUrl("Olá Fabi, prefiro falar direto com a equipe no WhatsApp!")}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Ir para WhatsApp"
+              className="rounded-xl p-2 text-emerald-600 hover:bg-emerald-500/10 transition-colors"
+            >
+              <MessageCircle className="size-4" />
+            </a>
+
+            <button
+              type="button"
+              onClick={onClose}
+              title="Fechar modal"
+              className="rounded-xl p-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+            >
+              <X className="size-5" />
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={handleResetChat}
-            title="Reiniciar conversa"
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
-          >
-            <RefreshCw className="size-4" />
-          </button>
+        {/* Lista de Mensagens */}
+        <ChatMessageList
+          messages={messages}
+          isLoading={isLoading}
+          onQuickSelect={handleSendMessage}
+        />
 
-          <a
-            href={buildWhatsAppUrl("Olá Fabi, prefiro continuar no WhatsApp!")}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Ir para WhatsApp"
-            className="rounded-lg p-1.5 text-emerald-600 hover:bg-emerald-500/10 transition-colors"
-          >
-            <MessageCircle className="size-4" />
-          </a>
-
-          <button
-            type="button"
-            onClick={onClose}
-            title="Fechar chat"
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
-          >
-            <X className="size-5" />
-          </button>
-        </div>
+        {/* Entrada de Texto */}
+        <ChatInput onSend={handleSendMessage} disabled={isLoading} />
       </div>
-
-      {/* Lista de Mensagens */}
-      <ChatMessageList messages={messages} isLoading={isLoading} />
-
-      {/* Entrada de Texto */}
-      <ChatInput onSend={handleSendMessage} disabled={isLoading} />
     </div>
   );
 }

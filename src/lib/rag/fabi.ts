@@ -82,24 +82,52 @@ function extractKeywords(query: string): string[] {
 }
 
 /**
+ * Expande e sintetiza a intenção comercial do usuário com base no histórico recente (HyDE / Query Expansion).
+ */
+export function expandQueryWithIntent(
+  input: string | Array<{ role: string; content: string }>
+): { combinedQuery: string; detectedIntent: string } {
+  if (typeof input === "string") {
+    return { combinedQuery: input, detectedIntent: input };
+  }
+
+  if (!Array.isArray(input) || input.length === 0) {
+    return { combinedQuery: "", detectedIntent: "" };
+  }
+
+  const userMessages = input.filter((m) => m.role === "user").map((m) => m.content);
+  const lastMessage = userMessages[userMessages.length - 1] || "";
+  const recentHistory = userMessages.slice(-3).join(" ").toLowerCase();
+
+  // Detecta esportes/modalidades no histórico recente
+  const sports = ["futebol", "ciclismo", "basquete", "corrida", "running", "volei", "vôlei", "agasalho", "polo", "empresarial", "turma"];
+  const detectedSport = sports.find((s) => recentHistory.includes(s)) || "";
+
+  // Detecta quantidades informadas
+  const qtyMatch = recentHistory.match(/(\d{1,4})\s*(?:peças|pecas|unidades|conjuntos|camisas)/);
+  const detectedQty = qtyMatch ? `${qtyMatch[1]} unidades` : "";
+
+  // Sintetiza a busca hipotética enriquecida (HyDE)
+  const enrichedParts = [lastMessage];
+  if (detectedSport && !lastMessage.toLowerCase().includes(detectedSport)) {
+    enrichedParts.push(detectedSport);
+  }
+  if (detectedQty && !lastMessage.toLowerCase().includes(detectedQty)) {
+    enrichedParts.push(detectedQty);
+  }
+
+  const combinedQuery = enrichedParts.join(" ");
+  return { combinedQuery, detectedIntent: `${detectedSport} ${detectedQty}`.trim() };
+}
+
+/**
  * Busca dinâmica de contexto relevante no Prisma e tabelas de precificação para enriquecer o prompt da Fabi.
  * Suporta busca por mensagem individual (string) ou por histórico completo de conversa (multi-turn).
  */
 export async function getFabiContext(
   input: string | Array<{ role: string; content: string }>
 ): Promise<RAGQueryResult> {
-  let combinedQuery = "";
-
-  if (typeof input === "string") {
-    combinedQuery = input;
-  } else if (Array.isArray(input)) {
-    const userMessages = input
-      .filter((m) => m.role === "user")
-      .slice(-3)
-      .map((m) => m.content);
-    combinedQuery = userMessages.join(" ");
-  }
-
+  const { combinedQuery } = expandQueryWithIntent(input);
   const keywords = extractKeywords(combinedQuery);
   const contextParts: string[] = [];
 
