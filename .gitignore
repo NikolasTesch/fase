@@ -43,3 +43,6 @@ next-env.d.ts
 
 # product images — armazenadas no Cloudflare R2, não no repositório
 /public/images/products/
+
+# opencode harness session state (transient)
+/.omo/run-continuation/

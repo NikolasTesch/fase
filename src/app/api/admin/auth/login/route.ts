@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
     const token = await new SignJWT({ sub: user.id, email: user.email, role: user.role, isActive: user.isActive })
       .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("7d")
+      .setExpirationTime(process.env.JWT_EXPIRES_IN || "7d")
       .sign(getJwtSecret());
 
     const response = Response.json({ success: true, role: user.role });
