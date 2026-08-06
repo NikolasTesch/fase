@@ -133,12 +133,20 @@ model Faq {
   categoryId String?
 }
 
+enum AdminRole {
+  T1_GERENCIA
+  T2_VENDEDOR
+}
+
 model AdminUser {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String      @id @default(cuid())
+  email        String      @unique
   passwordHash String
   name         String
-  createdAt    DateTime @default(now())
+  role         AdminRole   @default(T1_GERENCIA)
+  isActive     Boolean     @default(true)
+  artsCreated  ArtFile[]
+  createdAt    DateTime    @default(now())
 }
 
 model ModalityItem {
@@ -166,4 +174,28 @@ model SizeChart {
   rows      Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ArtTag {
+  id   String    @id @default(cuid())
+  name String    @unique
+  slug String    @unique
+  arts ArtFile[]
+}
+
+model ArtFile {
+  id               String    @id @default(cuid())
+  name             String
+  description      String?
+  previewFileId    String    // Drive file id da imagem de preview
+  previewMimeType  String
+  originalFileId   String    // Drive file id do arquivo original (.cdr/.svg/.pdf)
+  originalFileName String    // ex.: "escudo-corinthians.cdr"
+  originalMimeType String
+  sizeBytes        Int?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  createdBy        AdminUser? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdById      String?
+  tags             ArtTag[]
 }
