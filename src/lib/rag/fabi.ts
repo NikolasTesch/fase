@@ -230,8 +230,8 @@ export async function getFabiContext(
           scoredProducts
             .map(
               (item) =>
-                `• **[${item.product.name}](/produtos/${item.product.slug})** (Categoria: ${item.product.category.name})\n` +
-                `  - Link no site: /produtos/${item.product.slug}\n` +
+                `• **[${item.product.name}](/${item.product.category.slug}/${item.product.slug})** (Categoria: ${item.product.category.name})\n` +
+                `  - Link no site: /${item.product.category.slug}/${item.product.slug}\n` +
                 `  - Tecido: ${item.product.fabric || "Sublimação Dry Fit de alta performance"}\n` +
                 `  - Pedido Mínimo: ${item.product.minQty} unidades\n` +
                 `  - Descrição: ${item.product.description || "Uniforme esportivo personalizável."}`

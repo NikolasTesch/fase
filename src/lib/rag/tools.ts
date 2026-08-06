@@ -162,7 +162,7 @@ export async function executeFabiTool(
           description: true,
           fabric: true,
           minQty: true,
-          category: { select: { name: true } },
+          category: { select: { name: true, slug: true } },
         },
       });
 
@@ -171,7 +171,7 @@ export async function executeFabiTool(
         count: products.length,
         products: products.map((p) => ({
           name: p.name,
-          url: `/produtos/${p.slug}`,
+          url: `/${p.category.slug}/${p.slug}`,
           category: p.category.name,
           fabric: p.fabric || "Dry Fit de Alta Performance",
           minQty: p.minQty,
