@@ -93,6 +93,13 @@ export async function DELETE(
       return errorResponse("Você só pode editar/excluir suas próprias artes", 403);
     }
 
+    const csrf = validateCsrf(req);
+    if (!csrf.valid) return errorResponse(csrf.reason ?? "Requisição rejeitada", 400);
+
+    const ip = getClientIp(req);
+    const { success: allowed } = await adminRatelimit.limit(`admin:${ip}`);
+    if (!allowed) return errorResponse("Muitas requisições. Tente novamente.", 429);
+
     try {
       await deleteDriveFile(art.previewFileId);
       await deleteDriveFile(art.originalFileId);

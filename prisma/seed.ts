@@ -76,7 +76,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "",
+              url: "/images/products/kit-futebol-campo.webp",
               altText: "Kit futebol campo Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -94,7 +94,7 @@ async function main() {
           sortOrder: 2,
           images: [
             {
-              url: "",
+              url: "/images/products/kit-futebol-society.webp",
               altText: "Kit futebol society Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -112,7 +112,7 @@ async function main() {
           sortOrder: 3,
           images: [
             {
-              url: "",
+              url: "/images/products/camisa-futebol-premium.webp",
               altText: "Camisa futebol premium Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -130,7 +130,7 @@ async function main() {
           sortOrder: 4,
           images: [
             {
-              url: "",
+              url: "/images/products/uniforme-goleiro.webp",
               altText: "Uniforme de goleiro Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -184,7 +184,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "",
+              url: "/images/products/kit-volei-quadra.webp",
               altText: "Kit vôlei de quadra Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -202,7 +202,7 @@ async function main() {
           sortOrder: 2,
           images: [
             {
-              url: "",
+              url: "/images/products/bermuda-volei-praia.webp",
               altText: "Bermuda vôlei de praia Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -241,7 +241,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "",
+              url: "/images/products/kit-basquete.webp",
               altText: "Kit basquete Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -259,7 +259,7 @@ async function main() {
           sortOrder: 2,
           images: [
             {
-              url: "",
+              url: "/images/products/regata-basquete.webp",
               altText: "Regata basquete Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -291,7 +291,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "",
+              url: "/images/products/kit-handebol.webp",
               altText: "Kit handebol Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -323,7 +323,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "",
+              url: "/images/products/camisa-polo-comissao.webp",
               altText: "Camisa polo comissão Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -341,7 +341,7 @@ async function main() {
           sortOrder: 2,
           images: [
             {
-              url: "",
+              url: "/images/products/camisa-passeio-delegacao.webp",
               altText: "Camisa passeio delegação Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -373,7 +373,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "",
+              url: "/images/products/agasalho-esportivo.webp",
               altText: "Agasalho esportivo Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -391,7 +391,7 @@ async function main() {
           sortOrder: 2,
           images: [
             {
-              url: "",
+              url: "/images/products/jaqueta-corta-vento.webp",
               altText: "Jaqueta corta-vento Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -423,7 +423,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "",
+              url: "/images/products/colete-treino.webp",
               altText: "Colete treino Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -455,7 +455,7 @@ async function main() {
           sortOrder: 1,
           images: [
             {
-              url: "",
+              url: "/images/products/meiao-esportivo.webp",
               altText: "Meião esportivo Fase Sport",
               isPrimary: true,
               sortOrder: 0,
@@ -690,7 +690,7 @@ async function main() {
       isFeatured: false,
       sortOrder: 3,
       subcategoryId: operacionalSub?.id,
-      images: [{ url: "", altText: "Jaleco operacional Fase Sport", isPrimary: true, sortOrder: 0 }],
+      images: [{ url: "/images/products/jaleco-operacional.webp", altText: "Jaleco operacional Fase Sport", isPrimary: true, sortOrder: 0 }],
     },
     {
       slug: "uniforme-brim-pesado",
@@ -747,21 +747,21 @@ async function main() {
 
   // ─── Modalidades (seção da Homepage) ──────────────────────────────────────
   const modalitySeed = [
-    { sectionTitle: "Esportes", sectionSubtitle: "Futebol, Vôlei, Handebol e Escolinha", sectionOrder: 1, lineId: "prata", name: "Linha Prata", description: "Excelente custo-benefício para times amadores com tecido dry-fit de qualidade.", imageUrl: "", sortOrder: 1, catalogLinkLabel: "Ver Futebol", catalogLinkHref: "/futebol" },
-    { sectionTitle: "Esportes", sectionSubtitle: "Futebol, Vôlei, Handebol e Escolinha", sectionOrder: 1, lineId: "ouro", name: "Linha Ouro", description: "Sublimação total em alta definição e modelagem atlética.", imageUrl: "", sortOrder: 2, catalogLinkLabel: "Ver Vôlei", catalogLinkHref: "/volei" },
-    { sectionTitle: "Esportes", sectionSubtitle: "Futebol, Vôlei, Handebol e Escolinha", sectionOrder: 1, lineId: "profissional", name: "Profissional", description: "Tecidos tecnológicos combinados, gola personalizada e recortes dry.", imageUrl: "", sortOrder: 3, catalogLinkLabel: "Ver Handebol", catalogLinkHref: "/handebol" },
-    { sectionTitle: "Esportes", sectionSubtitle: "Futebol, Vôlei, Handebol e Escolinha", sectionOrder: 1, lineId: "escolinha", name: "Escolinha", description: "Kits duráveis com foco em mobilidade e conforto para jovens atletas.", imageUrl: "", sortOrder: 4, catalogLinkLabel: "Ver Escolinha", catalogLinkHref: "/futebol?sub=infantil" },
-    { sectionTitle: "Basquete", sectionSubtitle: null, sectionOrder: 2, lineId: "basquete-prata", name: "Linha Prata", description: "Modelagem tradicional americana com tecido respirável.", imageUrl: "", sortOrder: 1 },
-    { sectionTitle: "Basquete", sectionSubtitle: null, sectionOrder: 2, lineId: "basquete-ouro", name: "Linha Ouro", description: "Design moderno com sublimação completa, gola diferenciada.", imageUrl: "", sortOrder: 2 },
-    { sectionTitle: "Basquete", sectionSubtitle: null, sectionOrder: 2, lineId: "basquete-profissional", name: "Profissional", description: "Linha profissional com recortes dry, bordas elásticas e alta ventilação.", imageUrl: "", sortOrder: 3 },
-    { sectionTitle: "Coletes", sectionSubtitle: null, sectionOrder: 3, lineId: "colete-aberto", name: "Colete Aberto", description: "Ajuste por fitas elásticas nas laterais, alta praticidade.", imageUrl: "", sortOrder: 1 },
-    { sectionTitle: "Coletes", sectionSubtitle: null, sectionOrder: 3, lineId: "colete-fechado", name: "Fechado Simples", description: "Fechamento clássico lateral, caimento leve para treinos.", imageUrl: "", sortOrder: 2 },
-    { sectionTitle: "Coletes", sectionSubtitle: null, sectionOrder: 3, lineId: "colete-dupla", name: "Dupla Face", description: "Um colete com duas cores totalmente usáveis, agilidade na divisão de equipes.", imageUrl: "", sortOrder: 3 },
-    { sectionTitle: "Passeio", sectionSubtitle: null, sectionOrder: 4, lineId: "passeio-comissao", name: "Passeio Comissão", description: "Polos e camisas de botão para staff e equipe técnica.", imageUrl: "", sortOrder: 1 },
-    { sectionTitle: "Passeio", sectionSubtitle: null, sectionOrder: 4, lineId: "passeio-torcida", name: "Torcida", description: "Camisetas casuais sublimadas e personalizadas para apoiadores e famílias.", imageUrl: "", sortOrder: 2 },
-    { sectionTitle: "Agasalhos, Calças e Acessórios", sectionSubtitle: null, sectionOrder: 5, lineId: "agasalhos", name: "Agasalhos", description: "Jaquetas corta-vento ou de helanca com zíper e bolsos.", imageUrl: "", sortOrder: 1 },
-    { sectionTitle: "Agasalhos, Calças e Acessórios", sectionSubtitle: null, sectionOrder: 5, lineId: "calcas", name: "Calças", description: "Calças de treino flexíveis com ajuste elástico.", imageUrl: "", sortOrder: 2 },
-    { sectionTitle: "Agasalhos, Calças e Acessórios", sectionSubtitle: null, sectionOrder: 5, lineId: "acessorios", name: "Acessórios", description: "Meiões, tornozeleiras e headbands para fechar o uniforme do time.", imageUrl: "", sortOrder: 3 },
+    { sectionTitle: "Esportes", sectionSubtitle: "Futebol, Vôlei, Handebol e Escolinha", sectionOrder: 1, lineId: "prata", name: "Linha Prata", description: "Excelente custo-benefício para times amadores com tecido dry-fit de qualidade.", imageUrl: "/images/modalities/esportes-prata.webp", sortOrder: 1, catalogLinkLabel: "Ver Futebol", catalogLinkHref: "/futebol" },
+    { sectionTitle: "Esportes", sectionSubtitle: "Futebol, Vôlei, Handebol e Escolinha", sectionOrder: 1, lineId: "ouro", name: "Linha Ouro", description: "Sublimação total em alta definição e modelagem atlética.", imageUrl: "/images/modalities/esportes-ouro.webp", sortOrder: 2, catalogLinkLabel: "Ver Vôlei", catalogLinkHref: "/volei" },
+    { sectionTitle: "Esportes", sectionSubtitle: "Futebol, Vôlei, Handebol e Escolinha", sectionOrder: 1, lineId: "profissional", name: "Profissional", description: "Tecidos tecnológicos combinados, gola personalizada e recortes dry.", imageUrl: "/images/modalities/esportes-profissional.webp", sortOrder: 3, catalogLinkLabel: "Ver Handebol", catalogLinkHref: "/handebol" },
+    { sectionTitle: "Esportes", sectionSubtitle: "Futebol, Vôlei, Handebol e Escolinha", sectionOrder: 1, lineId: "escolinha", name: "Escolinha", description: "Kits duráveis com foco em mobilidade e conforto para jovens atletas.", imageUrl: "/images/modalities/esportes-escolinha.webp", sortOrder: 4, catalogLinkLabel: "Ver Escolinha", catalogLinkHref: "/futebol?sub=infantil" },
+    { sectionTitle: "Basquete", sectionSubtitle: null, sectionOrder: 2, lineId: "basquete-prata", name: "Linha Prata", description: "Modelagem tradicional americana com tecido respirável.", imageUrl: "/images/modalities/basquete-prata.webp", sortOrder: 1 },
+    { sectionTitle: "Basquete", sectionSubtitle: null, sectionOrder: 2, lineId: "basquete-ouro", name: "Linha Ouro", description: "Design moderno com sublimação completa, gola diferenciada.", imageUrl: "/images/modalities/basquete-ouro.webp", sortOrder: 2 },
+    { sectionTitle: "Basquete", sectionSubtitle: null, sectionOrder: 2, lineId: "basquete-profissional", name: "Profissional", description: "Linha profissional com recortes dry, bordas elásticas e alta ventilação.", imageUrl: "/images/modalities/basquete-profissional.webp", sortOrder: 3 },
+    { sectionTitle: "Coletes", sectionSubtitle: null, sectionOrder: 3, lineId: "colete-aberto", name: "Colete Aberto", description: "Ajuste por fitas elásticas nas laterais, alta praticidade.", imageUrl: "/images/modalities/colete-aberto.webp", sortOrder: 1 },
+    { sectionTitle: "Coletes", sectionSubtitle: null, sectionOrder: 3, lineId: "colete-fechado", name: "Fechado Simples", description: "Fechamento clássico lateral, caimento leve para treinos.", imageUrl: "/images/modalities/colete-fechado.webp", sortOrder: 2 },
+    { sectionTitle: "Coletes", sectionSubtitle: null, sectionOrder: 3, lineId: "colete-dupla", name: "Dupla Face", description: "Um colete com duas cores totalmente usáveis, agilidade na divisão de equipes.", imageUrl: "/images/modalities/colete-dupla.webp", sortOrder: 3 },
+    { sectionTitle: "Passeio", sectionSubtitle: null, sectionOrder: 4, lineId: "passeio-comissao", name: "Passeio Comissão", description: "Polos e camisas de botão para staff e equipe técnica.", imageUrl: "/images/modalities/passeio-comissao.webp", sortOrder: 1 },
+    { sectionTitle: "Passeio", sectionSubtitle: null, sectionOrder: 4, lineId: "passeio-torcida", name: "Torcida", description: "Camisetas casuais sublimadas e personalizadas para apoiadores e famílias.", imageUrl: "/images/modalities/passeio-torcida.webp", sortOrder: 2 },
+    { sectionTitle: "Agasalhos, Calças e Acessórios", sectionSubtitle: null, sectionOrder: 5, lineId: "agasalhos", name: "Agasalhos", description: "Jaquetas corta-vento ou de helanca com zíper e bolsos.", imageUrl: "/images/modalities/agasalho.webp", sortOrder: 1 },
+    { sectionTitle: "Agasalhos, Calças e Acessórios", sectionSubtitle: null, sectionOrder: 5, lineId: "calcas", name: "Calças", description: "Calças de treino flexíveis com ajuste elástico.", imageUrl: "/images/modalities/calca.webp", sortOrder: 2 },
+    { sectionTitle: "Agasalhos, Calças e Acessórios", sectionSubtitle: null, sectionOrder: 5, lineId: "acessorios", name: "Acessórios", description: "Meiões, tornozeleiras e headbands para fechar o uniforme do time.", imageUrl: "/images/modalities/acessorio.webp", sortOrder: 3 },
   ];
 
   for (const item of modalitySeed) {

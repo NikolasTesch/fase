@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireApiAdmin, canAccessRoute } from "@/lib/auth";
 import { errorResponse } from "@/lib/errors";
+import { getClientIp } from "@/lib/ip";
+import { streamRatelimit } from "@/lib/ratelimit";
 import { streamDriveFile } from "@/lib/drive";
 
 export const runtime = "nodejs";
@@ -26,6 +28,10 @@ export async function GET(
     if (auth.role === "T2_VENDEDOR" && art.createdById !== auth.id) {
       return errorResponse("Você só pode acessar suas próprias artes", 403);
     }
+
+    const ip = getClientIp(req);
+    const { success: allowed } = await streamRatelimit.limit(`stream:${ip}`);
+    if (!allowed) return errorResponse("Muitas requisições. Tente novamente.", 429);
 
     const stream = await streamDriveFile(art.originalFileId);
     return new Response(stream as ReadableStream, {

@@ -56,6 +56,9 @@ export function FabiChatWidget({ isOpen, onClose }: FabiChatWidgetProps) {
         throw new Error("Erro na API da Fabi");
       }
 
+      const sessionIdFromHeader = res.headers.get("X-Session-Id");
+      if (sessionIdFromHeader) setSessionId(sessionIdFromHeader);
+
       if (!res.body) return;
 
       const reader = res.body.getReader();
@@ -120,6 +123,7 @@ export function FabiChatWidget({ isOpen, onClose }: FabiChatWidgetProps) {
 
   const handleResetChat = () => {
     setMessages(INITIAL_MESSAGES);
+    setSessionId(undefined);
   };
 
   if (!isOpen) return null;

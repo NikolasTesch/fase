@@ -5,7 +5,7 @@ import { getClientIp } from "@/lib/ip";
 import { ratelimit } from "@/lib/ratelimit";
 import { getFabiContext } from "@/lib/rag/fabi";
 import { buildFabiSystemPrompt } from "@/lib/rag/prompts";
-import { FABI_TOOLS, executeFabiTool } from "@/lib/rag/tools";
+import { executeFabiTool } from "@/lib/rag/tools";
 import { fetchLLMStream } from "@/lib/rag/provider";
 
 const MessageSchema = z.object({
@@ -48,9 +48,19 @@ export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
     const userAgent = req.headers.get("user-agent") || undefined;
-    const { success } = await ratelimit.limit(`fabi-chat-${ip}`);
 
-    if (!success) {
+    let allowed: boolean;
+    try {
+      ({ success: allowed } = await ratelimit.limit(`fabi-chat-${ip}`));
+    } catch (rlError) {
+      console.error("[ratelimit]", rlError);
+      return Response.json(
+        { success: false, message: "Serviço temporariamente indisponível. Tente novamente." },
+        { status: 503 }
+      );
+    }
+
+    if (!allowed) {
       return Response.json(
         { success: false, message: "Muitas mensagens enviadas. Aguarde um instante." },
         { status: 429 }
@@ -109,6 +119,7 @@ export async function POST(req: NextRequest) {
           "Content-Type": "text/event-stream",
           "Cache-Control": "no-cache",
           Connection: "keep-alive",
+          "X-Session-Id": sessionId,
         },
       });
     }
@@ -121,6 +132,7 @@ export async function POST(req: NextRequest) {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
+        "X-Session-Id": sessionId,
       },
     });
   } catch (error) {

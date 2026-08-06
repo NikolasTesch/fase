@@ -3,12 +3,26 @@ import bcrypt from "bcryptjs";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getClientIp } from "@/lib/ip";
+import { validateCsrf } from "@/lib/csrf";
 import { loginRatelimit } from "@/lib/ratelimit";
 import { getJwtSecret } from "@/lib/auth-jwt";
 import { LoginSchema } from "@/lib/validations/auth";
 
+// Compara contra um hash dummy quando o e-mail não existe para uniformizar o
+// tempo de resposta — evita que o timing revele quais e-mails estão cadastrados
+let dummyHash: string | null = null;
+function getDummyHash(): string {
+  if (!dummyHash) dummyHash = bcrypt.hashSync("fase-timing-equalizer", 12);
+  return dummyHash;
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const csrf = validateCsrf(req);
+    if (!csrf.valid) {
+      return Response.json({ message: "Requisição rejeitada" }, { status: 400 });
+    }
+
     const ip = getClientIp(req);
     
     try {
@@ -38,7 +52,12 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.adminUser.findUnique({ where: { email } });
 
-    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+    const passwordMatches = await bcrypt.compare(
+      password,
+      user?.passwordHash ?? getDummyHash()
+    );
+
+    if (!user || !passwordMatches) {
       return Response.json({ message: "Credenciais inválidas" }, { status: 401 });
     }
 

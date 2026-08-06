@@ -19,10 +19,14 @@ function makeSlug(name: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const auth = await requireApiAdmin();
     if (auth instanceof NextResponse) return auth;
+
+    if (!canAccessRoute(auth.role, req.nextUrl.pathname, "GET")) {
+      return errorResponse("Acesso negado", 403);
+    }
 
     const tags = await prisma.artTag.findMany({
       include: { _count: { select: { arts: true } } },

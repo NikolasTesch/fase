@@ -3,6 +3,9 @@ import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { requireApiAdmin, canAccessRoute } from "@/lib/auth";
+import { validateCsrf } from "@/lib/csrf";
+import { getClientIp } from "@/lib/ip";
+import { adminRatelimit } from "@/lib/ratelimit";
 import { UserUpdateSchema } from "@/lib/validations/auth";
 import { formatZodError, errorResponse } from "@/lib/errors";
 
@@ -29,6 +32,13 @@ export async function PATCH(
     if (!canAccessRoute(auth.role, req.nextUrl.pathname, "PATCH")) {
       return errorResponse("Acesso negado", 403);
     }
+
+    const csrf = validateCsrf(req);
+    if (!csrf.valid) return errorResponse(csrf.reason ?? "Requisição rejeitada", 400);
+
+    const ip = getClientIp(req);
+    const { success: allowed } = await adminRatelimit.limit(`admin:${ip}`);
+    if (!allowed) return errorResponse("Muitas requisições. Tente novamente.", 429);
 
     const body = await req.json();
     const validated = UserUpdateSchema.safeParse(body);

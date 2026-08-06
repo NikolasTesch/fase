@@ -48,3 +48,9 @@ export const uploadRatelimit = createLimiter(
   Ratelimit.slidingWindow(10, "1 m"),
   "ratelimit:upload"
 );
+
+/** Rate limit para streaming (preview/download de artes): 240 req / 1 min */
+export const streamRatelimit = createLimiter(
+  Ratelimit.slidingWindow(240, "1 m"),
+  "ratelimit:stream"
+);

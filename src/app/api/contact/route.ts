@@ -17,9 +17,22 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const { success } = await ratelimit.limit(ip);
 
-    if (!success) {
+    let allowed: boolean;
+    try {
+      ({ success: allowed } = await ratelimit.limit(ip));
+    } catch (rlError) {
+      console.error("[ratelimit]", rlError);
+      return Response.json(
+        {
+          success: false,
+          message: "Serviço temporariamente indisponível. Tente novamente.",
+        },
+        { status: 503 }
+      );
+    }
+
+    if (!allowed) {
       return Response.json(
         {
           success: false,

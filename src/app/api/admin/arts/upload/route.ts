@@ -105,14 +105,17 @@ export async function POST(req: NextRequest) {
     const isImageExt = ["png", "jpg", "jpeg", "webp", "gif"].includes(ext);
     const originalMime =
       isImageExt && original.type ? original.type : "application/octet-stream";
-    const previewId = await uploadArtFile(previewBuf, `${name}-preview`, file.type);
-    const originalId = await uploadArtFile(
-      originalBuf,
-      original.name,
-      originalMime
-    );
 
+    let previewId: string | null = null;
+    let originalId: string | null = null;
     try {
+      previewId = await uploadArtFile(previewBuf, `${name}-preview`, file.type);
+      originalId = await uploadArtFile(
+        originalBuf,
+        original.name,
+        originalMime
+      );
+
       const art = await prisma.artFile.create({
         data: {
           name: validated.data.name,
@@ -130,11 +133,21 @@ export async function POST(req: NextRequest) {
 
       return Response.json({ id: art.id, name: art.name }, { status: 201 });
     } catch (error) {
-      try {
-        await deleteDriveFile(previewId);
-        await deleteDriveFile(originalId);
-      } catch {
-        // best-effort cleanup do Drive após falha no banco
+      // best-effort: remove do Drive qualquer arquivo já enviado (inclui o caso
+      // de o 2º upload falhar após o 1º ter subido — evita arquivos órfãos)
+      if (previewId) {
+        try {
+          await deleteDriveFile(previewId);
+        } catch {
+          // ignora falha do cleanup
+        }
+      }
+      if (originalId) {
+        try {
+          await deleteDriveFile(originalId);
+        } catch {
+          // ignora falha do cleanup
+        }
       }
       throw error;
     }
