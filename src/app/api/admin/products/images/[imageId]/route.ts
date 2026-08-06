@@ -6,6 +6,7 @@ import { getClientIp } from "@/lib/ip";
 import { adminRatelimit } from "@/lib/ratelimit";
 import { errorResponse } from "@/lib/errors";
 import { requireT1Admin } from "@/lib/auth";
+import { deleteFromR2 } from "@/lib/r2";
 
 interface Params {
   params: Promise<{ imageId: string }>;
@@ -36,6 +37,20 @@ export async function DELETE(req: NextRequest, { params }: Params) {
         { message: "Imagem não encontrada" },
         { status: 404 }
       );
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_R2_URL;
+    const r2Key =
+      baseUrl && image.url.startsWith(`${baseUrl}/`)
+        ? image.url.slice(baseUrl.length + 1)
+        : null;
+
+    if (r2Key) {
+      try {
+        await deleteFromR2(r2Key);
+      } catch {
+        // best-effort: remove o registro mesmo se a exclusão no R2 falhar
+      }
     }
 
     await prisma.productImage.delete({ where: { id: imageId } });

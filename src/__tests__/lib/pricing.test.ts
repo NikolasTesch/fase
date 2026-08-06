@@ -54,6 +54,30 @@ describe("Módulo de Precificação RAG (Pricing)", () => {
     }
   });
 
+  it("fatura o pedido mínimo quando a quantidade informada é menor que 10", () => {
+    const res = calculateEstimate({
+      productIdOrName: "camisa-futebol",
+      quantity: 5,
+    });
+
+    expect(res).not.toBeNull();
+    if (res) {
+      expect(res.quantity).toBe(10);
+      expect(res.discountPercentage).toBe(0);
+      expect(res.totalPrice).toBe(599.0);
+      expect(res.summaryText).toContain("Quantidade: 10 peças");
+    }
+  });
+
+  it("retorna null para produto desconhecido em vez de cotar outro produto", () => {
+    const res = calculateEstimate({
+      productIdOrName: "uniforme-de-dragon-ball",
+      quantity: 10,
+    });
+
+    expect(res).toBeNull();
+  });
+
   it("deve gerar contexto textual completo para o prompt da Fabi", () => {
     const context = getPricingRulesContext();
     expect(context).toContain("TABELA DE PREÇOS E REGRAS COMERCIAIS FASE SPORT");

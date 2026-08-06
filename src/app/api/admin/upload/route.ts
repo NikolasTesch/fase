@@ -32,6 +32,13 @@ export async function POST(req: NextRequest) {
     const isPrimary = formData.get("isPrimary") === "true";
     const altText = (formData.get("altText") as string) || null;
 
+    if (productId && categoryId) {
+      return Response.json(
+        { message: "Envie apenas productId ou categoryId, não ambos." },
+        { status: 400 }
+      );
+    }
+
     if (!file) {
       return Response.json({ message: "Arquivo não enviado" }, { status: 400 });
     }
@@ -75,6 +82,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Valida existência do alvo ANTES de subir ao R2 — evita arquivo órfão
+    // quando o produto/categoria não existe (P2003/P2025 no create)
+    if (productId) {
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+        select: { id: true },
+      });
+      if (!product) {
+        return Response.json({ message: "Produto não encontrado" }, { status: 404 });
+      }
+    } else if (categoryId) {
+      const category = await prisma.category.findUnique({
+        where: { id: categoryId },
+        select: { id: true },
+      });
+      if (!category) {
+        return Response.json({ message: "Categoria não encontrada" }, { status: 404 });
+      }
+    }
+
     const { buffer, mimeType } = await convertToWebP(raw, file.type);
 
     const timestamp = Date.now();
@@ -86,13 +113,6 @@ export async function POST(req: NextRequest) {
     }
 
     const url = await uploadToR2(key, buffer, mimeType);
-
-    if (productId && categoryId) {
-      return Response.json(
-        { message: "Envie apenas productId ou categoryId, não ambos." },
-        { status: 400 }
-      );
-    }
 
     if (productId) {
       const currentCount = await prisma.productImage.count({

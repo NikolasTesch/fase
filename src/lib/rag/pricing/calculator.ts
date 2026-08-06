@@ -32,18 +32,26 @@ export function calculateEstimate(options: EstimateOptions): EstimateResult | nu
   if (quantity <= 0) return null;
 
   const normalizedInput = productIdOrName.toLowerCase();
-  const product =
-    BASE_PRODUCT_PRICES.find(
-      (p) =>
-        p.id === normalizedInput ||
-        p.name.toLowerCase().includes(normalizedInput) ||
-        p.category.toLowerCase().includes(normalizedInput)
-    ) || BASE_PRODUCT_PRICES[0];
+  const product = BASE_PRODUCT_PRICES.find(
+    (p) =>
+      p.id === normalizedInput ||
+      p.name.toLowerCase().includes(normalizedInput) ||
+      p.category.toLowerCase().includes(normalizedInput)
+  );
+
+  if (!product) return null;
+
+  // Fatura o pedido mínimo quando a quantidade informada é menor — a busca de
+  // tier e a mensagem usam a mesma quantidade cobrada, evitando "5 peças"
+  // com valor de 10 ou desconto de tier errado
+  const effectiveQty = Math.max(quantity, COMMERCIAL_POLICIES.minOrderQty);
 
   const tier =
     PRICING_TIERS.find(
-      (t) => quantity >= t.minQty && (t.maxQty === undefined || quantity <= t.maxQty)
-    ) || PRICING_TIERS[PRICING_TIERS.length - 1];
+      (t) =>
+        effectiveQty >= t.minQty &&
+        (t.maxQty === undefined || effectiveQty <= t.maxQty)
+    ) || PRICING_TIERS[0];
 
   const discountPercentage = tier ? tier.discountPercentage : 0;
   const baseUnitPrice = product.basePrice;
@@ -56,9 +64,7 @@ export function calculateEstimate(options: EstimateOptions): EstimateResult | nu
   });
 
   const finalUnitPrice = Number((discountedUnitPrice + addOnsUnitPrice).toFixed(2));
-  const totalPrice = Number(
-    (finalUnitPrice * Math.max(quantity, COMMERCIAL_POLICIES.minOrderQty)).toFixed(2)
-  );
+  const totalPrice = Number((finalUnitPrice * effectiveQty).toFixed(2));
 
   const addOnsText =
     selectedAddOns.length > 0 ? selectedAddOns.map((a) => a.name).join(", ") : "Nenhum";
@@ -66,7 +72,7 @@ export function calculateEstimate(options: EstimateOptions): EstimateResult | nu
   const message =
     `Olá Fase Sport! Fiz uma simulação de orçamento no chat:\n\n` +
     `• Item: ${product.name}\n` +
-    `• Quantidade: ${quantity} unidades\n` +
+    `• Quantidade: ${effectiveQty} unidades\n` +
     `• Adicionais: ${addOnsText}\n` +
     `• Valor Unitário Estimado: R$ ${finalUnitPrice.toFixed(2).replace(".", ",")}\n` +
     `• Valor Total Estimado: R$ ${totalPrice.toFixed(2).replace(".", ",")}\n\n` +
@@ -76,7 +82,7 @@ export function calculateEstimate(options: EstimateOptions): EstimateResult | nu
 
   const summaryText =
     `Orçamento Estimado (${product.name}):\n` +
-    `- Quantidade: ${quantity} peças\n` +
+    `- Quantidade: ${effectiveQty} peças\n` +
     `- Valor Unitário: R$ ${finalUnitPrice.toFixed(2).replace(".", ",")} (Desconto de ${discountPercentage}% aplicado)\n` +
     `- Valor Total: R$ ${totalPrice.toFixed(2).replace(".", ",")}\n` +
     `- Condição: ${COMMERCIAL_POLICIES.paymentTerms}\n` +
@@ -84,7 +90,7 @@ export function calculateEstimate(options: EstimateOptions): EstimateResult | nu
 
   return {
     product,
-    quantity,
+    quantity: effectiveQty,
     baseUnitPrice,
     discountPercentage,
     discountedUnitPrice,
