@@ -82,6 +82,9 @@ model Lead {
   status      LeadStatus @default(NEW)
   source      String?
   createdAt   DateTime   @default(now())
+
+  @@index([status, createdAt])
+  @@index([phone])
 }
 
 enum LeadStatus {
