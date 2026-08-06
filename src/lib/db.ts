@@ -5,14 +5,9 @@ import { Pool } from "pg";
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createPrismaClient() {
-  const connectionString = process.env.DATABASE_URL;
-  const isSslRequired =
-    connectionString?.includes("sslmode=require") ||
-    connectionString?.includes("neon.tech");
-
+  // TLS é resolvido pelo sslmode=require da connection string (mesmo padrão do seed)
   const pool = new Pool({
-    connectionString,
-    ...(isSslRequired ? { ssl: { rejectUnauthorized: false } } : {}),
+    connectionString: process.env.DATABASE_URL,
   });
   const adapter = new PrismaPg(pool);
   return new PrismaClient({

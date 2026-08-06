@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og";
 
+// Dinâmico: o prerender estático em build falha com erro de sharp ("colourspace").
+// Render on-demand é barato (sem DB) e crawlers cachem a resposta.
 export const dynamic = "force-dynamic";
 
 export const size = { width: 1200, height: 630 };

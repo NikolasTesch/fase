@@ -1,5 +1,7 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getPricingRulesContext } from "@/lib/rag/pricing/calculator";
+import { COMMERCIAL_POLICIES } from "@/lib/rag/pricing/rules";
 
 export interface RAGQueryResult {
   contextText: string;
@@ -12,6 +14,21 @@ export interface RAGQueryResult {
 interface SizeChartRowData {
   label: string;
   values: string[];
+}
+
+interface CatalogSnapshot {
+  faqs: Array<{ question: string; answer: string; sortOrder: number }>;
+  products: Array<{
+    name: string;
+    slug: string;
+    description: string | null;
+    fabric: string | null;
+    minQty: number;
+    isFeatured: boolean;
+    category: { name: string; slug: string };
+  }>;
+  modalities: Array<{ name: string; description: string | null; sectionTitle: string }>;
+  sizeCharts: Array<{ type: string; title: string; columns: unknown; rows: unknown }>;
 }
 
 const SYNONYMS: Record<string, string[]> = {
@@ -99,15 +116,12 @@ export function expandQueryWithIntent(
   const lastMessage = userMessages[userMessages.length - 1] || "";
   const recentHistory = userMessages.slice(-3).join(" ").toLowerCase();
 
-  // Detecta esportes/modalidades no histórico recente
   const sports = ["futebol", "ciclismo", "basquete", "corrida", "running", "volei", "vôlei", "agasalho", "polo", "empresarial", "turma"];
   const detectedSport = sports.find((s) => recentHistory.includes(s)) || "";
 
-  // Detecta quantidades informadas
   const qtyMatch = recentHistory.match(/(\d{1,4})\s*(?:peças|pecas|unidades|conjuntos|camisas)/);
   const detectedQty = qtyMatch ? `${qtyMatch[1]} unidades` : "";
 
-  // Sintetiza a busca hipotética enriquecida (HyDE)
   const enrichedParts = [lastMessage];
   if (detectedSport && !lastMessage.toLowerCase().includes(detectedSport)) {
     enrichedParts.push(detectedSport);
@@ -121,8 +135,51 @@ export function expandQueryWithIntent(
 }
 
 /**
- * Busca dinâmica de contexto relevante no Prisma e tabelas de precificação para enriquecer o prompt da Fabi.
- * Suporta busca por mensagem individual (string) ou por histórico completo de conversa (multi-turn).
+ * Carrega o catálogo (FAQs, produtos, modalidades, medidas) para o contexto RAG.
+ * Cacheado por 5 minutos — o catálogo muda raramente e cada mensagem do chat
+ * dispararia uma varredura completa no banco.
+ */
+async function loadCatalog(): Promise<CatalogSnapshot> {
+  const [faqs, products, modalities, sizeCharts] = await Promise.all([
+    prisma.faq.findMany({
+      where: { isActive: true },
+      select: { question: true, answer: true, sortOrder: true },
+    }),
+    prisma.product.findMany({
+      where: { isActive: true },
+      select: {
+        name: true,
+        slug: true,
+        description: true,
+        fabric: true,
+        minQty: true,
+        isFeatured: true,
+        category: { select: { name: true, slug: true } },
+      },
+    }),
+    prisma.modalityItem.findMany({
+      where: { isActive: true },
+      select: { name: true, description: true, sectionTitle: true },
+    }),
+    prisma.sizeChart.findMany({
+      select: { type: true, title: true, columns: true, rows: true },
+    }),
+  ]);
+
+  return { faqs, products, modalities, sizeCharts };
+}
+
+const getCatalog = unstable_cache(loadCatalog, ["fabi-catalog"], {
+  revalidate: 300,
+});
+
+const normalizeForMatch = (value: string) =>
+  value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+/**
+ * Busca dinâmica de contexto relevante no catálogo (cacheado) e tabelas de
+ * precificação para enriquecer o prompt da Fabi. Suporta busca por mensagem
+ * individual (string) ou por histórico completo de conversa (multi-turn).
  */
 export async function getFabiContext(
   input: string | Array<{ role: string; content: string }>
@@ -137,18 +194,15 @@ export async function getFabiContext(
   let hasSizeChart = false;
 
   try {
+    const catalog = await getCatalog();
+
     // 1. FAQs relacionadas com pontuação por correspondência
     if (keywords.length > 0) {
-      const allFaqs = await prisma.faq.findMany({
-        where: { isActive: true },
-        select: { question: true, answer: true },
-      });
-
-      const scoredFaqs = allFaqs
+      const scoredFaqs = catalog.faqs
         .map((f) => {
           let score = 0;
-          const qNorm = f.question.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-          const aNorm = f.answer.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          const qNorm = normalizeForMatch(f.question);
+          const aNorm = normalizeForMatch(f.answer);
 
           for (const kw of keywords) {
             if (qNorm.includes(kw)) score += 3;
@@ -172,12 +226,9 @@ export async function getFabiContext(
 
     // Fallback/Top FAQs se não encontrou específicas por keyword
     if (!hasFaqs) {
-      const defaultFaqs = await prisma.faq.findMany({
-        where: { isActive: true },
-        take: 3,
-        orderBy: { sortOrder: "asc" },
-        select: { question: true, answer: true },
-      });
+      const defaultFaqs = [...catalog.faqs]
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .slice(0, 3);
       if (defaultFaqs.length > 0) {
         contextParts.push(
           "--- DÚVIDAS MAIS COMUNS DA LOJA ---\n" +
@@ -187,26 +238,13 @@ export async function getFabiContext(
     }
 
     // 2. Produtos & Categorias com busca pontuada e ordenação por relevância
-    const allProducts = await prisma.product.findMany({
-      where: { isActive: true },
-      select: {
-        name: true,
-        slug: true,
-        description: true,
-        fabric: true,
-        minQty: true,
-        isFeatured: true,
-        category: { select: { name: true, slug: true } },
-      },
-    });
-
-    const scoredProducts = allProducts
+    const scoredProducts = catalog.products
       .map((p) => {
         let score = 0;
-        const nameNorm = p.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const descNorm = (p.description || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const catNorm = p.category.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const fabricNorm = (p.fabric || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const nameNorm = normalizeForMatch(p.name);
+        const descNorm = normalizeForMatch(p.description || "");
+        const catNorm = normalizeForMatch(p.category.name);
+        const fabricNorm = normalizeForMatch(p.fabric || "");
 
         for (const kw of keywords) {
           if (nameNorm.includes(kw)) score += 5;
@@ -240,23 +278,19 @@ export async function getFabiContext(
       );
     }
 
-    // 3. Modalidades esportivas
-    const modalities = await prisma.modalityItem.findMany({
-      where: {
-        isActive: true,
-        ...(keywords.length > 0
-          ? {
-              OR: keywords.flatMap((kw) => [
-                { name: { contains: kw, mode: "insensitive" } },
-                { description: { contains: kw, mode: "insensitive" } },
-                { sectionTitle: { contains: kw, mode: "insensitive" } },
-              ]),
-            }
-          : {}),
-      },
-      take: 3,
-      select: { name: true, description: true, sectionTitle: true },
-    });
+    // 3. Modalidades esportivas (filtro em memória sobre o snapshot cacheado)
+    const modalities = keywords.length > 0
+      ? catalog.modalities
+          .filter((m) =>
+            keywords.some(
+              (kw) =>
+                normalizeForMatch(m.name).includes(kw) ||
+                normalizeForMatch(m.description || "").includes(kw) ||
+                normalizeForMatch(m.sectionTitle).includes(kw)
+            )
+          )
+          .slice(0, 3)
+      : catalog.modalities.slice(0, 3);
 
     if (modalities.length > 0) {
       sourceCount += modalities.length;
@@ -268,7 +302,7 @@ export async function getFabiContext(
       );
     }
 
-    // 4. Tabelas de medidas (se perguntado sobre tamanho, medidas, dimensoes, p, m, g, babylook, etc.)
+    // 4. Tabelas de medidas (se perguntado sobre tamanho, medidas, babylook, etc.)
     const sizeQueryTerms = [
       "tamanho", "tamanhos", "medida", "medidas", "dimensao", "dimensoes",
       "tabela", "veste", "largura", "comprimento", "altura", "peso", "babylook", "infantil"
@@ -276,7 +310,7 @@ export async function getFabiContext(
     const isAskingSize = keywords.some((kw) => sizeQueryTerms.includes(kw));
 
     if (isAskingSize) {
-      const sizeCharts = await prisma.sizeChart.findMany({ take: 4 });
+      const sizeCharts = catalog.sizeCharts.slice(0, 4);
       if (sizeCharts.length > 0) {
         hasSizeChart = true;
         sourceCount += sizeCharts.length;
@@ -318,20 +352,10 @@ export async function getFabiContext(
       contextParts.push(getPricingRulesContext());
     }
 
-    // 6. Configurações e Regras de Negócio
-    let minOrderQty = "10";
-    try {
-      const minQtySetting = await prisma.siteSetting.findUnique({
-        where: { key: "min_order_qty" },
-      });
-      if (minQtySetting?.value) minOrderQty = minQtySetting.value;
-    } catch {
-      // Usar fallback padrão em caso de erro no siteSetting
-    }
-
+    // 6. Configurações e Regras de Negócio (fonte única: policies.json)
     contextParts.push(
       "--- REGRAS DE NEGÓCIO E CONTATO FASE SPORT ---\n" +
-        `• Pedido mínimo: ${minOrderQty} peças por modelo/lote.\n` +
+        `• Pedido mínimo: ${COMMERCIAL_POLICIES.minOrderQty} peças por modelo/lote.\n` +
         "• Processo: 1) Seleção do modelo/esporte, 2) Criação do layout 3D personalizado, 3) Aprovação e produção por sublimação total.\n" +
         "• Personalização inclusa: Nomes, números, escudos e patrocinadores sem custo extra de impressão.\n" +
         "• Entrega: Enviamos para todo o Brasil via transportadora e Correios.\n" +
@@ -360,4 +384,3 @@ export async function getFabiContext(
     };
   }
 }
-
