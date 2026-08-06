@@ -26,6 +26,7 @@ async function getHomepageData() {
               slug: true,
               name: true,
               fabric: true,
+              minQty: true,
               images: {
                 where: { isPrimary: true },
                 take: 1,
@@ -56,7 +57,7 @@ async function getHomepageData() {
   } catch (error) {
     console.error("[GET /]", error);
     return {
-      featuredProducts: [] as { slug: string; name: string; fabric: string | null; images: { url: string; altText: string | null }[]; category: { slug: string; name: string } }[],
+      featuredProducts: [] as { slug: string; name: string; fabric: string | null; minQty: number | null; images: { url: string; altText: string | null }[]; category: { slug: string; name: string } }[],
       testimonials: [] as Awaited<ReturnType<typeof prisma.testimonial.findMany>>,
       instagramPosts: [] as Awaited<ReturnType<typeof prisma.instagramPost.findMany>>,
       heroVideoSetting: null,
@@ -90,6 +91,8 @@ export default async function HomePage() {
     imageUrl: product.images[0]?.url ?? null,
     imageAlt: product.images[0]?.altText ?? null,
     categorySlug: product.category.slug,
+    categoryName: product.category.name,
+    minQty: product.minQty,
   }));
 
   const testimonialItems = testimonials.map((testimonial) => ({

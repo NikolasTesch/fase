@@ -99,6 +99,8 @@ export default async function CategoryPage({
         slug: product.slug,
         name: product.name,
         categorySlug: category.slug,
+        categoryName: category.name,
+        minQty: product.minQty,
         fabric: product.fabric,
         imageUrl: primaryImage?.url ?? null,
         imageAlt: primaryImage?.altText ?? null,

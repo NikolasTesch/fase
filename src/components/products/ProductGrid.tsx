@@ -4,6 +4,8 @@ interface ProductGridItem {
   slug: string;
   name: string;
   categorySlug: string;
+  categoryName?: string | null;
+  minQty?: number | null;
   fabric?: string | null;
   imageUrl?: string | null;
   imageAlt?: string | null;
@@ -36,6 +38,8 @@ export function ProductGrid({ products }: ProductGridProps) {
           slug={product.slug}
           name={product.name}
           categorySlug={product.categorySlug}
+          categoryName={product.categoryName}
+          minQty={product.minQty}
           fabric={product.fabric}
           imageUrl={product.imageUrl}
           imageAlt={product.imageAlt}

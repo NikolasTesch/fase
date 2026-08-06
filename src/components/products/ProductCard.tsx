@@ -6,6 +6,8 @@ interface ProductCardProps {
   slug: string;
   name: string;
   categorySlug: string;
+  categoryName?: string | null;
+  minQty?: number | null;
   fabric?: string | null;
   imageUrl?: string | null;
   imageAlt?: string | null;
@@ -15,6 +17,8 @@ export function ProductCard({
   slug,
   name,
   categorySlug,
+  categoryName,
+  minQty,
   fabric,
   imageUrl,
   imageAlt,
@@ -58,6 +62,20 @@ export function ProductCard({
       </div>
       <div className="flex flex-col gap-1 p-4">
         <h3 className="font-medium text-card-foreground group-hover:text-accent transition-colors duration-200">{name}</h3>
+        {(categoryName || minQty != null) ? (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {categoryName ? (
+              <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                {categoryName}
+              </span>
+            ) : null}
+            {minQty != null ? (
+              <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                Mín. {minQty} peças
+              </span>
+            ) : null}
+          </div>
+        ) : null}
         <p className="text-sm italic text-muted-foreground/70">Sob consulta</p>
       </div>
     </Link>

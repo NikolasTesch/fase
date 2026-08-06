@@ -42,7 +42,7 @@ export default async function BuscaPage({ searchParams }: BuscaPageProps) {
         orderBy: { sortOrder: "asc" },
         include: {
           images: { where: { isPrimary: true }, take: 1 },
-          category: { select: { slug: true } },
+          category: { select: { slug: true, name: true } },
         },
       })
     : [];
@@ -51,6 +51,8 @@ export default async function BuscaPage({ searchParams }: BuscaPageProps) {
     slug: p.slug,
     name: p.name,
     categorySlug: p.category.slug,
+    categoryName: p.category.name,
+    minQty: p.minQty,
     fabric: p.fabric,
     imageUrl: p.images[0]?.url ?? null,
     imageAlt: p.images[0]?.altText ?? null,

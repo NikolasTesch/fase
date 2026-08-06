@@ -15,6 +15,8 @@ interface FeaturedProduct {
   imageUrl: string | null;
   imageAlt: string | null;
   categorySlug: string;
+  categoryName?: string | null;
+  minQty?: number | null;
 }
 
 interface FeaturedSectionProps {
@@ -103,6 +105,8 @@ export function FeaturedSection({ products }: FeaturedSectionProps) {
                 slug={product.slug}
                 name={product.name}
                 categorySlug={product.categorySlug}
+                categoryName={product.categoryName}
+                minQty={product.minQty}
                 fabric={product.fabric}
                 imageUrl={product.imageUrl}
                 imageAlt={product.imageAlt}
