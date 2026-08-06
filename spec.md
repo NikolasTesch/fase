@@ -36,8 +36,7 @@ Arquitetura **Monolito Modular** — Frontend + Backend API no mesmo repositóri
                        │ HTTP / Server Actions
 ┌──────────────────────▼──────────────────────────────┐
 │               NEXT.JS API ROUTES (Node.js)           │
-│  /api/products  /api/categories  /api/contact        │
-│  /api/upload    /api/admin/*                         │
+│  /api/contact  /api/chat/fabi   /api/admin/*         │
 └───────┬────────────────────────┬────────────────────┘
         │                        │
 ┌───────▼───────┐      ┌─────────▼───────────┐
@@ -58,6 +57,7 @@ Local:  Docker Compose (Next.js + PostgreSQL)
 | **Tailwind CSS + shadcn/ui** | Design system consistente. shadcn/ui fornece componentes acessíveis e customizáveis sem lock-in de biblioteca. |
 | **Prisma ORM** | Type-safe database access. Migrations automáticas. Suporte nativo ao PostgreSQL (Neon). Schema como fonte de verdade. |
 | **Cloudflare R2** | S3-compatible. Zero egress fees. Worker para otimização de imagem on-the-fly (resize, WebP conversion). |
+| **Google Drive (artes)** | Artes (logotipos, escudos, vetoriais) em pasta privada via service account (scope `drive.file`) — nunca há link público; preview/download via API autenticada. |
 | **Neon Database** | PostgreSQL serverless com branching. Escala para zero quando inativo. Ideal para projeto em crescimento. |
 | **Framer Motion** | Animações declarativas no React. Viewport-based animations para a landing page. Otimizado para performance. |
 | **React Hook Form + Zod** | Formulário multi-step com validação client e server-side. Schema compartilhado entre frontend e API. |
@@ -81,14 +81,13 @@ Local:  Docker Compose (Next.js + PostgreSQL)
 | ORM | Prisma | 7.x | Acesso ao banco de dados |
 | Validation | Zod | 4.x | Validação de schema |
 | Forms | React Hook Form | 7.x | Gerenciamento de forms |
-| State | Zustand | 4.x | Estado global leve |
 | Images | next/image | nativo | Otimização de imagens |
 | E-mail | Resend + React Email | latest | E-mails transacionais |
 | Storage SDK | AWS SDK v3 (S3 compat.) | 3.x | Upload para R2 |
-| Data Fetching | SWR | 2.x | Fetch client-side em Client Components |
-| Auth JWT | jose | 5.x | Geração/verificação de JWT (Edge Runtime compatível) |
-| Hashing | bcryptjs | 2.x | Hash de senhas admin (rounds: 12) |
-| Rate Limit | @upstash/ratelimit + @upstash/redis | latest | Rate limiting no endpoint `/api/contact` |
+| Data Fetching | Server Components + Prisma | — | Catálogo via RSC/ISR (sem SWR) |
+| Auth JWT | jose | 6.x | Geração/verificação de JWT |
+| Hashing | bcryptjs | 3.x | Hash de senhas admin (rounds: 12) |
+| Rate Limit | @upstash/ratelimit + @upstash/redis | latest | Rate limiting fail-closed (contact, chat, login, admin, upload, stream) |
 | Testing | Vitest + Playwright | latest | Unit e E2E tests |
 | Linting | ESLint + Prettier | latest | Code quality |
 
@@ -155,10 +154,9 @@ fasesport/
 │   │   │   ├── produtos/               # CRUD de produtos
 │   │   │   └── categorias/             # CRUD de categorias
 │   │   └── api/                        # API Routes
-│   │       ├── products/route.ts       # GET /api/products
-│   │       ├── categories/route.ts     # GET /api/categories
 │   │       ├── contact/route.ts        # POST /api/contact
-│   │       └── upload/route.ts         # POST /api/upload
+│   │       ├── chat/fabi/route.ts      # POST/PATCH /api/chat/fabi (RAG, SSE)
+│   │       └── admin/                  # Todas as rotas /api/admin/* (RBAC)
 │   ├── components/
 │   │   ├── ui/                         # shadcn/ui components
 │   │   ├── layout/                     # Navbar, Footer, Layout
@@ -197,26 +195,21 @@ fasesport/
 
 ### 11.1 Schema Prisma
 
-```prisma
-// prisma/schema.prisma
+> Schema completo em `prisma/schema.prisma`. Prisma 7 com adapter `@prisma/adapter-pg` (Pool `pg`) — a URL vive em `prisma.config.ts`, não no schema. Padrão do repo: `npx prisma db push` (sem `migrate`).
 
+```prisma
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-// Categorias de modalidade esportiva (ex: futebol, volei)
 model Category {
   id            String        @id @default(cuid())
-  slug          String        @unique  // "futebol", "volei"
-  name          String                 // "Futebol", "Vôlei"
+  slug          String        @unique
+  name          String
   description   String?
-  imageUrl      String?                // Imagem do hero da categoria
-  iconUrl       String?                // Ícone SVG da categoria
+  imageUrl      String?
+  iconUrl       String?
+  sizeTableUrl  String?
   sortOrder     Int           @default(0)
   isActive      Boolean       @default(true)
   seoTitle      String?
@@ -228,7 +221,6 @@ model Category {
   faqs          Faq[]
 }
 
-// Sub-categorias (ex: Conjunto, Camisa, Short dentro de Futebol)
 model Subcategory {
   id         String    @id @default(cuid())
   slug       String
@@ -241,54 +233,54 @@ model Subcategory {
   @@unique([categoryId, slug])
 }
 
-// Produtos/Modelos de uniforme
 model Product {
-  id            String        @id @default(cuid())
-  slug          String        @unique
-  name          String                 // "Modelo Champions Pro"
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  name          String
   description   String?
-  fabric        String?                // "Dry-fit 100% poliéster"
-  minQty        Int           @default(10)
-  isFeatured    Boolean       @default(false)
-  isActive      Boolean       @default(true)
+  fabric        String?
+  minQty        Int            @default(10)
+  isFeatured    Boolean        @default(false)
+  isActive      Boolean        @default(true)
   seoTitle      String?
   seoDesc       String?
-  simulatorUrl  String?                // Link direto no simulador
-  sortOrder     Int           @default(0)
-  category      Category      @relation(fields: [categoryId], references: [id])
+  simulatorUrl  String?
+  sortOrder     Int            @default(0)
+  category      Category       @relation(fields: [categoryId], references: [id])
   categoryId    String
-  subcategory   Subcategory?  @relation(fields: [subcategoryId], references: [id])
+  subcategory   Subcategory?   @relation(fields: [subcategoryId], references: [id])
   subcategoryId String?
   images        ProductImage[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
-// Imagens do produto (múltiplas por produto)
 model ProductImage {
-  id        String   @id @default(cuid())
-  url       String            // URL no Cloudflare R2
+  id        String  @id @default(cuid())
+  url       String
   altText   String?
-  sortOrder Int      @default(0)
-  isPrimary Boolean  @default(false)
-  product   Product  @relation(fields: [productId], references: [id])
+  sortOrder Int     @default(0)
+  isPrimary Boolean @default(false)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
 }
 
-// Leads de orçamento
 model Lead {
   id          String     @id @default(cuid())
   name        String
-  email       String
+  email       String?
   phone       String
   city        String?
-  sport       String              // Modalidade selecionada
+  sport       String
   quantity    Int?
-  details     String?             // Detalhes adicionais
-  productSlug String?             // Produto de interesse (opcional)
+  details     String?
+  productSlug String?
   status      LeadStatus @default(NEW)
-  source      String?             // "whatsapp", "form", "simulator"
+  source      String?
   createdAt   DateTime   @default(now())
+
+  @@index([status, createdAt])
+  @@index([phone])
 }
 
 enum LeadStatus {
@@ -299,21 +291,37 @@ enum LeadStatus {
   CLOSED_LOST
 }
 
-// Depoimentos de clientes
 model Testimonial {
-  id         String   @id @default(cuid())
-  clientName String
-  teamName   String?
-  sport      String?
-  text       String
-  photoUrl   String?
-  logoUrl    String?
-  rating     Int      @default(5)
-  isActive   Boolean  @default(true)
-  sortOrder  Int      @default(0)
+  id               String  @id @default(cuid())
+  clientName       String
+  teamName         String?
+  sport            String?
+  text             String
+  photoUrl         String?
+  logoUrl          String?
+  materialImageUrl String?
+  rating           Int     @default(5)
+  isActive         Boolean @default(true)
+  sortOrder        Int     @default(0)
 }
 
-// Perguntas frequentes por categoria (FAQ dinâmico via CMS)
+model InstagramPost {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  linkUrl   String
+  caption   String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 model Faq {
   id         String    @id @default(cuid())
   question   String
@@ -321,16 +329,97 @@ model Faq {
   sortOrder  Int       @default(0)
   isActive   Boolean   @default(true)
   category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId String?   // null = FAQ global (página "Como Funciona")
+  categoryId String?
 }
 
-// Admin users para o CMS
+enum AdminRole {
+  T1_GERENCIA
+  T2_VENDEDOR
+}
+
 model AdminUser {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String      @id @default(cuid())
+  email        String      @unique
   passwordHash String
   name         String
-  createdAt    DateTime @default(now())
+  role         AdminRole   @default(T1_GERENCIA)
+  isActive     Boolean     @default(true)
+  artsCreated  ArtFile[]
+  createdAt    DateTime    @default(now())
+}
+
+model ModalityItem {
+  id               String   @id @default(cuid())
+  sectionTitle     String
+  sectionSubtitle  String?
+  sectionOrder     Int      @default(0)
+  lineId           String   @unique
+  name             String
+  description      String?
+  imageUrl         String?
+  sortOrder        Int      @default(0)
+  catalogLinkLabel String?
+  catalogLinkHref  String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model SizeChart {
+  id        String   @id @default(cuid())
+  type      String   @unique
+  title     String
+  columns   Json
+  rows      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ArtTag {
+  id   String    @id @default(cuid())
+  name String    @unique
+  slug String    @unique
+  arts ArtFile[]
+}
+
+model ArtFile {
+  id               String    @id @default(cuid())
+  name             String
+  description      String?
+  previewFileId    String    // Drive file id da imagem de preview
+  previewMimeType  String
+  originalFileId   String    // Drive file id do arquivo original
+  originalFileName String
+  originalMimeType String
+  sizeBytes        Int?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  createdBy        AdminUser? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdById      String?
+  tags             ArtTag[]
+}
+
+model ChatSession {
+  id        String        @id @default(cuid())
+  userIp    String?
+  userAgent String?
+  status    String        @default("ACTIVE")
+  leadId    String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  messages  ChatMessage[]
+}
+
+model ChatMessage {
+  id         String      @id @default(cuid())
+  sessionId  String
+  role       String      // user | assistant | system | tool
+  content    String
+  feedback   Int?        // 1 = útil, -1 = não útil
+  createdAt  DateTime    @default(now())
+  session    ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
 }
 ```
 
@@ -342,144 +431,136 @@ model AdminUser {
 
 | Método | Rota | Descrição | Response |
 |---|---|---|---|
-| `GET` | `/api/categories` | Lista todas as categorias ativas com contagem de produtos | `200 Category[]` |
-| `GET` | `/api/categories/:slug` | Detalhes de uma categoria com produtos e subcategorias | `200 Category` |
-| `GET` | `/api/products` | Lista produtos (query: `category`, `subcategory`, `featured`, `limit`) | `200 Product[]` |
-| `GET` | `/api/products/:slug` | Detalhes de um produto com galeria de imagens | `200 Product` |
-| `POST` | `/api/contact` | Criação de lead. Validação Zod + salva no DB + envia e-mail | `201 Lead` |
+| `POST` | `/api/contact` | Criação de lead (Zod + CSRF + rate limit) + e-mail para vendas | `201 { success, leadId }` |
+| `POST` | `/api/chat/fabi` | Chat Fabi (RAG) — SSE stream; rate limit por IP; cria `ChatSession` e devolve `X-Session-Id` | `text/event-stream` |
+| `PATCH` | `/api/chat/fabi` | Registra feedback de mensagem (`messageId`, `feedback: -1\|0\|1`) | `200 { success }` |
+
+> As rotas públicas antigas `/api/products`, `/api/products/:slug`, `/api/categories` e `/api/categories/:slug` foram **removidas** — o catálogo é renderizado via Server Components com Prisma (RSC). As rotas de contato/chat são **fail-closed**: sem Redis (Upstash) configurado, retornam `503`.
 
 ### 12.2 Rotas Admin (autenticadas)
 
-| Método | Rota | Descrição |
-|---|---|---|
-| `POST` | `/api/admin/auth/login` | Login de admin (retorna JWT httpOnly cookie) |
-| `POST` | `/api/admin/auth/logout` | Logout (limpa cookie) |
-| `GET` | `/api/admin/products` | Lista todos os produtos (inclui inativos) |
-| `POST` | `/api/admin/products` | Cria novo produto |
-| `PATCH` | `/api/admin/products/:id` | Atualiza produto |
-| `DELETE` | `/api/admin/products/:id` | Soft delete de produto |
-| `POST` | `/api/upload` | Upload de imagem para Cloudflare R2 (`multipart/form-data`) |
-| `GET/POST` | `/api/admin/leads` | Lista leads de orçamento _(POST não implementado — leads criados via POST `/api/contact`)_ |
-| `PATCH` | `/api/admin/leads/:id` | Atualiza status do lead |
-| `GET` | `/api/admin/categories` | Lista todas as categorias |
-| `POST` | `/api/admin/categories` | Cria categoria |
-| `PATCH` | `/api/admin/categories/:id` | Atualiza categoria |
-| `GET` | `/api/admin/testimonials` | Lista depoimentos (inclui inativos) |
-| `POST` | `/api/admin/testimonials` | Cria depoimento |
-| `PATCH` | `/api/admin/testimonials/:id` | Atualiza / ativa / desativa depoimento |
-| `DELETE` | `/api/admin/testimonials/:id` | Remove depoimento |
-| `GET` | `/api/admin/faqs` | Lista FAQs (filtro: `?categoryId=`) |
-| `POST` | `/api/admin/faqs` | Cria pergunta |
-| `PATCH` | `/api/admin/faqs/:id` | Atualiza pergunta |
-| `DELETE` | `/api/admin/faqs/:id` | Remove pergunta |
+Todas as rotas `/api/admin/*` exigem cookie `admin_token` válido (validação no `src/proxy.ts`). Rotas T1-only chamam `requireT1Admin()`; rotas com role mista usam `requireApiAdmin()` + `canAccessRoute()`.
 
-### 12.3 Autenticação Admin — Spec Técnica
+| Método | Rota | Role | Descrição |
+|---|---|---|---|
+| `POST` | `/api/admin/auth/login` | Público | Login (JWT httpOnly cookie; valida `isActive`; payload com `role`) |
+| `POST` | `/api/admin/auth/logout` | Qualquer admin | Limpa cookie |
+| `GET` | `/api/admin/users` | T1 | Lista usuários (sem `passwordHash`) |
+| `POST` | `/api/admin/users` | T1 | Cria usuário (bcrypt 12; P2002 → 409) |
+| `PATCH` | `/api/admin/users/:id` | T1 | Edita role/isActive/senha (guard de auto-desativação) |
+| `GET` | `/api/admin/arts` | T1 + T2 (GET) | Lista artes (`?q=`, `?tagId=`); nunca expõe `*FileId` |
+| `POST` | `/api/admin/arts/upload` | T1 + T2 | Upload multipart (preview + original) → Google Drive; validação MIME/ext/tamanho/magic bytes |
+| `PATCH` | `/api/admin/arts/:id` | T1 (todas) / T2 (próprias) | Edita metadados/tags |
+| `DELETE` | `/api/admin/arts/:id` | T1 (todas) / T2 (próprias) | Exclui arte + arquivos no Drive (best-effort) |
+| `GET` | `/api/admin/arts/:id/preview` | T1 (todas) / T2 (próprias) | Stream do preview (autenticado, `nosniff`) |
+| `GET` | `/api/admin/arts/:id/download` | T1 (todas) / T2 (próprias) | Download do original (`Content-Disposition: attachment`) |
+| `GET` | `/api/admin/art-tags` | T1 + T2 (GET) | Lista tags com contagem |
+| `POST` | `/api/admin/art-tags` | T1 | Cria tag (slug automático; P2002 → 409) |
+| `PATCH/DELETE` | `/api/admin/art-tags/:id` | T1 | Renomeia/exclui tag |
+| `GET/POST` | `/api/admin/products` | T1 | Lista/cria produtos |
+| `PATCH/DELETE` | `/api/admin/products/:id` | T1 | Atualiza / soft-delete (`isActive: false`) |
+| `DELETE` | `/api/admin/products/images/:imageId` | T1 | Remove imagem + arquivo no R2 (best-effort) |
+| `POST` | `/api/admin/upload` | T1 | Upload de imagem de produto/categoria → R2 (valida alvo antes de subir) |
+| `GET` | `/api/admin/leads` | T1 | Lista leads (filtro `?status=`) |
+| `PATCH` | `/api/admin/leads/:id` | T1 | Atualiza status do lead |
+| `GET/POST` | `/api/admin/categories` | T1 | Lista/cria categorias |
+| `PATCH/DELETE` | `/api/admin/categories/:id` | T1 | Atualiza/exclui categoria |
+| `POST` | `/api/admin/categories/size-table` | T1 | Tabela de medidas por categoria |
+| `GET/POST` | `/api/admin/testimonials` | T1 | Lista/cria depoimentos |
+| `PATCH/DELETE` | `/api/admin/testimonials/:id` | T1 | Atualiza/remove depoimento |
+| `GET/POST` | `/api/admin/faqs` | T1 | Lista/cria FAQs |
+| `PATCH/DELETE` | `/api/admin/faqs/:id` | T1 | Atualiza/remove FAQ |
+| `GET/POST` | `/api/admin/instagram` | T1 | Lista/cria posts do Instagram |
+| `PATCH/DELETE` | `/api/admin/instagram/:id` | T1 | Atualiza/remove post |
+| `GET/POST` | `/api/admin/modalities` | T1 | Lista/cria modalidades |
+| `PATCH/DELETE` | `/api/admin/modalities/:id` | T1 | Atualiza/remove modalidade |
+| `GET/POST` | `/api/admin/size-charts` | T1 | Lista/upsert tabelas de medidas |
+| `PATCH/DELETE` | `/api/admin/size-charts/:type` | T1 | Atualiza/remove tabela |
+| `GET/PATCH` | `/api/admin/site-setting` | T1 | Lê/atualiza `SiteSetting` |
+| `GET` | `/api/admin/chat-analytics` | T1 | Métricas do chat Fabi + sessões recentes |
 
-**Bibliotecas:** `jose` (JWT, Edge-compatible) + `bcryptjs` (hash de senha, rounds: 12).
+### 12.3 Autenticação Admin — Spec Técnica (RBAC T1/T2)
 
-**Fluxo de login:**
-1. `POST /api/admin/auth/login` recebe `{ email, password }`
-2. Busca `AdminUser` no banco pelo email
-3. Verifica senha com `bcrypt.compare(password, user.passwordHash)`
-4. Cria JWT assinado com `jose` (algoritmo HS256, payload: `{ sub: user.id, email }`, expiração: 7d)
-5. Seta cookie `httpOnly`, `secure`, `sameSite: 'strict'`, `path: '/'`, `maxAge: 604800`
+**Bibliotecas:** `jose` (JWT) + `bcryptjs` (hash, rounds: 12).
 
-**Middleware (`src/middleware.ts`):**
+**Modelo de papéis:**
+- `T1_GERENCIA` — acesso total ao painel (dashboard, leads, produtos, usuários, tags, todas as artes)
+- `T2_VENDEDOR` — acesso apenas a `/admin/conteudo` (artes próprias + tags em leitura)
 
-```typescript
-import { jwtVerify } from 'jose'
-import { NextRequest, NextResponse } from 'next/server'
+**Fluxo de login (`POST /api/admin/auth/login`):**
+1. Valida CSRF (Origin/Referer) e rate limit (10/15min por IP, fail-closed → `503` se Redis fora)
+2. Busca `AdminUser` por e-mail; compara senha com `bcrypt.compare` (hash dummy quando o e-mail não existe — evita enumeração por timing)
+3. Rejeita usuário inativo (`isActive: false` → `401`)
+4. JWT HS256 com payload `{ sub, email, role, isActive }`, expiração `JWT_EXPIRES_IN` (default `7d`)
+5. Cookie `admin_token` httpOnly, secure, `SameSite=Strict`, `Path=/`, `Max-Age=604800`
+6. Resposta `{ success: true, role }` — o client redireciona por papel (T2 → `/admin/conteudo`)
 
-const PROTECTED = ['/admin', '/api/admin']
-const secret = new TextEncoder().encode(process.env.JWT_SECRET)
+**Segredo (`src/lib/auth-jwt.ts`):** fail-closed — `getJwtSecret()` **lança erro** se `JWT_SECRET` ausente (sem fallback hardcoded).
 
-export async function middleware(req: NextRequest) {
-  const isProtected = PROTECTED.some(p => req.nextUrl.pathname.startsWith(p))
-  if (!isProtected) return NextResponse.next()
+**Proxy (`src/proxy.ts` — Next 16 renomeou `middleware` → `proxy`):** valida assinatura/expiração do JWT em `/admin/*` e `/api/admin/*` (edge/Node, sem acesso ao banco). `getJwtSecret()` sem fallback.
 
-  const token = req.cookies.get('admin_token')?.value
-  if (!token) return NextResponse.redirect(new URL('/admin/login', req.url))
+**Autorização por requisição (`src/lib/auth.ts`):**
+- `getAdminUser()` — lê cookie → `jwtVerify` → busca `AdminUser` no banco → `null` se token inválido, usuário inexistente ou **inativo** (revogação imediata)
+- `requireAdmin()` — para server components/páginas (redirect `/admin/login`)
+- `requireApiAdmin()` — para API routes (401 JSON)
+- `requireT1Admin()` — API routes T1-only (403 para T2)
+- `canAccessRoute(role, pathname, method)` — matcher puro testável (T2: `/admin/conteudo*`, GET arts/tags, upload, PATCH/DELETE/GET de artes próprias, logout)
 
-  try {
-    await jwtVerify(token, secret)
-    return NextResponse.next()
-  } catch {
-    return NextResponse.redirect(new URL('/admin/login', req.url))
-  }
-}
+**Gate de páginas:** route group `(t1)` em `src/app/(admin)/admin/(t1)/layout.tsx` redireciona não-T1 para `/admin/conteudo` — 100% server-side, consulta o banco por requisição antes de renderizar (protege PII de leads, LGPD).
 
-export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
-}
-```
-
-**Primeiro admin — via seed (`prisma/seed.ts`):**
-
-```typescript
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
-
-async function main() {
-  const hash = await bcrypt.hash(process.env.ADMIN_SEED_PASSWORD!, 12)
-  await prisma.adminUser.upsert({
-    where: { email: process.env.ADMIN_SEED_EMAIL! },
-    update: {},
-    create: {
-      email: process.env.ADMIN_SEED_EMAIL!,
-      passwordHash: hash,
-      name: 'Admin Fase',
-    },
-  })
-}
-
-main().finally(() => prisma.$disconnect())
-```
-
-Adicionar ao `.env.local` (não vai para o `.env.example`):
+**Seed (usuários):**
 ```bash
+# .env
 ADMIN_SEED_EMAIL=admin@fasesport.com
 ADMIN_SEED_PASSWORD=trocar_em_producao
+SELLER_SEED_EMAIL=vendedor@fasesport.com   # opcional — cria T2
+SELLER_SEED_PASSWORD=trocar_tambem
 ```
 
-Adicionar ao `package.json`:
-```json
-"prisma": { "seed": "ts-node --transpile-only prisma/seed.ts" }
-```
-
-> **Sem recuperação de senha na V1.** Redefinição é feita diretamente via `npx prisma studio` ou re-seed.
+> **Sem recuperação de senha na V1.** Reset via página Usuários (T1) ou re-seed. Tokens não são revogáveis por troca de senha (JWT stateless, 7d) — trade-off documentado.
 
 ---
 
-### 12.4 Rate Limiting — `/api/contact`
+### 12.4 Rate Limiting — fail-closed
 
 Biblioteca: `@upstash/ratelimit` + `@upstash/redis`.
 
-**Regra:** máximo 5 requisições por IP em uma janela deslizante de 10 minutos.
+**Limiters (`src/lib/ratelimit.ts`):**
+
+| Limiter | Janela | Uso |
+|---|---|---|
+| `ratelimit` | 5 req / 10 min | `/api/contact`, `/api/chat/fabi` |
+| `loginRatelimit` | 10 req / 15 min | `POST /api/admin/auth/login` |
+| `adminRatelimit` | 60 req / 1 min | Mutações CRUD admin |
+| `uploadRatelimit` | 10 req / 1 min | Uploads (R2 e Drive) |
+| `streamRatelimit` | 240 req / 1 min | Preview/download de artes |
+
+**Comportamento fail-closed:** sem `UPSTASH_REDIS_REST_URL/TOKEN` configurados, `limit()` **lança erro** (nunca `success: true`). Rotas públicas (contact, chat, login) capturam e respondem **`503`**; rotas admin mutantes respondem `500`. Não há fallback fail-open — a proteção nunca é desativada silenciosamente.
 
 ```typescript
-// src/lib/ratelimit.ts
-import { Ratelimit } from '@upstash/ratelimit'
-import { Redis } from '@upstash/redis'
-
-export const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(5, '10 m'),
-  analytics: false,
-})
+// src/lib/ratelimit.ts (resumo)
+function createLimiter(limiter, prefix?) {
+  if (!redis) {
+    return {
+      limit: async () => {
+        throw new Error("UPSTASH_REDIS_REST_URL/TOKEN não configurados");
+      },
+    };
+  }
+  return new Ratelimit({ redis, limiter, analytics: false, ...(prefix ? { prefix } : {}) });
+}
 ```
 
 ```typescript
-// Em POST /api/contact — antes da validação Zod:
-const ip = req.headers.get('x-forwarded-for') ?? 'anonymous'
-const { success } = await ratelimit.limit(ip)
-if (!success) {
-  return Response.json(
-    { success: false, message: 'Muitas tentativas. Tente novamente em 10 minutos.' },
-    { status: 429 }
-  )
+// Em POST /api/contact:
+const ip = getClientIp(req);   // x-real-ip → x-vercel-forwarded-for → último valor de x-forwarded-for
+try {
+  ({ success } = await ratelimit.limit(ip));
+} catch (rlError) {
+  console.error("[ratelimit]", rlError);
+  return Response.json({ success: false, message: "Serviço temporariamente indisponível." }, { status: 503 });
 }
+if (!success) return Response.json({ success: false, message: "Muitas tentativas." }, { status: 429 });
 ```
 
 ---
@@ -590,7 +671,6 @@ CMD ["npm", "run", "dev"]
 ```bash
 # ── App ───────────────────────────────────────
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_SITE_NAME="Fase Sport"
 
 # ── Database ───────────────────────────────────
 # Local (Docker):
@@ -603,7 +683,7 @@ R2_ACCOUNT_ID=your_cloudflare_account_id
 R2_ACCESS_KEY_ID=your_r2_access_key
 R2_SECRET_ACCESS_KEY=your_r2_secret_key
 R2_BUCKET_NAME=fasesport-media
-NEXT_PUBLIC_R2_URL=https://media.fasesport.com   # Domínio customizado do R2 (público, usado no client)
+NEXT_PUBLIC_R2_URL=https://media.fasesport.com
 
 # ── E-mail (Resend) ────────────────────────────
 RESEND_API_KEY=re_your_resend_api_key
@@ -622,11 +702,39 @@ UPSTASH_REDIS_REST_TOKEN=your_upstash_token
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 
 # ── Analytics ──────────────────────────────────
-NEXT_PUBLIC_GA4_ID=G-XXXXXXXXXX
 NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
 
+# ── Chat Fabi (RAG / IA) ───────────────────────
+# Provedor: "opencode-go" (padrão) | "openrouter" | "local"
+AI_PROVIDER=opencode-go
+# OpenRouter:
+OPENROUTER_API_KEY=sk-or-your_openrouter_key
+OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct:free
+# OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+# opencode-go / OpenAI-compatível:
+# OPENCODE_GO_API_KEY=sk-...
+# OPENCODE_GO_MODEL=opencode-go/deepseek-v4-flash
+# OPENCODE_GO_BASE_URL=https://api.openai.com/v1
+# OPENAI_API_KEY=sk-...
+# OPENAI_BASE_URL=https://api.openai.com/v1
+# DEEPSEEK_API_KEY=sk-...
+# Sem chave configurada, a Fabi usa o motor local por regras (sem LLM).
+
 # ── WhatsApp ───────────────────────────────────
-NEXT_PUBLIC_WHATSAPP_NUMBER=5573XXXXXXXXX
+NEXT_PUBLIC_WHATSAPP_NUMBER=5500000000000
+
+# ── Simulador de Uniformes ─────────────────────
+NEXT_PUBLIC_SIMULATOR_URL=
+
+# ── Seed (usuários demo) ───────────────────────
+ADMIN_SEED_EMAIL=admin@fasesport.com
+ADMIN_SEED_PASSWORD=change_me_admin
+SELLER_SEED_EMAIL=vendedor@fasesport.com   # opcional
+SELLER_SEED_PASSWORD=change_me_seller
+
+# ── Google Drive (Artes) ───────────────────────
+GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
+GOOGLE_DRIVE_ARTS_FOLDER_ID=1xxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ### 13.4 Comandos Úteis
@@ -892,10 +1000,12 @@ async function CategoryPage({ params }: { params: { categoria: string } }) {
   // ...
 }
 
-// Client Component (para dados dinâmicos/interativos)
-'use client'
-function FilteredProducts({ categoryId }: { categoryId: string }) {
-  const { data } = useSWR(`/api/products?category=${categoryId}`, fetcher)
+// Server Component (padrão do projeto — catálogo via Prisma/RSC)
+async function FilteredProducts({ categoryId }: { categoryId: string }) {
+  const products = await prisma.product.findMany({
+    where: { isActive: true, categoryId },
+    include: { images: { where: { isPrimary: true }, take: 1 } },
+  })
   // ...
 }
 ```
@@ -1052,7 +1162,7 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 
 ## 18. Progresso de Implementação
 
-> **Atualizado:** 2026-06-14 — plataforma V1 completa (28 specs finalizadas). Aguardando: conteúdo real + configuração de produção. Specs de melhorias (fase 2) em `specs/pendentes/`.
+> **Atualizado:** 2026-08-06 — V1 completa + evolução: RBAC T1/T2, artes no Google Drive, página Usuários, Chat Fabi (RAG), grade de produtos no admin, migração `middleware`→`proxy` (Next 16), otimizações (índices no Lead, remoção de rotas públicas mortas, OG image raiz, sitemap cacheado). Aguardando: conteúdo real + integrações de produção (Redis Upstash, chaves RAG, credenciais Drive).
 
 ### 18.1 Concluído
 
@@ -1060,7 +1170,7 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 - [x] `next.config.ts` — remotePatterns para Cloudflare R2
 - [x] `.env.example` — todas as variáveis do §13.3
 - [x] `src/app/layout.tsx` — metadata PT-BR, OpenGraph, fontes Inter + Barlow Condensed
-- [x] Pacotes instalados: `jose`, `bcryptjs`, `swr`, `@upstash/ratelimit`, `@upstash/redis`, `tsx`
+- [x] Pacotes: `jose`, `bcryptjs`, `@upstash/ratelimit`, `@upstash/redis`, `googleapis`, `sharp`, `resend`, `tsx` (`swr`/`zustand` removidos — nunca importados)
 - [x] Script `type-check` (`tsc --noEmit`) no `package.json`
 - [x] Prisma seed configurado (`prisma.seed` → `tsx prisma/seed.ts`)
 
@@ -1069,9 +1179,9 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 - [x] Componentes shadcn/ui configurados com design system (Button, Input, Card, etc.)
 
 #### Banco de dados
-- [x] `prisma/schema.prisma` — modelos: Category, Subcategory, Product, ProductImage, Lead, Testimonial, Faq, AdminUser
+- [x] `prisma/schema.prisma` — Category, Subcategory, Product, ProductImage, Lead, Testimonial, Faq, SiteSetting, InstagramPost, ModalityItem, SizeChart, ChatSession, ChatMessage, AdminUser (RBAC T1/T2), ArtTag, ArtFile — índices em `Lead(status, createdAt)` e `Lead(phone)`
 - [x] `docker/docker-compose.yml` + `docker/Dockerfile.dev`
-- [x] `prisma/seed.ts` — cria admin + 8 categorias padrão
+- [x] `prisma/seed.ts` — admin (T1), vendedor opcional (T2 via `SELLER_SEED_*`), 9 tags de arte, catálogo completo, depoimentos, FAQs, modalidades e medidas
 
 #### Libs compartilhadas
 - [x] `src/lib/db.ts` — singleton Prisma
@@ -1084,15 +1194,15 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 - [x] `src/lib/validations/contact.ts` — `ContactSchema` (Zod)
 - [x] `src/lib/validations/auth.ts` — `LoginSchema` (Zod)
 
-#### Auth e middleware
-- [x] `src/middleware.ts` — JWT guard em `/admin` e `/api/admin`
+#### Auth, proxy e RBAC
+- [x] `src/proxy.ts` (Next 16 — convenção `middleware` renomeada) — JWT guard em `/admin` e `/api/admin`
+- [x] `src/lib/auth.ts` — `getAdminUser`, `requireAdmin`, `requireApiAdmin`, `requireT1Admin`, `canAccessRoute` (matcher puro testável); `getJwtSecret()` fail-closed (lança se `JWT_SECRET` ausente)
+- [x] Route group `(t1)` — gate server-side por requisição (redirect não-T1 → `/admin/conteudo`)
 
 #### API Routes — Públicas
-- [x] `GET /api/categories` — lista categorias ativas com contagem de produtos
-- [x] `GET /api/categories/[slug]` — categoria com produtos, subcategorias e FAQs
-- [x] `GET /api/products` — lista produtos (query: category, subcategory, featured, limit, **q** para busca por nome/descrição)
-- [x] `GET /api/products/[slug]` — produto com galeria completa
-- [x] `POST /api/contact` — cria lead, rate limit, notificação por e-mail
+- [x] `POST /api/contact` — cria lead, CSRF, rate limit fail-closed, notificação por e-mail
+- [x] `POST/PATCH /api/chat/fabi` — chat RAG (SSE + `X-Session-Id` + captura automática de lead + feedback)
+- [x] Rotas `/api/products` e `/api/categories` **removidas** — catálogo via Server Components + Prisma (RSC)
 
 #### API Routes — Admin
 - [x] `POST /api/admin/auth/login` — JWT httpOnly cookie
@@ -1107,20 +1217,32 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 - [x] `PATCH/DELETE /api/admin/testimonials/[id]`
 - [x] `GET/POST /api/admin/faqs` — lista (filtro por categoryId)/cria
 - [x] `PATCH/DELETE /api/admin/faqs/[id]`
-- [x] `POST /api/admin/upload` — upload para R2, registra ProductImage
+- [x] `POST /api/admin/upload` — upload para R2, registra ProductImage (valida alvo antes de subir — sem órfãos)
+- [x] `GET/POST /api/admin/users` + `PATCH /api/admin/users/[id]` — gestão de usuários (T1, bcrypt 12, auto-desativação bloqueada)
+- [x] `GET/POST/PATCH/DELETE /api/admin/art-tags` + `[id]` — tags de arte (T1 muta, T2 lê)
+- [x] `GET/POST /api/admin/arts` + `arts/upload` + `arts/[id]` + `preview/download` — artes no Google Drive (ownership T2, nunca expõe `*FileId`)
+- [x] `GET/POST/PATCH/DELETE /api/admin/size-charts` + `[type]`
+- [x] `GET/POST/PATCH/DELETE /api/admin/instagram` + `[id]`
+- [x] `GET/POST/PATCH/DELETE /api/admin/modalities` + `[id]`
+- [x] `GET/PATCH /api/admin/site-setting`
+- [x] `GET /api/admin/chat-analytics` — métricas do chat Fabi
 
 #### CMS Admin — Páginas
-- [x] `src/app/(admin)/layout.tsx` — sidebar + verificação JWT server-side
-- [x] `src/app/admin/login/page.tsx`
-- [x] `src/app/(admin)/admin/dashboard/page.tsx` — cards de resumo + atalhos
-- [x] `src/app/(admin)/admin/leads/page.tsx` — tabela com filtro de status + painel lateral
-- [x] `src/app/(admin)/admin/categorias/page.tsx` + `CategoryRow.tsx` — edição inline de ordem/ativo
-- [x] `src/app/(admin)/admin/depoimentos/page.tsx` + `TestimonialToggle.tsx` + `AnimatedTestimonialRows.tsx`
-- [x] `src/app/(admin)/admin/faqs/page.tsx` — edição inline, por categoria ou global
-- [x] `src/app/(admin)/admin/produtos/page.tsx` + `AnimatedTableRows.tsx` — tabela de produtos
-- [x] `src/app/(admin)/admin/produtos/novo/page.tsx`
-- [x] `src/app/(admin)/admin/produtos/[id]/page.tsx`
-- [x] `src/app/(admin)/admin/produtos/_components/ProductForm.tsx` — form completo com upload de imagens
+- [x] `src/app/(admin)/layout.tsx` — sidebar filtrada por role + `getAdminUser` server-side
+- [x] `src/app/admin/login/page.tsx` — redirect por papel (T2 → `/admin/conteudo`)
+- [x] `src/app/(admin)/admin/(t1)/dashboard/page.tsx` — cards de resumo + atalhos
+- [x] `src/app/(admin)/admin/(t1)/leads/page.tsx` — tabela com filtro de status + painel lateral
+- [x] `src/app/(admin)/admin/(t1)/categorias/page.tsx` + `CategoryRow.tsx` — edição inline de ordem/ativo
+- [x] `src/app/(admin)/admin/(t1)/depoimentos/page.tsx` + `TestimonialToggle.tsx` + `AnimatedTestimonialRows.tsx`
+- [x] `src/app/(admin)/admin/(t1)/faqs/page.tsx` — edição inline, por categoria ou global
+- [x] `src/app/(admin)/admin/(t1)/produtos/page.tsx` + `ProductGridAdmin.tsx` — **grade com fotos** (substituiu tabela `AnimatedTableRows`)
+- [x] `src/app/(admin)/admin/(t1)/produtos/novo/page.tsx`
+- [x] `src/app/(admin)/admin/(t1)/produtos/[id]/page.tsx`
+- [x] `src/app/(admin)/admin/(t1)/produtos/_components/ProductForm.tsx` — form completo com upload de imagens
+- [x] `src/app/(admin)/admin/(t1)/usuarios/page.tsx` + `UsuariosClient.tsx` — criar/editar/desativar usuários
+- [x] `src/app/(admin)/admin/conteudo/page.tsx` + `ConteudoClient.tsx` — biblioteca de artes + tags (abas por role)
+- [x] `src/app/(admin)/admin/(t1)/chat-analytics/page.tsx` — métricas do chat Fabi
+- [x] `src/app/(admin)/admin/(t1)/instagram/page.tsx` + `HeroVideoUploader` — vídeo hero + posts
 
 #### Layout público
 - [x] `src/app/(marketing)/layout.tsx` — wrapper com Navbar + Footer + WhatsAppFab
@@ -1134,7 +1256,7 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 
 #### Homepage — `src/app/(marketing)/page.tsx`
 - [x] `HeroSection` — CTA duplo (simulador + orçamento)
-- [x] `CategoriesSection` + `CategoryCard`
+- [x] `CategoriesSection` (cards por modalidade)
 - [x] `FeaturedSection` + `ProductCard`
 - [x] `HowItWorksSection` + `ProcessSteps`
 - [x] `TestimonialsSection`
@@ -1190,13 +1312,20 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 
 #### CI/CD
 - [x] `.github/workflows/ci.yml` — type-check, lint, unit tests, next build em PRs e pushes para main
-- [x] `vercel.json` — headers de segurança (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
+- [x] `next.config.ts` — headers de segurança (CSP + X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, HSTS); `vercel.json` simplificado (framework + região — headers deduplicados)
 
 #### Email e notificações
 - [x] `src/emails/LeadNotificationEmail.tsx` — template React Email com branding FASE, dados do lead, botão WhatsApp e link admin
 
 #### Admin — Dashboard de Métricas
 - [x] `src/app/(admin)/admin/dashboard/_components/LeadMetrics.tsx` — leads por modalidade, funil de status, volume ao longo do tempo (Prisma `groupBy`)
+
+#### Chat Fabi (RAG / IA)
+- [x] `src/lib/rag/*` — `fabi.ts` (contexto RAG: FAQs, produtos, modalidades, medidas, pricing), `provider.ts` (OpenRouter/opencode-go/local com fallback), `prompts.ts`, `tools.ts` (function calling: calculate_quote, search_catalog, get_size_chart, register_lead), `pricing/` (tabelas + calculadora com faturamento do mínimo e fail-closed p/ produto desconhecido)
+- [x] `src/components/chat/*` — widget Fabi (modal, avatar, input, lista com streaming SSE, feedback)
+- [x] `POST/PATCH /api/chat/fabi` — SSE + `X-Session-Id` + captura automática de lead + feedback
+- [x] `GET /api/admin/chat-analytics` + página de métricas
+- [x] Correção de links do RAG para rotas reais `/{categoria}/{produto}`
 
 #### OG Images dinâmicas
 - [x] `src/app/(marketing)/[categoria]/opengraph-image.tsx` — OG image gerada por categoria
@@ -1276,7 +1405,7 @@ const [categories, featuredProducts, testimonials] = await Promise.all([
 | Seção | Componente | Notas |
 |---|---|---|
 | Hero | `src/components/sections/HeroSection.tsx` | Full-width, overlay, headline animada (Framer Motion `whileInView`), 2 CTAs: "Simular Uniforme" (link externo simulador) + "Pedir Orçamento" (`/orcamento`) |
-| Categorias | `src/components/sections/CategoriesSection.tsx` | Grid de `CategoryCard` com ícone + nome. Cada card leva para `/{categoria.slug}`. |
+| Categorias | `src/components/sections/CategoriesSection.tsx` | Grid de cards por modalidade (`ModalityItem`). Cada card leva para `/{categoria.slug}`. |
 | Destaque | `src/components/sections/FeaturedSection.tsx` | Grid 3-4 `ProductCard`. Dados: `featuredProducts`. |
 | Como Funciona | `src/components/sections/ProcessSection.tsx` | 4 etapas. Layout horizontal desktop / vertical mobile. |
 | Clientes | `src/components/sections/TestimonialsSection.tsx` | Carrossel (`"use client"` + Framer Motion). Dados: `testimonials`. |
@@ -1288,26 +1417,16 @@ const [categories, featuredProducts, testimonials] = await Promise.all([
 ```typescript
 // src/components/products/ProductCard.tsx
 interface ProductCardProps {
-  product: {
-    slug: string
-    name: string
-    fabric: string | null
-    images: { url: string; altText: string | null }[]
-    category: { slug: string; name: string }
-  }
-  className?: string
+  slug: string
+  name: string
+  fabric: string | null
+  categoryName?: string | null
+  minQty?: number | null
+  imageUrl: string | null
+  imageAlt: string | null
+  categorySlug: string
 }
-
-// src/components/categories/CategoryCard.tsx
-interface CategoryCardProps {
-  category: {
-    slug: string
-    name: string
-    imageUrl: string | null
-    iconUrl: string | null
-    _count?: { products: number }
-  }
-}
+```
 ```
 
 ---
