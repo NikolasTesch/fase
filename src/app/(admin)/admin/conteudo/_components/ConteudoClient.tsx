@@ -433,6 +433,8 @@ export function ConteudoClient({ tags, arts, role, userId }: ConteudoClientProps
                   className="group overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm transition-shadow hover:shadow-md"
                 >
                   <div className="aspect-square w-full overflow-hidden bg-muted/40">
+                    {/* Rota autenticada com cookie — não passa pelo otimizador do next/image */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={`/api/admin/arts/${art.id}/preview`}
                       alt={art.name}

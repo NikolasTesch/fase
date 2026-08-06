@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -15,21 +15,30 @@ import { CATEGORY_NAV, CORPORATE_NAV } from "@/lib/site";
 import { MobileMenu } from "./MobileMenu";
 import { SearchForm } from "./SearchForm";
 
+function subscribeToTheme(callback: () => void) {
+  const observer = new MutationObserver(callback);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  return () => observer.disconnect();
+}
+
+function getThemeSnapshot(): boolean {
+  return document.documentElement.classList.contains("dark");
+}
+
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [corporateOpen, setCorporateOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
   const shouldReduce = useReducedMotion();
 
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains("dark"));
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains("dark"));
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
-  }, []);
+  const isDark = useSyncExternalStore(
+    subscribeToTheme,
+    getThemeSnapshot,
+    () => false
+  );
 
   useEffect(() => {
     let ticking = false;
@@ -137,7 +146,6 @@ export function Navbar() {
               const next = !html.classList.contains("dark");
               html.classList.toggle("dark", next);
               localStorage.setItem("fase_theme", next ? "dark" : "light");
-              setIsDark(next);
             }}
             aria-label={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
             className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"

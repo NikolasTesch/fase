@@ -85,6 +85,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
       : "/api/admin/products";
 
     // Ao editar, o slug é imutável — não enviá-lo evita rejeição do schema da API
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { slug, ...formWithoutSlug } = form;
     const payload = isEditing ? formWithoutSlug : form;
 

@@ -134,7 +134,6 @@ export default function LeadsPage() {
 
   useEffect(() => {
     const abortController = new AbortController();
-    setLoading(true);
     const url = filter ? `/api/admin/leads?status=${filter}` : "/api/admin/leads";
     fetch(url, { signal: abortController.signal })
       .then((r) => (r.ok ? r.json() : []))
@@ -190,7 +189,10 @@ export default function LeadsPage() {
             {STATUS_FILTERS.map(({ value, label }) => (
               <button
                 key={value}
-                onClick={() => setFilter(value)}
+                onClick={() => {
+                  setLoading(true);
+                  setFilter(value);
+                }}
                 className={cn(
                   "rounded-full px-3.5 py-1.5 text-xs font-medium border transition-all duration-200",
                   filter === value

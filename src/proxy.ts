@@ -4,7 +4,7 @@ import { getJwtSecret } from "@/lib/auth-jwt";
 
 const PROTECTED = ["/admin", "/api/admin"];
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
   const isProtected = PROTECTED.some((p) => pathname.startsWith(p));
 

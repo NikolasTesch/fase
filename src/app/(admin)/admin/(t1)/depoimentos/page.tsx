@@ -4,8 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
-import { TestimonialToggle } from "./_components/TestimonialToggle";
-import { Plus, MessageSquare, Star } from "lucide-react";
+import { Plus, MessageSquare } from "lucide-react";
 import { AnimatedTestimonialRows } from "./_components/AnimatedTestimonialRows";
 
 export const metadata: Metadata = { title: "Depoimentos — Admin" };

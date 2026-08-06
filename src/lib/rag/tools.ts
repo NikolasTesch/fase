@@ -1,6 +1,23 @@
 import { calculateEstimate } from "./pricing/calculator";
 import { prisma } from "@/lib/db";
 
+export interface FabiToolResult {
+  success: boolean;
+  error?: string;
+  productName?: string;
+  quantity?: number;
+  finalUnitPrice?: number;
+  totalPrice?: number;
+  discountPercentage?: number;
+  whatsAppUrl?: string;
+  summaryText?: string;
+  count?: number;
+  products?: Array<Record<string, unknown>>;
+  charts?: unknown[];
+  leadId?: string;
+  message?: string;
+}
+
 export const FABI_TOOLS = [
   {
     type: "function",
@@ -93,11 +110,11 @@ export const FABI_TOOLS = [
 
 export async function executeFabiTool(
   name: string,
-  args: Record<string, any>
-): Promise<Record<string, any>> {
+  args: Record<string, unknown>
+): Promise<FabiToolResult> {
   try {
     if (name === "calculate_quote") {
-      const product = args.product || "camisa-futebol";
+      const product = String(args.product || "camisa-futebol");
       const quantity = Number(args.quantity) || 10;
       const addOnIds = Array.isArray(args.addOnIds) ? args.addOnIds : [];
 
@@ -197,11 +214,11 @@ export async function executeFabiTool(
 
       const lead = await prisma.lead.create({
         data: {
-          name: args.name || "Cliente Chat Fabi",
+          name: String(args.name || "Cliente Chat Fabi"),
           phone,
-          sport: args.sport || "Geral",
+          sport: String(args.sport || "Geral"),
           quantity: args.quantity ? Number(args.quantity) : null,
-          details: args.details || "Cadastrado via Tool Use Chat Fabi",
+          details: String(args.details || "Cadastrado via Tool Use Chat Fabi"),
           source: "chat_fabi_tool",
         },
       });

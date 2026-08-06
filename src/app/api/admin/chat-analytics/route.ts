@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireT1Admin } from "@/lib/auth";
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   const auth = await requireT1Admin();
   if (auth instanceof NextResponse) return auth;
 

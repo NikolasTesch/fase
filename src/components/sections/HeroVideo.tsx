@@ -16,12 +16,22 @@ export function HeroVideo({ src }: HeroVideoProps) {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    const onPlay = () => setPlaying(true);
+    const onPause = () => setPlaying(false);
+    video.addEventListener("play", onPlay);
+    video.addEventListener("pause", onPause);
+
     if (shouldReduce) {
       video.pause();
-      setPlaying(false);
     } else {
       video.play().catch(() => {});
     }
+
+    return () => {
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("pause", onPause);
+    };
   }, [shouldReduce]);
 
   const toggle = () => {

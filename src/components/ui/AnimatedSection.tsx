@@ -42,7 +42,7 @@ function getDirectionalVariants(dir: "left" | "right" | "up" | "down") {
   };
 }
 
-function getContainerVariants(dir: "left" | "right" | "up" | "down") {
+function getContainerVariants() {
   return {
     hidden: {},
     show: {
@@ -104,13 +104,13 @@ export function StaggerItem({ children, className }: Props) {
   );
 }
 
-export function DirectionalStagger({ children, className, direction = "up" }: DirectionalProps) {
+export function DirectionalStagger({ children, className }: Props) {
   const reduced = useReducedMotion();
   if (reduced) return <div className={className}>{children}</div>;
   return (
     <motion.div
       className={className}
-      variants={getContainerVariants(direction)}
+      variants={getContainerVariants()}
       initial="hidden"
       whileInView="show"
       viewport={{ once: true, margin: "-60px" }}

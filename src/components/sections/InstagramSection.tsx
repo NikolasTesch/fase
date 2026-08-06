@@ -31,6 +31,21 @@ export function InstagramSection({ posts, videoUrl }: InstagramSectionProps) {
             </p>
           </RevealOnScroll>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {videoUrl ? (
+              <div className="relative aspect-square overflow-hidden rounded-xl bg-black ring-1 ring-black/[0.03]">
+                <video
+                  src={videoUrl}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  controls
+                  aria-label="Vídeo institucional Fase Sport"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : null}
             {posts.map((post) => (
               <a
                 key={post.id}

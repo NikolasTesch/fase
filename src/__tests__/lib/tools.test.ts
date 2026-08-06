@@ -18,7 +18,7 @@ describe("Módulo de Ferramentas RAG (Function Calling & Multi-turn)", () => {
     });
 
     expect(res.success).toBe(true);
-    expect(res.productName).toContain("Futebol");
+    expect(res.productName ?? "").toContain("Futebol");
     expect(res.quantity).toBe(20);
     expect(res.whatsAppUrl).toBeDefined();
   });

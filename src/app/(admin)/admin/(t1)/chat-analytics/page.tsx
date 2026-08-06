@@ -33,7 +33,6 @@ export default function ChatAnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchAnalytics = async () => {
-    setIsLoading(true);
     try {
       const res = await fetch("/api/admin/chat-analytics");
       if (res.ok) {
@@ -49,7 +48,24 @@ export default function ChatAnalyticsPage() {
   };
 
   useEffect(() => {
-    fetchAnalytics();
+    const controller = new AbortController();
+
+    fetch("/api/admin/chat-analytics", { signal: controller.signal })
+      .then((res) =>
+        res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))
+      )
+      .then((data) => {
+        setMetrics(data.metrics);
+        setRecentSessions(data.recentSessions || []);
+      })
+      .catch((err) => {
+        if (err.name !== "AbortError") {
+          console.error("Erro ao buscar analytics do chat:", err);
+        }
+      })
+      .finally(() => setIsLoading(false));
+
+    return () => controller.abort();
   }, []);
 
   return (
@@ -68,7 +84,10 @@ export default function ChatAnalyticsPage() {
 
         <button
           type="button"
-          onClick={fetchAnalytics}
+          onClick={() => {
+            setIsLoading(true);
+            fetchAnalytics();
+          }}
           disabled={isLoading}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-muted hover:bg-muted/80 text-foreground transition-colors cursor-pointer border border-border/50 shadow-sm"
         >

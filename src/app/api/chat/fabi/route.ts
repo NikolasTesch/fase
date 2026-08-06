@@ -269,8 +269,8 @@ async function createLocalFabiStream(query: string, context: string): Promise<Re
     if (calc.success) {
       answer =
         `Com certeza! Fiz uma simulação de orçamento para **${calc.quantity} unidades** de **${calc.productName}**:\n\n` +
-        `• **Valor Unitário**: R$ ${calc.finalUnitPrice.toFixed(2).replace(".", ",")} (com ${calc.discountPercentage}% de desconto)\n` +
-        `• **Valor Total Estimado**: R$ ${calc.totalPrice.toFixed(2).replace(".", ",")}\n\n` +
+        `• **Valor Unitário**: R$ ${(calc.finalUnitPrice ?? 0).toFixed(2).replace(".", ",")} (com ${calc.discountPercentage}% de desconto)\n` +
+        `• **Valor Total Estimado**: R$ ${(calc.totalPrice ?? 0).toFixed(2).replace(".", ",")}\n\n` +
         `Lembrando que o pedido mínimo é de **10 peças por modelo** e a personalização (nomes, números e patrocinadores) já está toda inclusa sem taxa extra!\n\n` +
         `Gostaria de criar o seu layout 3D personalizado com nosso time?`;
     } else {
