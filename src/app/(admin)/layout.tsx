@@ -1,29 +1,19 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { jwtVerify } from "jose";
 import Link from "next/link";
 import { Zap, ExternalLink, ShieldCheck } from "lucide-react";
 import { AdminSidebarClient } from "./_components/AdminSidebarClient";
 import { LogoutButton } from "./_components/LogoutButton";
 import { ThemeToggle } from "./_components/ThemeToggle";
 
-import { getJwtSecret } from "@/lib/auth-jwt";
+import { getAdminUser } from "@/lib/auth";
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("admin_token")?.value;
-
-  if (!token) redirect("/admin/login");
-
-  try {
-    await jwtVerify(token, getJwtSecret());
-  } catch {
-    redirect("/admin/login");
-  }
+  const user = await getAdminUser();
+  if (!user) redirect("/admin/login");
 
   return (
     <div className="flex min-h-screen bg-background selection:bg-primary selection:text-primary-foreground">
@@ -51,7 +41,7 @@ export default async function AdminLayout({
 
         {/* Navigation */}
         <nav className="flex-1 py-4 px-3 overflow-y-auto">
-          <AdminSidebarClient />
+          <AdminSidebarClient role={user.role} />
         </nav>
 
         {/* Footer / Controls */}
