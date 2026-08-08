@@ -1,5 +1,6 @@
 import path from "node:path";
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
+import { loginAsAdmin } from "./admin-helpers";
 
 const r2Configured = Boolean(
   process.env.R2_ACCESS_KEY_ID &&
@@ -9,17 +10,6 @@ const r2Configured = Boolean(
 
 const PREVIEW_FIXTURE = path.join(__dirname, "..", "fixtures", "preview.png");
 const ORIGINAL_FIXTURE = path.join(__dirname, "..", "fixtures", "arte.cdr");
-
-async function loginAsAdmin(page: Page) {
-  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@fasesport.com";
-  const adminPassword = process.env.ADMIN_PASSWORD ?? "admin123";
-
-  await page.goto("/admin/login");
-  await page.locator("input[name='email'], input[type='email']").fill(adminEmail);
-  await page.locator("input[name='password'], input[type='password']").fill(adminPassword);
-  await page.locator("button[type='submit']").click();
-  await expect(page).toHaveURL(/\/admin\/dashboard/);
-}
 
 test.describe("Admin — Artes", () => {
   // Compartilham estado (banco/R2): o teste de upload cria e remove uma arte,

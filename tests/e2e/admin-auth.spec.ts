@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 
+const adminEmail = process.env.ADMIN_SEED_EMAIL ?? "admin@fasesport.com";
+const adminPassword = process.env.ADMIN_SEED_PASSWORD ?? "fase2026";
+
 test.describe("Autenticação Admin", () => {
   test("rota /admin redireciona para /admin/login sem sessão", async ({
     page,
@@ -33,9 +36,6 @@ test.describe("Autenticação Admin", () => {
   test("login com credenciais válidas redireciona ao dashboard", async ({
     page,
   }) => {
-    const adminEmail = process.env.ADMIN_EMAIL ?? "admin@fasesport.com";
-    const adminPassword = process.env.ADMIN_PASSWORD ?? "admin123";
-
     await page.goto("/admin/login");
 
     await page.locator("input[name='email'], input[type='email']").fill(adminEmail);

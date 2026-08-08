@@ -31,13 +31,37 @@ export function calculateEstimate(options: EstimateOptions): EstimateResult | nu
 
   if (quantity <= 0) return null;
 
-  const normalizedInput = productIdOrName.toLowerCase();
-  const product = BASE_PRODUCT_PRICES.find(
-    (p) =>
-      p.id === normalizedInput ||
-      p.name.toLowerCase().includes(normalizedInput) ||
-      p.category.toLowerCase().includes(normalizedInput)
-  );
+  const normalizedInput = productIdOrName.toLowerCase().trim();
+
+  // Mapeamento inteligente de aliases (ex: "kit", "kits", "conjunto")
+  let targetId = normalizedInput;
+  if (
+    normalizedInput === "kit" ||
+    normalizedInput === "kits" ||
+    normalizedInput === "conjunto" ||
+    normalizedInput === "conjuntos" ||
+    normalizedInput.includes("kit futebol") ||
+    normalizedInput.includes("conjunto futebol")
+  ) {
+    targetId = "conjunto-futebol";
+  } else if (normalizedInput.includes("kit basquete") || normalizedInput.includes("conjunto basquete")) {
+    targetId = "kit-basquete";
+  } else if (normalizedInput.includes("kit goleiro")) {
+    targetId = "kit-goleiro";
+  } else if (normalizedInput === "camisa" || normalizedInput === "camisas" || normalizedInput === "manto" || normalizedInput.includes("camisa futebol")) {
+    targetId = "camisa-futebol";
+  }
+
+  let product = BASE_PRODUCT_PRICES.find((p) => p.id === targetId);
+
+  if (!product) {
+    product = BASE_PRODUCT_PRICES.find(
+      (p) =>
+        p.id === normalizedInput ||
+        p.name.toLowerCase().includes(normalizedInput) ||
+        p.category.toLowerCase().includes(normalizedInput)
+    );
+  }
 
   if (!product) return null;
 
@@ -67,16 +91,20 @@ export function calculateEstimate(options: EstimateOptions): EstimateResult | nu
   const totalPrice = Number((finalUnitPrice * effectiveQty).toFixed(2));
 
   const addOnsText =
-    selectedAddOns.length > 0 ? selectedAddOns.map((a) => a.name).join(", ") : "Nenhum";
+    selectedAddOns.length > 0 ? selectedAddOns.map((a) => a.name).join(", ") : null;
 
-  const message =
-    `Olá Fase Sport! Fiz uma simulação de orçamento no chat:\n\n` +
+  let message =
+    `Olá Fase Sport! Gostaria de dar sequência ao meu orçamento:\n\n` +
     `• Item: ${product.name}\n` +
-    `• Quantidade: ${effectiveQty} unidades\n` +
-    `• Adicionais: ${addOnsText}\n` +
-    `• Valor Unitário Estimado: R$ ${finalUnitPrice.toFixed(2).replace(".", ",")}\n` +
-    `• Valor Total Estimado: R$ ${totalPrice.toFixed(2).replace(".", ",")}\n\n` +
-    `Gostaria de dar sequência ao atendimento e criar meu layout 3D!`;
+    `• Quantidade: ${effectiveQty} unidades\n`;
+
+  if (addOnsText) {
+    message += `• Opcionais: ${addOnsText}\n`;
+  }
+
+  message +=
+    `• Estimativa: R$ ${finalUnitPrice.toFixed(2).replace(".", ",")} / un (Total R$ ${totalPrice.toFixed(2).replace(".", ",")})\n\n` +
+    `Gostaria de solicitar minha maquete 3D gratuita!`;
 
   const whatsAppUrl = buildWhatsAppUrl(message);
 

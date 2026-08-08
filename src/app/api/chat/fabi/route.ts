@@ -214,7 +214,7 @@ async function attemptAutoLeadCapture(
 
         // Tenta inferir quantidade mencionada
         let quantity: number | null = null;
-        const qtyMatch = fullConversation.match(/(\d{1,4})\s*(?:peças|pecas|unidades|conjuntos|camisas)/i);
+        const qtyMatch = fullConversation.match(/(\d{1,4})\s*(?:peças|pecas|unidades|unidade|conjuntos|conjunto|camisas|camisa|kits|kit|jogos|jogo|pares|par|itens|item|uniformes|uniforme|fardamentos|fardamento)/i);
         if (qtyMatch && qtyMatch[1]) {
           const parsedQty = parseInt(qtyMatch[1], 10);
           if (!isNaN(parsedQty) && parsedQty > 0) {
@@ -261,13 +261,22 @@ async function createLocalFabiStream(query: string, context: string): Promise<Re
   let answer = "";
 
   // Tenta identificar quantidade informada para simular orçamento automático no local stream
-  const qtyMatch = lower.match(/(\d{1,4})\s*(?:peças|pecas|unidades|conjuntos|camisas|pecas)/);
+  const qtyMatch = lower.match(/(\d{1,4})\s*(?:peças|pecas|unidades|unidade|conjuntos|conjunto|camisas|camisa|kits|kit|jogos|jogo|pares|par|itens|item|uniformes|uniforme|fardamentos|fardamento)/i);
   const detectedQty = qtyMatch ? parseInt(qtyMatch[1], 10) : 0;
 
   if (detectedQty > 0 || lower.includes("orcamento") || lower.includes("orçamento") || lower.includes("quanto custa") || lower.includes("preço")) {
     const qty = detectedQty >= 10 ? detectedQty : 10;
+    let targetProduct = "camisa-futebol";
+    if (lower.includes("kit") || lower.includes("conjunto")) {
+      targetProduct = lower.includes("basquete") ? "kit-basquete" : "conjunto-futebol";
+    } else if (lower.includes("ciclismo")) {
+      targetProduct = "camisa-ciclismo";
+    } else if (lower.includes("basquete")) {
+      targetProduct = "regata-basquete";
+    }
+
     const calc = await executeFabiTool("calculate_quote", {
-      product: lower.includes("ciclismo") ? "camisa-ciclismo" : lower.includes("basquete") ? "basquete" : "camisa-futebol",
+      product: targetProduct,
       quantity: qty,
     });
 

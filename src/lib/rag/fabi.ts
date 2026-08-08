@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getPricingRulesContext } from "@/lib/rag/pricing/calculator";
 import { COMMERCIAL_POLICIES } from "@/lib/rag/pricing/rules";
+import { extractTriageState } from "@/lib/rag/triage";
 
 export interface RAGQueryResult {
   contextText: string;
@@ -119,7 +120,7 @@ export function expandQueryWithIntent(
   const sports = ["futebol", "ciclismo", "basquete", "corrida", "running", "volei", "vôlei", "agasalho", "polo", "empresarial", "turma"];
   const detectedSport = sports.find((s) => recentHistory.includes(s)) || "";
 
-  const qtyMatch = recentHistory.match(/(\d{1,4})\s*(?:peças|pecas|unidades|conjuntos|camisas)/);
+  const qtyMatch = recentHistory.match(/(\d{1,4})\s*(?:peças|pecas|unidades|unidade|conjuntos|conjunto|camisas|camisa|kits|kit|jogos|jogo|pares|par|itens|item|uniformes|uniforme|fardamentos|fardamento)/i);
   const detectedQty = qtyMatch ? `${qtyMatch[1]} unidades` : "";
 
   const enrichedParts = [lastMessage];
@@ -377,12 +378,14 @@ export async function getFabiContext(
       triageState &&
       (triageState.detectedSport ||
         triageState.detectedQuantity ||
+        triageState.detectedProductType ||
         triageState.customerName ||
         triageState.customerPhone)
     ) {
       contextParts.unshift(
         "--- ESTADO DA TRIAGEM DA SESSÃO ATUAL ---\n" +
           `• Esporte Informado: ${triageState.detectedSport || "Ainda não informado"}\n` +
+          `• Tipo de Produto: ${triageState.detectedProductType || "Ainda não especificado"}\n` +
           `• Quantidade Cotada: ${triageState.detectedQuantity ? `${triageState.detectedQuantity} unidades` : "Ainda não informada"}\n` +
           `• Nome do Cliente: ${triageState.customerName || "Ainda não informado"}\n` +
           `• Telefone/WhatsApp: ${triageState.customerPhone || "Ainda não informado"}\n` +
@@ -433,60 +436,6 @@ export async function getFabiContext(
   }
 }
 
-/**
- * Extrai o estado atual da triagem da sessão a partir do histórico de conversa.
- */
-export function extractTriageState(input: string | Array<{ role: string; content: string }>) {
-  if (typeof input === "string" || !Array.isArray(input) || input.length === 0) {
-    return null;
-  }
+export { extractTriageState, buildCleanWhatsAppMessage } from "@/lib/rag/triage";
+export type { TriageState } from "@/lib/rag/triage";
 
-  const fullText = input.map((m) => m.content).join(" ");
-  const textLower = fullText.toLowerCase();
-
-  const sportsMap: Record<string, string> = {
-    futebol: "Futebol",
-    volei: "Vôlei",
-    vôlei: "Vôlei",
-    basquete: "Basquete",
-    ciclismo: "Ciclismo",
-    pedal: "Ciclismo",
-    corrida: "Corrida / Running",
-    running: "Corrida / Running",
-    empresarial: "Empresarial",
-    polo: "Empresarial (Polo)",
-  };
-
-  let detectedSport: string | null = null;
-  for (const [k, v] of Object.entries(sportsMap)) {
-    if (textLower.includes(k)) {
-      detectedSport = v;
-      break;
-    }
-  }
-
-  let detectedQuantity: number | null = null;
-  const qtyMatch = fullText.match(/(\d{1,4})\s*(?:peças|pecas|unidades|conjuntos|camisas)/i);
-  if (qtyMatch && qtyMatch[1]) {
-    detectedQuantity = parseInt(qtyMatch[1], 10);
-  }
-
-  let customerName: string | null = null;
-  const nameMatch = fullText.match(/(?:meu nome [eé]|sou o|sou a|me chamo)\s+([A-ZÀ-Úa-zà-ú]{2,15})/i);
-  if (nameMatch && nameMatch[1]) {
-    customerName = nameMatch[1].charAt(0).toUpperCase() + nameMatch[1].slice(1);
-  }
-
-  let customerPhone: string | null = null;
-  const phoneMatch = fullText.match(/(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?(?:9\d{4}[-\s]?\d{4}|\d{4}[-\s]?\d{4})/);
-  if (phoneMatch) {
-    customerPhone = phoneMatch[0].replace(/\D/g, "");
-  }
-
-  return {
-    detectedSport,
-    detectedQuantity,
-    customerName,
-    customerPhone,
-  };
-}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, User, ThumbsUp, ThumbsDown, ArrowRight, Copy, Check, Sparkles, Shirt, Ruler, ExternalLink } from "lucide-react";
 import { buildWhatsAppUrl } from "@/lib/site";
+import { buildCleanWhatsAppMessage } from "@/lib/rag/triage";
 import { cn } from "@/lib/utils";
 import { FabiAvatar } from "./FabiAvatar";
 
@@ -252,12 +253,7 @@ export function ChatMessageList({ messages, isLoading, onFeedback, onQuickSelect
                   <div className="mt-3.5 pt-3 border-t border-border/50 flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-2">
                       <a
-                        href={buildWhatsAppUrl(
-                          `Olá equipe Fase Sport! Concluí a triagem de orçamento com a Fabi pelo site:\n\n${msg.content
-                            .replace(/\[(.*?)\]\(.*?\)/g, "$1")
-                            .replace(/\*\*/g, "")
-                            .slice(0, 450)}\n\nGostaria de dar seguimento com o atendimento humano e receber meu layout 3D!`
-                        )}
+                        href={buildWhatsAppUrl(buildCleanWhatsAppMessage(messages.slice(0, index + 1)))}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={cn(

@@ -32,4 +32,17 @@ describe("Memória de Sessão e Triagem Multi-Turno (Item 4)", () => {
     expect(context.contextText).toContain("Futebol");
     expect(context.contextText).toContain("30 unidades");
   });
+
+  it("deve extrair corretamente quantidade e tipo de produto para pedidos de kits", () => {
+    const history = [
+      { role: "user", content: "Gostaria de um orçamento para 20 kits de futebol." },
+    ];
+
+    const state = extractTriageState(history);
+
+    expect(state).not.toBeNull();
+    expect(state?.detectedSport).toBe("Futebol");
+    expect(state?.detectedQuantity).toBe(20);
+    expect(state?.detectedProductType).toBe("Kit Completo (Camisa + Shorts)");
+  });
 });

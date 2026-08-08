@@ -1,15 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
-
-async function loginAsAdmin(page: Page) {
-  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@fasesport.com";
-  const adminPassword = process.env.ADMIN_PASSWORD ?? "admin123";
-
-  await page.goto("/admin/login");
-  await page.locator("input[name='email'], input[type='email']").fill(adminEmail);
-  await page.locator("input[name='password'], input[type='password']").fill(adminPassword);
-  await page.locator("button[type='submit']").click();
-  await expect(page).toHaveURL(/\/admin\/dashboard/);
-}
+import { test, expect } from "@playwright/test";
+import { loginAsAdmin } from "./admin-helpers";
 
 test.describe("Admin — Produtos", () => {
   test("login T1 e lista produtos", async ({ page }) => {

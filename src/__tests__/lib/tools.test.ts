@@ -23,6 +23,18 @@ describe("Módulo de Ferramentas RAG (Function Calling & Multi-turn)", () => {
     expect(res.whatsAppUrl).toBeDefined();
   });
 
+  it("deve mapear produto 'kit' para Conjunto Futebol (Camisa + Shorts) e calcular 20 unidades", async () => {
+    const res = await executeFabiTool("calculate_quote", {
+      product: "kit",
+      quantity: 20,
+    });
+
+    expect(res.success).toBe(true);
+    expect(res.productName).toBe("Conjunto Futebol (Camisa + Shorts)");
+    expect(res.quantity).toBe(20);
+    expect(res.whatsAppUrl).toBeDefined();
+  });
+
   it("deve retornar erro ao cadastrar lead sem telefone válido", async () => {
     const res = await executeFabiTool("register_lead", {
       name: "João",

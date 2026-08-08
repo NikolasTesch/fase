@@ -1,15 +1,15 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
-async function openFabiChat(page: any) {
+async function openFabiChat(page: Page) {
   await page.goto("/");
-  // Fecha o banner de cookies se estiver visível
-  const acceptCookies = page.getByRole("button", { name: /aceitar|concordar/i }).first();
+  const acceptCookies = page.getByRole("button", { name: "Aceitar" }).first();
+  await acceptCookies.waitFor({ state: "visible", timeout: 5000 }).catch(() => {});
   if (await acceptCookies.isVisible().catch(() => false)) {
-    await acceptCookies.click().catch(() => {});
+    await acceptCookies.click();
   }
   const fabiBtn = page.getByTestId("whatsapp-fab");
   await expect(fabiBtn).toBeVisible();
-  await fabiBtn.click({ force: true });
+  await fabiBtn.click();
 }
 
 test.describe("Assistente Virtual Fabi AI — Chat E2E", () => {
