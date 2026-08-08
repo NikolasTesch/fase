@@ -268,12 +268,57 @@ export function ProductForm({ categories, product }: ProductFormProps) {
     setUploadingArt(true);
     setArtError(null);
 
-    const fd = new FormData();
-    fd.append("file", previewFile);
-    fd.append("original", originalFile);
-    if (product?.id) fd.append("productId", product.id);
-
     try {
+      let directUrl: string | null = null;
+
+      // Se o arquivo original for maior que 3 MB (para evitar o limite de 4.5 MB da Vercel), faz upload direto para o R2 via Presigned URL
+      if (originalFile.size > 3 * 1024 * 1024) {
+        const presignedRes = await fetch("/api/admin/products/art/presigned-url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fileName: originalFile.name,
+            contentType: originalFile.type || "application/octet-stream",
+            fileSize: originalFile.size,
+          }),
+        });
+
+        if (!presignedRes.ok) {
+          const pData = await presignedRes.json().catch(() => ({}));
+          setArtError(pData.message ?? "Erro ao obter autorização de upload");
+          return;
+        }
+
+        const { uploadUrl, fileUrl } = await presignedRes.json();
+
+        // Upload direto do navegador para o Cloudflare R2
+        const uploadRes = await fetch(uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": originalFile.type || "application/octet-stream",
+          },
+          body: originalFile,
+        });
+
+        if (!uploadRes.ok) {
+          setArtError("Falha no upload direto para o armazenamento. Tente novamente.");
+          return;
+        }
+
+        directUrl = fileUrl;
+      }
+
+      const fd = new FormData();
+      fd.append("file", previewFile);
+      if (directUrl) {
+        fd.append("originalFileUrl", directUrl);
+        fd.append("originalFileName", originalFile.name);
+        fd.append("sizeBytes", String(originalFile.size));
+      } else {
+        fd.append("original", originalFile);
+      }
+      if (product?.id) fd.append("productId", product.id);
+
       const res = await fetch("/api/admin/products/art", { method: "POST", body: fd });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -289,6 +334,8 @@ export function ProductForm({ categories, product }: ProductFormProps) {
       setPreviewFile(null);
       setOriginalFile(null);
       if (product?.id) router.refresh();
+    } catch {
+      setArtError("Erro de rede durante o upload.");
     } finally {
       setUploadingArt(false);
     }

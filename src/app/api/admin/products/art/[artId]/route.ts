@@ -6,17 +6,11 @@ import { validateCsrf } from "@/lib/csrf";
 import { getClientIp } from "@/lib/ip";
 import { adminRatelimit } from "@/lib/ratelimit";
 import { errorResponse } from "@/lib/errors";
-import { deleteFromR2 } from "@/lib/r2";
+import { deleteFromR2, r2KeyFromUrl } from "@/lib/r2";
 import { deleteDriveFile } from "@/lib/drive";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-function r2KeyFromUrl(url: string): string | null {
-  const baseUrl = process.env.NEXT_PUBLIC_R2_URL;
-  if (!baseUrl) return null;
-  return url.startsWith(`${baseUrl}/`) ? url.slice(baseUrl.length + 1) : null;
-}
 
 export async function DELETE(
   req: NextRequest,

@@ -54,3 +54,9 @@ export async function uploadToR2(
 export async function deleteFromR2(key: string) {
   await r2.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
 }
+
+export function r2KeyFromUrl(url: string): string | null {
+  const baseUrl = process.env.NEXT_PUBLIC_R2_URL;
+  if (!baseUrl) return null;
+  return url.startsWith(`${baseUrl}/`) ? url.slice(baseUrl.length + 1) : null;
+}

@@ -7,7 +7,7 @@ import { validateCsrf } from "@/lib/csrf";
 import { getClientIp } from "@/lib/ip";
 import { uploadRatelimit } from "@/lib/ratelimit";
 import { formatZodError, errorResponse } from "@/lib/errors";
-import { convertToWebP, uploadToR2, deleteFromR2 } from "@/lib/r2";
+import { convertToWebP, uploadToR2, deleteFromR2, r2KeyFromUrl } from "@/lib/r2";
 import { uploadArtFile, deleteDriveFile } from "@/lib/drive";
 import {
   ArtSchema,
@@ -30,12 +30,6 @@ async function fileToBuffer(file: File): Promise<Buffer> {
     chunks.push(value);
   }
   return Buffer.concat(chunks);
-}
-
-function r2KeyFromUrl(url: string): string | null {
-  const baseUrl = process.env.NEXT_PUBLIC_R2_URL;
-  if (!baseUrl) return null;
-  return url.startsWith(`${baseUrl}/`) ? url.slice(baseUrl.length + 1) : null;
 }
 
 export async function POST(req: NextRequest) {
