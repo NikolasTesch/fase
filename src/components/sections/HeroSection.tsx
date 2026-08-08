@@ -45,38 +45,7 @@ export function HeroSection() {
       </div>
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-col items-start gap-6 px-4 py-24 lg:py-36">
-        {/* Badges Flutuantes de Alta Performance (Ambient Motion em Desktop) */}
-        {!reduced && (
-          <>
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="pointer-events-none absolute right-8 top-28 hidden lg:flex items-center gap-2.5 rounded-2xl border border-white/15 bg-black/60 px-4 py-2.5 backdrop-blur-xl shadow-2xl"
-            >
-              <span className="flex size-8 items-center justify-center rounded-xl bg-accent/20 text-accent">
-                <Zap className="size-4" />
-              </span>
-              <div>
-                <p className="text-xs font-bold text-white">Dry-Fit Tecnológico</p>
-                <p className="text-[11px] text-white/70">Secagem rápida e Proteção UV</p>
-              </div>
-            </motion.div>
 
-            <motion.div
-              animate={{ y: [0, 10, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              className="pointer-events-none absolute right-24 bottom-24 hidden lg:flex items-center gap-2.5 rounded-2xl border border-white/15 bg-black/60 px-4 py-2.5 backdrop-blur-xl shadow-2xl"
-            >
-              <span className="flex size-8 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
-                <ShieldCheck className="size-4" />
-              </span>
-              <div>
-                <p className="text-xs font-bold text-white">Sublimação HD 4K</p>
-                <p className="text-[11px] text-white/70">Cores vibrantes que não desbotam</p>
-              </div>
-            </motion.div>
-          </>
-        )}
 
         {/* GlowBadge para anúncio */}
         <motion.div

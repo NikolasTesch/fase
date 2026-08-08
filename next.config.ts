@@ -6,7 +6,7 @@ const csp = [
   `style-src 'self' 'unsafe-inline'`,
   `img-src 'self' data: blob: https://media.fasesport.com https://pub-*.r2.dev https://*.r2.cloudflarestorage.com https://maps.googleapis.com https://maps.gstatic.com`,
   `font-src 'self' data:`,
-  `connect-src 'self' https://*.upstash.io https://*.google-analytics.com https://*.googletagmanager.com https://maps.googleapis.com`,
+  `connect-src 'self' https://*.upstash.io https://*.google-analytics.com https://*.googletagmanager.com https://maps.googleapis.com https://*.r2.cloudflarestorage.com https://pub-*.r2.dev`,
   `frame-src 'self' https://www.google.com`,
   `object-src 'none'`,
   `base-uri 'self'`,

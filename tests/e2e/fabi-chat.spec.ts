@@ -1,13 +1,20 @@
 import { test, expect } from "@playwright/test";
 
+async function openFabiChat(page: any) {
+  await page.goto("/");
+  // Fecha o banner de cookies se estiver visível
+  const acceptCookies = page.getByRole("button", { name: /aceitar|concordar/i }).first();
+  if (await acceptCookies.isVisible().catch(() => false)) {
+    await acceptCookies.click().catch(() => {});
+  }
+  const fabiBtn = page.getByTestId("whatsapp-fab");
+  await expect(fabiBtn).toBeVisible();
+  await fabiBtn.click({ force: true });
+}
+
 test.describe("Assistente Virtual Fabi AI — Chat E2E", () => {
   test("deve abrir o modal do chat Fabi ao clicar no botão flutuante", async ({ page }) => {
-    await page.goto("/");
-
-    // Clica no botão flutuante da Fabi no canto da tela
-    const fabiBtn = page.getByRole("button", { name: /fabi/i }).first();
-    await expect(fabiBtn).toBeVisible();
-    await fabiBtn.click();
+    await openFabiChat(page);
 
     // Modal do chat deve abrir com a mensagem de boas-vindas
     const chatModal = page.locator("div").filter({ hasText: "Fabi" }).first();
@@ -16,11 +23,7 @@ test.describe("Assistente Virtual Fabi AI — Chat E2E", () => {
   });
 
   test("deve interagir via chips de pergunta rápida e receber resposta", async ({ page }) => {
-    await page.goto("/");
-
-    // Abre o chat da Fabi
-    const fabiBtn = page.getByRole("button", { name: /fabi/i }).first();
-    await fabiBtn.click();
+    await openFabiChat(page);
 
     // Clica no chip de orçamento rápido
     const chip = page.getByRole("button", { name: /cotar 20 camisas/i });
@@ -37,13 +40,10 @@ test.describe("Assistente Virtual Fabi AI — Chat E2E", () => {
   });
 
   test("deve enviar mensagem de triagem e gerar link pré-preenchido para WhatsApp", async ({ page }) => {
-    await page.goto("/");
-
-    const fabiBtn = page.getByRole("button", { name: /fabi/i }).first();
-    await fabiBtn.click();
+    await openFabiChat(page);
 
     // Digita no input do chat
-    const chatInput = page.getByPlaceholder("Digite sua mensagem...");
+    const chatInput = page.getByPlaceholder("Digite sua dúvida para a Fabi...");
     await expect(chatInput).toBeVisible();
     await chatInput.fill("Meu nome é Carlos, quero cotar 15 conjuntos de ciclismo. Meu zap é (73) 99999-8888");
 

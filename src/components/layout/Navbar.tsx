@@ -161,11 +161,9 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent("open-fabi-chat"))}
-            className="group relative inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3.5 py-1.5 text-sm font-semibold text-accent transition-all duration-200 hover:border-accent hover:bg-accent hover:text-accent-foreground shadow-sm"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-muted"
           >
-            <Sparkles className="size-3.5 text-accent group-hover:text-accent-foreground animate-pulse" />
             Fabi
-            <span className="flex size-2 rounded-full bg-emerald-500 animate-ping" />
           </button>
         </nav>
 
