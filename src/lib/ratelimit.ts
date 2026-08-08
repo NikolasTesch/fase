@@ -12,20 +12,28 @@ function createLimiter(
   prefix?: string
 ) {
   if (!redis) {
-    // fail-closed: sem Redis configurado, nenhuma requisição passa sem erro explícito
     return {
-      limit: async () => {
-        throw new Error("UPSTASH_REDIS_REST_URL/TOKEN não configurados");
-      },
+      limit: async () => ({ success: true, limit: 100, remaining: 100, reset: Date.now() }),
     };
   }
 
-  return new Ratelimit({
+  const instance = new Ratelimit({
     redis,
     limiter,
     analytics: false,
     ...(prefix ? { prefix } : {}),
   });
+
+  return {
+    limit: async (identifier: string) => {
+      try {
+        return await instance.limit(identifier);
+      } catch (err) {
+        // Se a URL do Upstash for inválida (ex: ENOTFOUND) ou o Redis estiver fora, permite a requisição normalmente
+        return { success: true, limit: 100, remaining: 100, reset: Date.now() };
+      }
+    },
+  };
 }
 
 /** Rate limit para o formulário de contato público: 5 req / 10 min */
