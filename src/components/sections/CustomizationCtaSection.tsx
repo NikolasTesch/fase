@@ -12,7 +12,7 @@ export function CustomizationCtaSection() {
   );
 
   return (
-    <section className="bg-background py-16 lg:py-24">
+    <section className="bg-background border-t border-border/60 py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4">
         <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
           <RevealOnScroll className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-lg lg:order-last">

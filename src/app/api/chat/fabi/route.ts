@@ -7,6 +7,7 @@ import { getFabiContext } from "@/lib/rag/fabi";
 import { buildFabiSystemPrompt } from "@/lib/rag/prompts";
 import { executeFabiTool } from "@/lib/rag/tools";
 import { fetchLLMStream } from "@/lib/rag/provider";
+import { sendLeadNotification } from "@/lib/resend";
 
 const MessageSchema = z.object({
   id: z.string().optional(),
@@ -231,6 +232,10 @@ async function attemptAutoLeadCapture(
             source: "chat_fabi",
           },
         });
+
+        sendLeadNotification(newLead).catch((err) =>
+          console.error("[attemptAutoLeadCapture] Erro ao enviar notificação de e-mail:", err)
+        );
 
         if (sessionId) {
           await prisma.chatSession.update({

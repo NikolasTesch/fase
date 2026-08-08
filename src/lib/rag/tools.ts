@@ -1,5 +1,6 @@
 import { calculateEstimate } from "./pricing/calculator";
 import { prisma } from "@/lib/db";
+import { sendLeadNotification } from "@/lib/resend";
 
 export interface FabiToolResult {
   success: boolean;
@@ -222,6 +223,10 @@ export async function executeFabiTool(
           source: "chat_fabi_tool",
         },
       });
+
+      sendLeadNotification(lead).catch((err) =>
+        console.error("[register_lead] Erro ao enviar e-mail de notificação:", err)
+      );
 
       return {
         success: true,

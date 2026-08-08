@@ -84,7 +84,7 @@ export function ProcessSteps() {
   }
 
   return (
-    <section className="py-16 lg:py-24">
+    <section className="bg-background border-t border-border/60 py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4">
         <RevealOnScroll className="mb-12 max-w-2xl">
           <h2 className="font-heading text-4xl text-foreground lg:text-5xl">

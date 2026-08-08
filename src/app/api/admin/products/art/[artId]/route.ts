@@ -7,7 +7,7 @@ import { getClientIp } from "@/lib/ip";
 import { adminRatelimit } from "@/lib/ratelimit";
 import { errorResponse } from "@/lib/errors";
 import { deleteFromR2, r2KeyFromUrl } from "@/lib/r2";
-import { deleteDriveFile } from "@/lib/drive";
+import { revalidateCatalog } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -50,13 +50,19 @@ export async function DELETE(
       }
     }
 
-    try {
-      await deleteDriveFile(art.originalFileId);
-    } catch {
-      // best-effort: remove o registro mesmo se a exclusão no Drive falhar
+    // Artes legadas do Drive não têm key R2 (r2KeyFromUrl null) — ficam órfãs
+    const origKey = r2KeyFromUrl(art.originalFileId);
+    if (origKey) {
+      try {
+        await deleteFromR2(origKey);
+      } catch {
+        // best-effort: remove o registro mesmo se a exclusão no R2 falhar
+      }
     }
 
     await prisma.artFile.delete({ where: { id: artId } });
+
+    revalidateCatalog();
 
     return Response.json({ success: true });
   } catch (error) {

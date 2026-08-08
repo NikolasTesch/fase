@@ -8,7 +8,6 @@ import { getClientIp } from "@/lib/ip";
 import { uploadRatelimit } from "@/lib/ratelimit";
 import { formatZodError, errorResponse } from "@/lib/errors";
 import { convertToWebP, uploadToR2, deleteFromR2, r2KeyFromUrl } from "@/lib/r2";
-import { uploadArtFile, deleteDriveFile } from "@/lib/drive";
 import {
   ArtSchema,
   ART_PREVIEW_MIME,
@@ -16,6 +15,7 @@ import {
   ART_MAX_PREVIEW_SIZE,
   ART_MAX_ORIGINAL_SIZE,
 } from "@/lib/validations/art";
+import { revalidateCatalog } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,9 +48,11 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     const original = formData.get("original") as File | null;
+    const originalFileUrl = (formData.get("originalFileUrl") as string)?.trim() || null;
+    const originalFileName = (formData.get("originalFileName") as string)?.trim() || null;
     const productId = (formData.get("productId") as string)?.trim() || null;
 
-    if (!file || !original) {
+    if (!file || (!original && !originalFileUrl)) {
       return errorResponse("Envie o preview e o arquivo original.", 400);
     }
 
@@ -71,15 +73,39 @@ export async function POST(req: NextRequest) {
       return errorResponse("Preview não é uma imagem válida.", 400);
     }
 
-    const ext = original.name.split(".").pop()?.toLowerCase() ?? "";
-    if (!(ART_ORIGINAL_EXTENSIONS as readonly string[]).includes(ext)) {
-      return errorResponse("Extensão do arquivo original não permitida.", 400);
-    }
-    if (original.size > ART_MAX_ORIGINAL_SIZE) {
-      return errorResponse("Arquivo original muito grande. Máximo 100 MB.", 400);
+    const originalName = original ? original.name : (originalFileName ?? "");
+    const ext = originalName.split(".").pop()?.toLowerCase() ?? "";
+    // Originais não-imagem (.cdr/.ai/.eps/.svg/.pdf) não são validáveis por magic
+    // bytes — força octet-stream em vez de confiar no MIME fornecido pelo cliente
+    const isImageExt = ["png", "jpg", "jpeg", "webp", "gif"].includes(ext);
+
+    let originalFileId: string | null = null;
+    let originalMime = "application/octet-stream";
+    let originalSize = 0;
+
+    if (originalFileUrl) {
+      // Upload direto via presigned URL já feito pelo browser — ext/tamanho foram
+      // validados na geração da presigned; aqui só valida a URL e a guarda como referência
+      if (!r2KeyFromUrl(originalFileUrl)) {
+        return errorResponse("URL de arquivo original inválida.", 400);
+      }
+      originalFileId = originalFileUrl;
+      if (isImageExt) {
+        originalMime = `image/${ext === "jpg" ? "jpeg" : ext}`;
+      }
+      originalSize = Number(formData.get("sizeBytes")) || 0;
+    } else if (original) {
+      if (!(ART_ORIGINAL_EXTENSIONS as readonly string[]).includes(ext)) {
+        return errorResponse("Extensão do arquivo original não permitida.", 400);
+      }
+      if (original.size > ART_MAX_ORIGINAL_SIZE) {
+        return errorResponse("Arquivo original muito grande. Máximo 100 MB.", 400);
+      }
+      originalMime = isImageExt && original.type ? original.type : "application/octet-stream";
+      originalSize = original.size;
     }
 
-    const name = original.name.replace(/\.[^.]+$/, "");
+    const name = originalName.replace(/\.[^.]+$/, "");
     const validated = ArtSchema.safeParse({ name });
     if (!validated.success) return formatZodError(validated.error);
 
@@ -98,21 +124,22 @@ export async function POST(req: NextRequest) {
       existingArt = product.art;
     }
 
-    const originalBuf = await fileToBuffer(original);
-    // Originais não-imagem (.cdr/.ai/.eps/.svg/.pdf) não são validáveis por magic
-    // bytes — força octet-stream em vez de confiar no MIME fornecido pelo cliente
-    const isImageExt = ["png", "jpg", "jpeg", "webp", "gif"].includes(ext);
-    const originalMime =
-      isImageExt && original.type ? original.type : "application/octet-stream";
+    const originalBuf = original ? await fileToBuffer(original) : null;
 
     let previewUrl: string | null = null;
-    let originalFileId: string | null = null;
     try {
       const { buffer: webpBuf, mimeType: webpMime } = await convertToWebP(previewBuf, file.type);
       previewUrl = await uploadToR2(`arts/${Date.now()}-${name}.webp`, webpBuf, webpMime);
-      originalFileId = await uploadArtFile(originalBuf, original.name, originalMime);
+      if (originalBuf) {
+        originalFileId = await uploadToR2(
+          `arts/originals/${Date.now()}-${originalName}`,
+          originalBuf,
+          originalMime
+        );
+      }
 
-      // Substitui a arte anterior do produto (arquivos + registro) — best-effort
+      // Substitui a arte anterior do produto (arquivos + registro) — best-effort;
+      // artes legadas do Drive não têm key R2 (r2KeyFromUrl null) e são ignoradas
       if (existingArt) {
         const oldKey = r2KeyFromUrl(existingArt.previewUrl);
         if (oldKey) {
@@ -122,10 +149,13 @@ export async function POST(req: NextRequest) {
             // ignora falha do cleanup
           }
         }
-        try {
-          await deleteDriveFile(existingArt.originalFileId);
-        } catch {
-          // ignora falha do cleanup
+        const oldOriginalKey = r2KeyFromUrl(existingArt.originalFileId);
+        if (oldOriginalKey) {
+          try {
+            await deleteFromR2(oldOriginalKey);
+          } catch {
+            // ignora falha do cleanup
+          }
         }
         try {
           await prisma.artFile.delete({ where: { id: existingArt.id } });
@@ -139,10 +169,10 @@ export async function POST(req: NextRequest) {
           name: validated.data.name,
           previewUrl,
           previewMimeType: webpMime,
-          originalFileId,
-          originalFileName: original.name,
+          originalFileId: originalFileId!,
+          originalFileName: originalName,
           originalMimeType: originalMime,
-          sizeBytes: original.size,
+          sizeBytes: originalSize,
           createdById: user.id,
         },
       });
@@ -154,6 +184,8 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      revalidateCatalog();
+
       return Response.json(
         {
           id: art.id,
@@ -164,7 +196,7 @@ export async function POST(req: NextRequest) {
         { status: 201 }
       );
     } catch (error) {
-      // best-effort: remove do R2/Drive qualquer arquivo já enviado (inclui o caso
+      // best-effort: remove do R2 qualquer arquivo já enviado (inclui o caso
       // de o 2º upload falhar após o 1º ter subido — evita arquivos órfãos)
       if (previewUrl) {
         const r2Key = r2KeyFromUrl(previewUrl);
@@ -177,23 +209,19 @@ export async function POST(req: NextRequest) {
         }
       }
       if (originalFileId) {
-        try {
-          await deleteDriveFile(originalFileId);
-        } catch {
-          // ignora falha do cleanup
+        const origKey = r2KeyFromUrl(originalFileId);
+        if (origKey) {
+          try {
+            await deleteFromR2(origKey);
+          } catch {
+            // ignora falha do cleanup
+          }
         }
       }
       throw error;
     }
   } catch (error) {
     console.error("[POST /api/admin/products/art]", error);
-    if (
-      error instanceof Error &&
-      typeof error.message === "string" &&
-      error.message.includes("GOOGLE_")
-    ) {
-      return errorResponse(error.message, 500);
-    }
     return Response.json({ message: "Erro interno" }, { status: 500 });
   }
 }

@@ -43,6 +43,8 @@ Configure todas as variáveis no painel da Vercel (Settings → Environment Vari
 | `R2_BUCKET_NAME` | Nome do bucket (ex: `fase-media`) |
 | `NEXT_PUBLIC_R2_URL` | URL pública do bucket (ex: `https://media.fasesport.com`) |
 
+As artes (preview + original) são armazenadas no R2; o original é público, servido por stream autenticado na rota de download.
+
 ### E-mail (Resend)
 
 | Variável | Descrição |
@@ -72,21 +74,6 @@ Configure todas as variáveis no painel da Vercel (Settings → Environment Vari
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | Número WhatsApp sem formatação (ex: `5527999999999`) |
 | `NEXT_PUBLIC_SIMULATOR_URL` | URL do simulador de uniforme (opcional) |
 | `NEXT_PUBLIC_APP_URL` | URL canônica do site (ex: `https://fasesport.com.br`) |
-
-### Google Drive (Artes)
-
-Cada produto tem **uma arte** anexada (relação 1:1). O **arquivo original** (vetorial: `.cdr`, `.svg`, `.pdf`) é armazenado em uma pasta privada do Google Drive, acessada via conta de serviço — nunca há link público. O **preview** (imagem convertida para WebP) vai para o Cloudflare R2 público e é exibido na página do produto. Configuração:
-
-1. **Criar projeto no Google Cloud** — acesse [Google Cloud Console](https://console.cloud.google.com), crie um projeto (ex: `fase-sport-arts`).
-2. **Habilitar a Google Drive API** — em APIs & Services → Library, ative `Google Drive API` para o projeto.
-3. **Criar a conta de serviço e baixar a chave JSON** — em IAM & Admin → Service Accounts, crie uma conta de serviço (ex: `arts-service-account`), gere uma chave no formato JSON e baixe o arquivo. Nunca commite esse arquivo no repositório.
-4. **Criar a pasta no Drive e compartilhar com a conta de serviço** — crie uma pasta no Google Drive (ex: `Artes Fase Sport`), clique em Compartilhar e adicione o e-mail da conta de serviço (termine com `@<projeto>.iam.gserviceaccount.com`) com permissão **Editor**.
-5. **Definir as variáveis no Vercel / `.env.local`** — copie o **conteúdo JSON inteiro** da chave (entre aspas simples) em `GOOGLE_SERVICE_ACCOUNT_JSON` e o ID da pasta (final da URL do Drive) em `GOOGLE_DRIVE_ARTS_FOLDER_ID`.
-
-| Variável | Descrição |
-|---|---|
-| `GOOGLE_SERVICE_ACCOUNT_JSON` | Conteúdo JSON completo da chave da conta de serviço (ex: `{"type":"service_account",...}`) |
-| `GOOGLE_DRIVE_ARTS_FOLDER_ID` | ID da pasta do Drive onde os arquivos originais das artes são salvos (ex: `1xxxxxxxxxxxxxxxxxxxxxxxx`) |
 
 ### Chat Fabi (RAG / IA)
 

@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Users, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { computePageRange } from "@/lib/pagination";
+import { LeadsPagination } from "./_components/LeadsPagination";
+
+const PAGE_SIZE = 20;
 
 type Lead = {
   id: string;
@@ -131,14 +135,23 @@ export default function LeadsPage() {
   const [selected, setSelected] = useState<Lead | null>(null);
   const [updating, setUpdating] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     const abortController = new AbortController();
-    const url = filter ? `/api/admin/leads?status=${filter}` : "/api/admin/leads";
+    const url = `/api/admin/leads?page=${page}&pageSize=${PAGE_SIZE}${
+      filter ? `&status=${filter}` : ""
+    }`;
     fetch(url, { signal: abortController.signal })
-      .then((r) => (r.ok ? r.json() : []))
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        setLeads(data);
+        if (!data) {
+          setLoading(false);
+          return;
+        }
+        setLeads(data.data);
+        setTotal(data.total);
         setLoading(false);
       })
       .catch((err) => {
@@ -146,7 +159,7 @@ export default function LeadsPage() {
         setLoading(false);
       });
     return () => abortController.abort();
-  }, [filter]);
+  }, [filter, page]);
 
   async function updateStatus(id: string, status: string) {
     setUpdating(true);
@@ -178,7 +191,7 @@ export default function LeadsPage() {
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Leads</h1>
               <p className="text-muted-foreground text-sm mt-1">
-                {leads.length} resultado{leads.length !== 1 ? "s" : ""}{" "}
+                {total} resultado{total !== 1 ? "s" : ""}{" "}
                 {filter ? `com status "${STATUS_CONFIG[filter]?.label}"` : "no total"}
               </p>
             </div>
@@ -192,6 +205,7 @@ export default function LeadsPage() {
                 onClick={() => {
                   setLoading(true);
                   setFilter(value);
+                  setPage(1);
                 }}
                 className={cn(
                   "rounded-full px-3.5 py-1.5 text-xs font-medium border transition-all duration-200",
@@ -270,6 +284,17 @@ export default function LeadsPage() {
             </tbody>
           </table>
         </div>
+
+        {!loading && (
+          <LeadsPagination
+            page={page}
+            pageCount={computePageRange(total, page, PAGE_SIZE).pageCount}
+            onPageChange={(p) => {
+              setLoading(true);
+              setPage(p);
+            }}
+          />
+        )}
       </div>
 
       {/* Painel lateral */}

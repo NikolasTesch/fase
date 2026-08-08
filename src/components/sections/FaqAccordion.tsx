@@ -69,7 +69,7 @@ export function FaqAccordion({ faqs }: FaqAccordionProps) {
   }
 
   return (
-    <section className="bg-muted py-16 lg:py-24">
+    <section className="bg-background border-t border-border/60 py-16 lg:py-24">
       <div className="mx-auto w-full max-w-3xl px-4">
         <h2 className="mb-8 font-heading text-4xl text-foreground lg:text-5xl">
           Perguntas frequentes

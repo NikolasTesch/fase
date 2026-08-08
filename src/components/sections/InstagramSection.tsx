@@ -18,7 +18,7 @@ export function InstagramSection({ posts, videoUrl }: InstagramSectionProps) {
   if (posts.length === 0) return null;
 
   return (
-    <section className="bg-muted py-16 lg:py-24">
+    <section className="bg-background border-t border-border/60 py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4">
         {/* Grid Instagram */}
         <div>

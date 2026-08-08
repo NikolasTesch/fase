@@ -77,7 +77,8 @@ export function FeaturedSection({ products }: FeaturedSectionProps) {
 
   return (
     <section
-      className="bg-muted py-16 lg:py-24"
+      id="destaques"
+      className="bg-background border-t border-border/60 py-16 lg:py-24"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >

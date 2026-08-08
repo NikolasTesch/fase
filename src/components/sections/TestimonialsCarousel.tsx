@@ -74,7 +74,8 @@ export function TestimonialsCarousel({ testimonials }: TestimonialsCarouselProps
 
   return (
     <section
-      className="bg-background py-16 lg:py-24"
+      id="depoimentos"
+      className="bg-background border-t border-border/60 py-16 lg:py-24"
       aria-roledescription="carrossel"
       aria-label="Depoimentos de clientes"
       onMouseEnter={() => setPaused(true)}

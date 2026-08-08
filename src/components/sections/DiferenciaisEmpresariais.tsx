@@ -23,7 +23,7 @@ const DIFERENCIAIS = [
 
 export function DiferenciaisEmpresariais() {
   return (
-    <section className="rounded-2xl bg-muted/50 px-6 py-10 lg:px-10">
+    <section className="rounded-2xl border border-border/60 bg-background px-6 py-10 lg:px-10">
       <h2 className="font-heading text-3xl font-extrabold uppercase tracking-tight text-foreground lg:text-4xl">
         Por que a Fase Sport?
       </h2>

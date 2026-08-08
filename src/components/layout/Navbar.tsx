@@ -8,10 +8,10 @@ import {
   motion,
   useReducedMotion,
 } from "framer-motion";
-import { ChevronDown, Moon, Sun } from "lucide-react";
+import { ChevronDown, Moon, Sun, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { CATEGORY_NAV, CORPORATE_NAV } from "@/lib/site";
+import { CATEGORY_NAV } from "@/lib/site";
 import { MobileMenu } from "./MobileMenu";
 import { SearchForm } from "./SearchForm";
 
@@ -30,8 +30,7 @@ function getThemeSnapshot(): boolean {
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
-  const [corporateOpen, setCorporateOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
   const shouldReduce = useReducedMotion();
 
   const isDark = useSyncExternalStore(
@@ -76,65 +75,98 @@ export function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">
-          {CATEGORY_NAV.map((item) => (
-            <Link
-              key={item.slug}
-              href={`/${item.slug}`}
-              onMouseEnter={() => setHoveredSlug(item.slug)}
-              onMouseLeave={() => setHoveredSlug(null)}
-              className="relative rounded-lg px-3 py-2 text-sm font-medium text-foreground"
-            >
-              <span className="relative z-10">{item.label}</span>
-                {hoveredSlug === item.slug && !shouldReduce ? (
-                <motion.span
-                  layoutId="nav-hover-pill"
-                  className="absolute inset-0 -z-10 rounded-lg bg-accent/10"
-                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                />
-              ) : null}
-            </Link>
-          ))}
-
-          {/* Empresarial dropdown */}
+          {/* Menu Dropdown: Categorias Esportivas */}
           <div
             className="relative"
-            onMouseEnter={() => setCorporateOpen(true)}
-            onMouseLeave={() => setCorporateOpen(false)}
+            onMouseEnter={() => setCategoriesOpen(true)}
+            onMouseLeave={() => setCategoriesOpen(false)}
           >
             <button
               type="button"
               aria-haspopup="true"
-              aria-expanded={corporateOpen}
-              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              aria-expanded={categoriesOpen}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
             >
-              {CORPORATE_NAV.label}
+              Categorias Esportivas
               <ChevronDown
-                className={`size-3.5 text-muted-foreground transition-transform duration-200 ${corporateOpen ? "rotate-180" : ""}`}
+                className={`size-3.5 text-muted-foreground transition-transform duration-200 ${categoriesOpen ? "rotate-180" : ""}`}
               />
             </button>
 
             <AnimatePresence>
-              {corporateOpen ? (
+              {categoriesOpen ? (
                 <motion.div
                   initial={shouldReduce ? { opacity: 1 } : { opacity: 0, scale: 0.96, y: -4 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={shouldReduce ? { opacity: 1 } : { opacity: 0, scale: 0.96, y: -4 }}
                   transition={{ duration: 0.15, ease: "easeOut" }}
-                  className="absolute left-0 top-full z-50 mt-1 w-56 rounded-xl border border-border bg-background p-2 shadow-lg"
+                  className="absolute left-0 top-full z-50 mt-1 w-64 rounded-2xl border border-border bg-background/95 backdrop-blur-md p-3 shadow-xl"
                 >
-                  {CORPORATE_NAV.subcategories.map((sub) => (
-                    <Link
-                      key={sub.slug}
-                      href={`/${CORPORATE_NAV.slug}?sub=${sub.slug}`}
-                      className="block rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                    >
-                      {sub.label}
-                    </Link>
-                  ))}
+                  <p className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+                    Linha de Esportes
+                  </p>
+                  <div className="grid grid-cols-2 gap-1">
+                    {CATEGORY_NAV.map((cat) => (
+                      <Link
+                        key={cat.slug}
+                        href={`/${cat.slug}`}
+                        className="rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent/10 hover:text-accent"
+                      >
+                        {cat.label}
+                      </Link>
+                    ))}
+                  </div>
+
+                  <div className="my-2 border-t border-border/60" />
+
+                  <Link
+                    href="/empresarial"
+                    className="flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    Uniformes Empresariais
+                    <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent">
+                      Corporativo
+                    </span>
+                  </Link>
                 </motion.div>
               ) : null}
             </AnimatePresence>
           </div>
+
+          {/* Destaques */}
+          <Link
+            href="/#destaques"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            Destaques
+          </Link>
+
+          {/* Avaliações */}
+          <Link
+            href="/#depoimentos"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            Avaliações
+          </Link>
+
+          {/* Onde Estamos */}
+          <Link
+            href="/#contato"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            Onde Estamos
+          </Link>
+
+          {/* Botão Fabi (Abre o chat modal) */}
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("open-fabi-chat"))}
+            className="group relative inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3.5 py-1.5 text-sm font-semibold text-accent transition-all duration-200 hover:border-accent hover:bg-accent hover:text-accent-foreground shadow-sm"
+          >
+            <Sparkles className="size-3.5 text-accent group-hover:text-accent-foreground animate-pulse" />
+            Fabi
+            <span className="flex size-2 rounded-full bg-emerald-500 animate-ping" />
+          </button>
         </nav>
 
         <div className="flex items-center gap-1.5">

@@ -43,10 +43,65 @@ export async function fetchLLMStream(
     }
 
     if (!apiKey && provider !== "local") {
-      // Se não houver chave para o provedor selecionado, desvia silenciosamente para o local stream
       return null;
     }
 
+    // 1. Tenta chamada inicial sem stream para verificar se a LLM quer executar Tool Call
+    const initialMessages: Array<{ role: string; content: string; tool_calls?: unknown }> = [
+      { role: "system", content: options.systemPrompt },
+      ...options.messages.map((m) => ({ role: m.role, content: m.content })),
+    ];
+
+    try {
+      const checkRes = await fetch(`${apiBaseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+          ...extraHeaders,
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages: initialMessages,
+          tools: FABI_TOOLS,
+          temperature: options.temperature ?? 0.5,
+          stream: false,
+        }),
+      });
+
+      if (checkRes.ok) {
+        const data = await checkRes.json();
+        const choiceMsg = data.choices?.[0]?.message;
+
+        if (choiceMsg?.tool_calls && Array.isArray(choiceMsg.tool_calls) && choiceMsg.tool_calls.length > 0) {
+          // Executa as ferramentas solicitadas no servidor
+          const { executeFabiTool } = await import("./tools");
+          initialMessages.push(choiceMsg);
+
+          for (const tc of choiceMsg.tool_calls) {
+            if (tc.type === "function" && tc.function) {
+              const fnName = tc.function.name;
+              let parsedArgs = {};
+              try {
+                parsedArgs = JSON.parse(tc.function.arguments || "{}");
+              } catch {
+                parsedArgs = {};
+              }
+
+              const result = await executeFabiTool(fnName, parsedArgs);
+              initialMessages.push({
+                role: "tool",
+                content: JSON.stringify(result),
+              });
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("[fetchLLMStream] Falha no teste inicial de tool calling. Prosseguindo com stream direto:", err);
+    }
+
+    // 2. Transmite a resposta final com as ferramentas já resolvidas
     const response = await fetch(`${apiBaseUrl}/chat/completions`, {
       method: "POST",
       headers: {
@@ -56,10 +111,7 @@ export async function fetchLLMStream(
       },
       body: JSON.stringify({
         model: modelName,
-        messages: [
-          { role: "system", content: options.systemPrompt },
-          ...options.messages.map((m) => ({ role: m.role, content: m.content })),
-        ],
+        messages: initialMessages,
         tools: FABI_TOOLS,
         temperature: options.temperature ?? 0.5,
         stream: true,

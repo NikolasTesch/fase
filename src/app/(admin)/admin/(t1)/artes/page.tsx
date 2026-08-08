@@ -4,15 +4,31 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
+import { computePageRange } from "@/lib/pagination";
 import { FileDown, Package } from "lucide-react";
 import { ArtesGrid } from "./_components/ArtesGrid";
 
 export const metadata: Metadata = { title: "Artes — Admin Fase Sport" };
 
-export default async function ArtesPage() {
+const PAGE_SIZE = 12;
+
+export default async function ArtesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const sp = await searchParams;
+  const rawPage = Number(sp?.page ?? 1);
+
+  const total = await prisma.product.count({ where: { art: { isNot: null } } });
+  const pg = computePageRange(total, rawPage, PAGE_SIZE);
+
   const products = await prisma.product.findMany({
     where: { art: { isNot: null } },
     orderBy: [{ category: { sortOrder: "asc" } }, { sortOrder: "asc" }],
+    skip: pg.offset,
+    take: pg.pageSize,
     select: {
       id: true,
       name: true,
@@ -79,6 +95,12 @@ export default async function ArtesPage() {
           </div>
         )}
       </div>
+
+      <Pagination
+        page={pg.page}
+        pageCount={pg.pageCount}
+        buildHref={(p) => `/admin/artes?page=${p}`}
+      />
     </div>
   );
 }

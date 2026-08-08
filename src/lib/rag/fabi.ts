@@ -169,9 +169,18 @@ async function loadCatalog(): Promise<CatalogSnapshot> {
   return { faqs, products, modalities, sizeCharts };
 }
 
-const getCatalog = unstable_cache(loadCatalog, ["fabi-catalog"], {
+const cachedCatalog = unstable_cache(loadCatalog, ["fabi-catalog"], {
   revalidate: 300,
+  tags: ["fabi-catalog"],
 });
+
+async function getCatalog(): Promise<CatalogSnapshot> {
+  try {
+    return await cachedCatalog();
+  } catch {
+    return await loadCatalog();
+  }
+}
 
 const normalizeForMatch = (value: string) =>
   value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -362,6 +371,25 @@ export async function getFabiContext(
         "• Botão de Orçamento / WhatsApp: Disponível no site para falar direto com a equipe de vendas."
     );
 
+    // 7. Estado da Triagem da Sessão (Multi-Turn Memory)
+    const triageState = extractTriageState(input);
+    if (
+      triageState &&
+      (triageState.detectedSport ||
+        triageState.detectedQuantity ||
+        triageState.customerName ||
+        triageState.customerPhone)
+    ) {
+      contextParts.unshift(
+        "--- ESTADO DA TRIAGEM DA SESSÃO ATUAL ---\n" +
+          `• Esporte Informado: ${triageState.detectedSport || "Ainda não informado"}\n` +
+          `• Quantidade Cotada: ${triageState.detectedQuantity ? `${triageState.detectedQuantity} unidades` : "Ainda não informada"}\n` +
+          `• Nome do Cliente: ${triageState.customerName || "Ainda não informado"}\n` +
+          `• Telefone/WhatsApp: ${triageState.customerPhone || "Ainda não informado"}\n` +
+          "Lembrete: Mantenha esses dados na memória da conversa e não pergunte novamente o que o cliente já informou!"
+      );
+    }
+
     return {
       contextText: contextParts.join("\n\n"),
       sourceCount,
@@ -371,16 +399,94 @@ export async function getFabiContext(
     };
   } catch (error) {
     console.error("[getFabiContext] Erro ao buscar contexto no banco:", error);
+    let fallbackText =
+      "--- INFORMAÇÕES PADRÃO FASE SPORT ---\n" +
+      "• Pedido mínimo: 10 unidades.\n" +
+      "• Fabricação própria por sublimação total de alta durabilidade.\n" +
+      "• WhatsApp para orçamentos disponível no botão da tela.";
+
+    const triageState = extractTriageState(input);
+    if (
+      triageState &&
+      (triageState.detectedSport ||
+        triageState.detectedQuantity ||
+        triageState.customerName ||
+        triageState.customerPhone)
+    ) {
+      fallbackText =
+        "--- ESTADO DA TRIAGEM DA SESSÃO ATUAL ---\n" +
+        `• Esporte Informado: ${triageState.detectedSport || "Ainda não informado"}\n` +
+        `• Quantidade Cotada: ${triageState.detectedQuantity ? `${triageState.detectedQuantity} unidades` : "Ainda não informada"}\n` +
+        `• Nome do Cliente: ${triageState.customerName || "Ainda não informado"}\n` +
+        `• Telefone/WhatsApp: ${triageState.customerPhone || "Ainda não informado"}\n` +
+        "Lembrete: Mantenha esses dados na memória da conversa e não pergunte novamente o que o cliente já informou!\n\n" +
+        fallbackText;
+    }
+
     return {
-      contextText:
-        "--- INFORMAÇÕES PADRÃO FASE SPORT ---\n" +
-        "• Pedido mínimo: 10 unidades.\n" +
-        "• Fabricação própria por sublimação total de alta durabilidade.\n" +
-        "• WhatsApp para orçamentos disponível no botão da tela.",
+      contextText: fallbackText,
       sourceCount: 0,
       hasProducts: false,
       hasFaqs: false,
       hasSizeChart: false,
     };
   }
+}
+
+/**
+ * Extrai o estado atual da triagem da sessão a partir do histórico de conversa.
+ */
+export function extractTriageState(input: string | Array<{ role: string; content: string }>) {
+  if (typeof input === "string" || !Array.isArray(input) || input.length === 0) {
+    return null;
+  }
+
+  const fullText = input.map((m) => m.content).join(" ");
+  const textLower = fullText.toLowerCase();
+
+  const sportsMap: Record<string, string> = {
+    futebol: "Futebol",
+    volei: "Vôlei",
+    vôlei: "Vôlei",
+    basquete: "Basquete",
+    ciclismo: "Ciclismo",
+    pedal: "Ciclismo",
+    corrida: "Corrida / Running",
+    running: "Corrida / Running",
+    empresarial: "Empresarial",
+    polo: "Empresarial (Polo)",
+  };
+
+  let detectedSport: string | null = null;
+  for (const [k, v] of Object.entries(sportsMap)) {
+    if (textLower.includes(k)) {
+      detectedSport = v;
+      break;
+    }
+  }
+
+  let detectedQuantity: number | null = null;
+  const qtyMatch = fullText.match(/(\d{1,4})\s*(?:peças|pecas|unidades|conjuntos|camisas)/i);
+  if (qtyMatch && qtyMatch[1]) {
+    detectedQuantity = parseInt(qtyMatch[1], 10);
+  }
+
+  let customerName: string | null = null;
+  const nameMatch = fullText.match(/(?:meu nome [eé]|sou o|sou a|me chamo)\s+([A-ZÀ-Úa-zà-ú]{2,15})/i);
+  if (nameMatch && nameMatch[1]) {
+    customerName = nameMatch[1].charAt(0).toUpperCase() + nameMatch[1].slice(1);
+  }
+
+  let customerPhone: string | null = null;
+  const phoneMatch = fullText.match(/(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?(?:9\d{4}[-\s]?\d{4}|\d{4}[-\s]?\d{4})/);
+  if (phoneMatch) {
+    customerPhone = phoneMatch[0].replace(/\D/g, "");
+  }
+
+  return {
+    detectedSport,
+    detectedQuantity,
+    customerName,
+    customerPhone,
+  };
 }

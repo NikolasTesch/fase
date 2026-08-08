@@ -8,6 +8,7 @@ import { getClientIp } from "@/lib/ip";
 import { uploadRatelimit } from "@/lib/ratelimit";
 import { errorResponse } from "@/lib/errors";
 import { requireT1Admin } from "@/lib/auth";
+import { revalidateCatalog } from "@/lib/revalidate";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
@@ -122,6 +123,8 @@ export async function POST(req: NextRequest) {
         data: { url, altText, isPrimary, productId, sortOrder: currentCount },
       });
 
+      revalidateCatalog();
+
       return Response.json({ url, imageId: image.id }, { status: 201 });
     }
 
@@ -130,6 +133,8 @@ export async function POST(req: NextRequest) {
         where: { id: categoryId },
         data: { imageUrl: url },
       });
+
+      revalidateCatalog();
 
       return Response.json({ url }, { status: 201 });
     }

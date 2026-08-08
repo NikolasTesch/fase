@@ -3,7 +3,9 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export const r2 = new S3Client({
   region: "auto",
@@ -37,8 +39,6 @@ export async function uploadToR2(
   body: Buffer,
   contentType: string
 ) {
-  // O AWS SDK v3 no Vercel recebe SharedArrayBuffer ao invés de ArrayBuffer
-  // quando um Buffer Node.js é passado diretamente — Uint8Array força um ArrayBuffer regular
   await r2.send(
     new PutObjectCommand({
       Bucket: BUCKET,
@@ -55,8 +55,30 @@ export async function deleteFromR2(key: string) {
   await r2.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
 }
 
+export async function streamFromR2(key: string): Promise<ReadableStream | null> {
+  const res = await r2.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }));
+  return (res.Body as ReadableStream | undefined) ?? null;
+}
+
 export function r2KeyFromUrl(url: string): string | null {
   const baseUrl = process.env.NEXT_PUBLIC_R2_URL;
   if (!baseUrl) return null;
   return url.startsWith(`${baseUrl}/`) ? url.slice(baseUrl.length + 1) : null;
+}
+
+export async function getPresignedUploadUrl(
+  key: string,
+  contentType: string,
+  expiresInSeconds = 3600
+): Promise<{ uploadUrl: string; fileUrl: string; key: string }> {
+  const command = new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    ContentType: contentType,
+  });
+
+  const uploadUrl = await getSignedUrl(r2, command, { expiresIn: expiresInSeconds });
+  const fileUrl = `${process.env.NEXT_PUBLIC_R2_URL}/${key}`;
+
+  return { uploadUrl, fileUrl, key };
 }

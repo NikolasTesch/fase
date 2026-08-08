@@ -186,7 +186,7 @@ model ArtFile {
   name             String
   previewUrl       String    // R2 público (NEXT_PUBLIC_R2_URL) — servido na página pública
   previewMimeType  String
-  originalFileId   String    // Drive file id do arquivo original (.cdr/.svg/.pdf)
+  originalFileId   String    // URL pública R2 do arquivo original (.cdr/.svg/.pdf)
   originalFileName String    // ex.: "escudo-corinthians.cdr"
   originalMimeType String
   sizeBytes        Int?

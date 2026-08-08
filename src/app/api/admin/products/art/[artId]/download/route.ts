@@ -4,10 +4,11 @@ import { requireT1Admin } from "@/lib/auth";
 import { getClientIp } from "@/lib/ip";
 import { streamRatelimit } from "@/lib/ratelimit";
 import { errorResponse } from "@/lib/errors";
-import { streamDriveFile } from "@/lib/drive";
+import { r2KeyFromUrl, streamFromR2 } from "@/lib/r2";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // arquivos originais até 100 MB — timeout maior para o stream
 
 export async function GET(
   req: NextRequest,
@@ -26,7 +27,11 @@ export async function GET(
     const art = await prisma.artFile.findUnique({ where: { id: artId } });
     if (!art) return errorResponse("Arte não encontrada", 404);
 
-    const stream = await streamDriveFile(art.originalFileId);
+    // Artes legadas do Drive não migraram para o R2 — sem key, sem download
+    const origKey = r2KeyFromUrl(art.originalFileId);
+    if (!origKey) return errorResponse("Arquivo original não disponível (migrado do armazenamento antigo).", 410);
+    const stream = await streamFromR2(origKey);
+    if (!stream) return errorResponse("Arquivo original não encontrado no armazenamento.", 404);
 
     return new Response(stream as ReadableStream, {
       headers: {

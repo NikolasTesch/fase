@@ -7,6 +7,7 @@ import { getClientIp } from "@/lib/ip";
 import { adminRatelimit } from "@/lib/ratelimit";
 import { formatZodError, errorResponse } from "@/lib/errors";
 import { requireT1Admin } from "@/lib/auth";
+import { revalidateCatalog } from "@/lib/revalidate";
 
 const ProductSchema = z.object({
   slug: z.string().min(1),
@@ -88,6 +89,8 @@ export async function POST(req: NextRequest) {
         artId: artId || null,
       },
     });
+
+    revalidateCatalog();
 
     return Response.json(product, { status: 201 });
   } catch (error) {

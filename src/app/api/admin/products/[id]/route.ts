@@ -7,6 +7,7 @@ import { getClientIp } from "@/lib/ip";
 import { adminRatelimit } from "@/lib/ratelimit";
 import { formatZodError, errorResponse } from "@/lib/errors";
 import { requireT1Admin } from "@/lib/auth";
+import { revalidateCatalog } from "@/lib/revalidate";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -64,6 +65,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       },
     });
 
+    revalidateCatalog();
+
     return Response.json(product);
   } catch (error) {
     if (
@@ -101,6 +104,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       where: { id },
       data: { isActive: false },
     });
+
+    revalidateCatalog();
 
     return Response.json(product);
   } catch (error) {

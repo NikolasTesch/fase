@@ -23,10 +23,17 @@ export async function GET(req: NextRequest) {
   try {
     const categoryId = req.nextUrl.searchParams.get("categoryId");
 
+    let whereClause: Prisma.FaqWhereInput = {};
+    if (categoryId === "global" || categoryId === "null") {
+      whereClause = { categoryId: null };
+    } else if (categoryId && categoryId !== "all") {
+      whereClause = { categoryId };
+    }
+
     const faqs = await prisma.faq.findMany({
-      where: categoryId ? { categoryId } : { categoryId: null },
+      where: whereClause,
       orderBy: { sortOrder: "asc" },
-      include: { category: { select: { slug: true, name: true } } },
+      include: { category: { select: { id: true, slug: true, name: true } } },
     });
 
     return Response.json(faqs);

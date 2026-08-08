@@ -17,26 +17,36 @@ export async function sendLeadNotification(lead: {
   city?: string | null;
   productSlug?: string | null;
 }) {
-  const to = process.env.EMAIL_TO_SALES ?? "contato@fasesport.com";
-  const from = process.env.EMAIL_FROM ?? "noreply@fasesport.com";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || apiKey.startsWith("re_your_") || apiKey.trim() === "") {
+    return;
+  }
 
-  const phone = lead.phone.replace(/\D/g, "");
-  const message = encodeURIComponent(
-    `Olá ${lead.name}! Recebemos seu pedido de orçamento de uniforme de ${lead.sport} pelo site da Fase Sport. Podemos conversar sobre os detalhes?`
-  );
-  const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
-  const adminUrl = `${appUrl}/admin/leads`;
+  try {
+    const to = process.env.EMAIL_TO_SALES ?? "contato@fasesport.com";
+    const from = process.env.EMAIL_FROM ?? "noreply@fasesport.com";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-  const html = await render(
-    LeadNotificationEmail({ lead, adminUrl, whatsappUrl })
-  );
+    const phone = lead.phone.replace(/\D/g, "");
+    const message = encodeURIComponent(
+      `Olá ${lead.name}! Recebemos seu pedido de orçamento de uniforme de ${lead.sport} pelo site da Fase Sport. Podemos conversar sobre os detalhes?`
+    );
+    const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+    const adminUrl = `${appUrl}/admin/leads`;
 
-  const resend = getResend();
-  await resend.emails.send({
-    from,
-    to,
-    subject: `Novo orçamento de ${lead.name} — ${lead.sport}`,
-    html,
-  });
+    const html = await render(
+      LeadNotificationEmail({ lead, adminUrl, whatsappUrl })
+    );
+
+    const resend = getResend();
+    await resend.emails.send({
+      from,
+      to,
+      subject: `Novo orçamento de ${lead.name} — ${lead.sport}`,
+      html,
+    });
+  } catch (error) {
+    // Ignorar falhas de envio de e-mail em desenvolvimento ou sem provedor ativo
+    console.warn("[sendLeadNotification] Envio de e-mail ignorado:", error);
+  }
 }

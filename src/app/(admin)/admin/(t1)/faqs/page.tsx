@@ -21,12 +21,12 @@ type Category = { id: string; slug: string; name: string };
 export default function FaqsPage() {
   const [faqs, setFaqs] = useState<Faq[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("global");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ question: "", answer: "", sortOrder: 0, isActive: true });
+  const [form, setForm] = useState({ question: "", answer: "", sortOrder: 0, isActive: true, categoryId: null as string | null });
   const [saving, setSaving] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [newForm, setNewForm] = useState({ question: "", answer: "" });
+  const [newForm, setNewForm] = useState({ question: "", answer: "", categoryId: "" });
 
   useEffect(() => {
     fetch("/api/admin/categories")
@@ -36,10 +36,7 @@ export default function FaqsPage() {
   }, []);
 
   useEffect(() => {
-    const url =
-      selectedCategory === "global"
-        ? "/api/admin/faqs"
-        : `/api/admin/faqs?categoryId=${selectedCategory}`;
+    const url = `/api/admin/faqs?categoryId=${selectedCategory}`;
     fetch(url)
       .then((r) => (r.ok ? r.json() : []))
       .then(setFaqs)
@@ -53,6 +50,7 @@ export default function FaqsPage() {
       answer: faq.answer,
       sortOrder: faq.sortOrder,
       isActive: faq.isActive,
+      categoryId: faq.categoryId,
     });
   }
 
@@ -65,7 +63,17 @@ export default function FaqsPage() {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error("Erro ao salvar");
-      setFaqs((prev) => prev.map((f) => (f.id === id ? { ...f, ...form } : f)));
+      setFaqs((prev) =>
+        prev.map((f) => {
+          if (f.id !== id) return f;
+          const matchedCat = categories.find((c) => c.id === form.categoryId);
+          return {
+            ...f,
+            ...form,
+            category: matchedCat ? { slug: matchedCat.slug, name: matchedCat.name } : null,
+          };
+        }),
+      );
       setEditingId(null);
     } catch (err) {
       console.error("[saveEdit]", err);
@@ -88,19 +96,32 @@ export default function FaqsPage() {
   async function addFaq() {
     setSaving(true);
     try {
+      const catId =
+        selectedCategory !== "all" && selectedCategory !== "global"
+          ? selectedCategory
+          : newForm.categoryId || null;
+
       const res = await fetch("/api/admin/faqs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...newForm,
-          categoryId: selectedCategory === "global" ? null : selectedCategory,
+          question: newForm.question,
+          answer: newForm.answer,
+          categoryId: catId,
           sortOrder: faqs.length,
         }),
       });
       if (!res.ok) throw new Error("Erro ao criar FAQ");
       const created = await res.json();
-      setFaqs((prev) => [...prev, created]);
-      setNewForm({ question: "", answer: "" });
+      const matchedCat = categories.find((c) => c.id === created.categoryId);
+      setFaqs((prev) => [
+        ...prev,
+        {
+          ...created,
+          category: matchedCat ? { slug: matchedCat.slug, name: matchedCat.name } : null,
+        },
+      ]);
+      setNewForm({ question: "", answer: "", categoryId: "" });
       setAdding(false);
     } catch (err) {
       console.error("[addFaq]", err);
@@ -116,7 +137,12 @@ export default function FaqsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">FAQs</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {faqs.length} pergunta{faqs.length !== 1 ? "s" : ""} nesta seção
+            {faqs.length} pergunta{faqs.length !== 1 ? "s" : ""}{" "}
+            {selectedCategory === "all"
+              ? "cadastradas no total"
+              : selectedCategory === "global"
+              ? "globais"
+              : "nesta categoria"}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -125,6 +151,7 @@ export default function FaqsPage() {
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="rounded-xl border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
           >
+            <option value="all">Todas as FAQs</option>
             <option value="global">Global (Como Funciona)</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
@@ -152,6 +179,25 @@ export default function FaqsPage() {
                 exit={{ opacity: 0 }}
                 className="rounded-2xl border border-primary/40 bg-primary/4 p-5 space-y-3"
               >
+                <div className="flex items-center justify-between gap-3 mb-1">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Categoria:
+                  </span>
+                  <select
+                    value={form.categoryId ?? ""}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, categoryId: e.target.value || null }))
+                    }
+                    className="rounded-xl border border-border bg-background px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="">Global (Como Funciona)</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <input
                   value={form.question}
                   onChange={(e) => setForm((f) => ({ ...f, question: e.target.value }))}
@@ -221,6 +267,17 @@ export default function FaqsPage() {
                 )}
               >
                 <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    {faq.category ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">
+                        {faq.category.name}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-muted text-muted-foreground border border-border">
+                        Global
+                      </span>
+                    )}
+                  </div>
                   <p
                     className={cn(
                       "font-medium text-sm",
@@ -263,7 +320,7 @@ export default function FaqsPage() {
           >
             <div className="flex flex-col items-center gap-3 text-muted-foreground">
               <HelpCircle size={32} className="opacity-30" />
-              <p className="text-sm">Nenhuma pergunta cadastrada para esta categoria.</p>
+              <p className="text-sm">Nenhuma pergunta cadastrada para esta seção.</p>
               <button
                 onClick={() => setAdding(true)}
                 className="text-xs text-primary hover:underline underline-offset-2"
@@ -284,6 +341,23 @@ export default function FaqsPage() {
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className="rounded-2xl border border-primary/40 bg-primary/4 p-5 space-y-3"
             >
+              <div className="flex items-center justify-between gap-3 mb-1">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Categoria da Pergunta:
+                </span>
+                <select
+                  value={newForm.categoryId}
+                  onChange={(e) => setNewForm((f) => ({ ...f, categoryId: e.target.value }))}
+                  className="rounded-xl border border-border bg-background px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">Global (Como Funciona)</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <input
                 value={newForm.question}
                 onChange={(e) =>

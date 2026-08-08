@@ -4,14 +4,30 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
+import { computePageRange } from "@/lib/pagination";
 import { Plus, Package, Layers } from "lucide-react";
 import { ProductGridAdmin } from "./_components/ProductGridAdmin";
 
 export const metadata: Metadata = { title: "Produtos — Admin Fase Sport" };
 
-export default async function ProdutosPage() {
+const PAGE_SIZE = 24;
+
+export default async function ProdutosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const sp = await searchParams;
+  const rawPage = Number(sp?.page ?? 1);
+
+  const total = await prisma.product.count();
+  const pg = computePageRange(total, rawPage, PAGE_SIZE);
+
   const products = await prisma.product.findMany({
     orderBy: [{ category: { sortOrder: "asc" } }, { sortOrder: "asc" }],
+    skip: pg.offset,
+    take: pg.pageSize,
     select: {
       id: true,
       name: true,
@@ -37,7 +53,7 @@ export default async function ProdutosPage() {
             Produtos
           </h1>
           <p className="text-muted-foreground text-sm mt-0.5">
-            Total de <span className="font-semibold text-foreground">{products.length}</span> produto{products.length !== 1 ? "s" : ""} no catálogo
+            Total de <span className="font-semibold text-foreground">{total}</span> produto{total !== 1 ? "s" : ""} no catálogo
           </p>
         </div>
         <Button variant="default" render={<Link href="/admin/produtos/novo" />} className="gap-2 shrink-0 shadow-md shadow-primary/20">
@@ -67,6 +83,12 @@ export default async function ProdutosPage() {
           </div>
         )}
       </div>
+
+      <Pagination
+        page={pg.page}
+        pageCount={pg.pageCount}
+        buildHref={(p) => `/admin/produtos?page=${p}`}
+      />
     </div>
   );
 }

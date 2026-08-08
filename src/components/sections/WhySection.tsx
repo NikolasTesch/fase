@@ -1,7 +1,15 @@
-import { Shield, Clock, Users, MapPin } from "lucide-react";
+import { Shield, Clock, Users, MapPin, Award, Shirt, UsersRound, CalendarCheck } from "lucide-react";
 
 import { RevealOnScroll } from "@/components/sections/RevealOnScroll";
 import { StaggerContainer, StaggerItem } from "@/components/ui/AnimatedSection";
+import { CountUp } from "@/components/ui/CountUp";
+
+const STATS = [
+  { icon: Shirt, value: 50000, prefix: "+", suffix: "", label: "Peças Entregues", sub: "Qualidade de alta performance" },
+  { icon: UsersRound, value: 500, prefix: "", suffix: "+", label: "Times & Equipes", sub: "Uniformes sob medida" },
+  { icon: Award, value: 100, prefix: "", suffix: "%", label: "Produção Própria", sub: "Controle em cada etapa" },
+  { icon: CalendarCheck, value: 10, prefix: "", suffix: "+ Anos", label: "De Tradição", sub: "No mercado esportivo" },
+];
 
 const DIFFERENTIALS = [
   {
@@ -32,8 +40,29 @@ const DIFFERENTIALS = [
 
 export function WhySection() {
   return (
-    <section className="bg-muted py-16 lg:py-24">
+    <section className="bg-background border-t border-border/60 py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4">
+        {/* Bloco de estatísticas animadas com CountUp */}
+        <RevealOnScroll className="mb-16">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
+            {STATS.map((stat) => (
+              <div
+                key={stat.label}
+                className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 p-6 text-center shadow-sm backdrop-blur-md transition-all duration-300 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/5"
+              >
+                <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-transform duration-300 group-hover:scale-110">
+                  <stat.icon className="size-6" />
+                </div>
+                <div className="font-heading text-3xl font-extrabold text-foreground sm:text-4xl lg:text-5xl">
+                  <CountUp end={stat.value} prefix={stat.prefix} suffix={stat.suffix} />
+                </div>
+                <p className="mt-1 text-sm font-semibold text-foreground">{stat.label}</p>
+                <p className="text-xs text-muted-foreground">{stat.sub}</p>
+              </div>
+            ))}
+          </div>
+        </RevealOnScroll>
+
         <RevealOnScroll className="mb-12 text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-primary">
             Por que escolher a Fase?

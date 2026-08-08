@@ -149,7 +149,7 @@ interface CategoriesSectionProps {
 
 export function CategoriesSection({ sections }: CategoriesSectionProps) {
   return (
-    <section id="categorias" className="bg-background py-16 lg:py-24">
+    <section id="categorias" className="bg-background border-t border-border/60 py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4">
         <RevealOnScroll className="mb-10 max-w-2xl">
           <h2 className="font-heading text-4xl text-foreground lg:text-5xl">Modalidades</h2>

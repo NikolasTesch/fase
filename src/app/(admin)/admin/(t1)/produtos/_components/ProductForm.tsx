@@ -273,7 +273,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
 
       // Se o arquivo original for maior que 3 MB (para evitar o limite de 4.5 MB da Vercel), faz upload direto para o R2 via Presigned URL
       if (originalFile.size > 3 * 1024 * 1024) {
-        const presignedRes = await fetch("/api/admin/products/art/presigned-url", {
+        const presignedRes = await fetch("/api/admin/presigned-url", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -700,7 +700,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
               <p className="mb-4 text-sm text-muted-foreground">
                 Envie o preview (PNG/JPG/WebP/GIF) e o arquivo original da arte
                 (CDR/SVG/PDF/AI/EPS ou imagem). O preview fica público na página do
-                produto; o original é armazenado privado no Google Drive.
+                produto; o original é armazenado na Fase Sport (R2).
               </p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>

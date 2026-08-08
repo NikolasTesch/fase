@@ -17,9 +17,18 @@ export function WhatsAppFab() {
     const tooltipTimer = setTimeout(() => setShowTooltip(true), 3000);
     // Parar pulsar após 10 segundos
     const pulseTimer = setTimeout(() => setPulse(false), 10000);
+
+    const handleOpenChat = () => {
+      setShowTooltip(false);
+      setIsChatOpen(true);
+    };
+
+    window.addEventListener("open-fabi-chat", handleOpenChat);
+
     return () => {
       clearTimeout(tooltipTimer);
       clearTimeout(pulseTimer);
+      window.removeEventListener("open-fabi-chat", handleOpenChat);
     };
   }, []);
 

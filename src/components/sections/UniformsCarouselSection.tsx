@@ -18,7 +18,7 @@ export function UniformsCarouselSection({ uniforms = [] }: UniformsCarouselSecti
   const items = uniforms.length > 0 ? [...uniforms, ...uniforms] : [];
 
   return (
-    <section className="bg-muted py-16 lg:py-24 overflow-hidden">
+    <section className="bg-background border-t border-border/60 py-16 lg:py-24 overflow-hidden">
       <div className="mx-auto w-full max-w-7xl px-4">
         <RevealOnScroll className="mb-10 text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-primary">

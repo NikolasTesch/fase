@@ -158,7 +158,7 @@ export default async function CategoryPage({
         </div>
       ) : null}
 
-      <section className="flex flex-col items-start gap-4 rounded-2xl bg-muted px-6 py-10 sm:items-center sm:text-center lg:px-10">
+      <section className="flex flex-col items-start gap-4 rounded-2xl border border-border/60 bg-background px-6 py-10 sm:items-center sm:text-center lg:px-10">
         <h2 className="font-heading text-3xl text-foreground lg:text-4xl">
           Pronto para o uniforme do seu time?
         </h2>

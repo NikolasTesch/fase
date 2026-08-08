@@ -12,7 +12,7 @@ export function ContactSection() {
     : "https://maps.google.com/maps?q=Av.+Mal.+Castelo+Branco,+258+-+Centro,+Teixeira+de+Freitas+-+BA&t=&z=15&ie=UTF8&iwloc=&output=embed";
 
   return (
-    <section id="contato" className="py-16 lg:py-24 bg-background">
+    <section id="contato" className="bg-background border-t border-border/60 py-16 lg:py-24">
       <div className="mx-auto w-full max-w-7xl px-4">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-start">
           {/* Coluna Esquerda: Informações e Mapa */}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, User, ThumbsUp, ThumbsDown, ArrowRight, Copy, Check, Sparkles } from "lucide-react";
+import { MessageCircle, User, ThumbsUp, ThumbsDown, ArrowRight, Copy, Check, Sparkles, Shirt, Ruler, ExternalLink } from "lucide-react";
 import { buildWhatsAppUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { FabiAvatar } from "./FabiAvatar";
@@ -27,7 +27,70 @@ const QUICK_CHIPS = [
 ];
 
 /**
- * Renderizador com suporte completo a marcadores em negrito (**texto**) e links Markdown ([Texto](/url))
+ * Card visual interativo para sugestões de produtos no chat
+ */
+function ProductCardWidget({ name, url }: { name: string; url: string }) {
+  const isExternal = url.startsWith("http");
+  return (
+    <div className="my-2 flex items-center justify-between rounded-xl border border-primary/20 bg-primary/5 p-3 transition-all hover:border-primary/40 hover:bg-primary/10">
+      <div className="flex items-center gap-2.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Shirt className="size-5" />
+        </div>
+        <div>
+          <h4 className="text-xs font-bold text-foreground">{name}</h4>
+          <span className="text-[10px] text-muted-foreground font-medium">Sublimação Total • Mínimo 10 peças</span>
+        </div>
+      </div>
+      <a
+        href={url}
+        target={isExternal ? "_blank" : "_self"}
+        rel={isExternal ? "noopener noreferrer" : undefined}
+        className="inline-flex items-center gap-1 rounded-lg bg-primary px-2.5 py-1.5 text-[11px] font-bold text-primary-foreground shadow-2xs hover:bg-primary/90 transition-colors"
+      >
+        Ver Modelo
+        <ExternalLink className="size-3" />
+      </a>
+    </div>
+  );
+}
+
+/**
+ * Widget sanfonado/formatado para tabelas de medidas
+ */
+function SizeChartWidget({ content }: { content: string }) {
+  if (!content.toLowerCase().includes("tabela") && !content.toLowerCase().includes("medida")) return null;
+
+  return (
+    <div className="my-2.5 rounded-xl border border-border/80 bg-background/80 p-3 shadow-2xs">
+      <div className="flex items-center gap-1.5 text-xs font-bold text-foreground mb-2">
+        <Ruler className="size-4 text-emerald-500" />
+        <span>Tabela de Medidas Rápidas (em cm)</span>
+      </div>
+      <div className="grid grid-cols-4 gap-1.5 text-[11px] text-center font-medium">
+        <div className="rounded-lg bg-muted/60 p-1.5">
+          <span className="block font-bold text-foreground">P</span>
+          <span className="text-[10px] text-muted-foreground">50 x 68</span>
+        </div>
+        <div className="rounded-lg bg-muted/60 p-1.5">
+          <span className="block font-bold text-foreground">M</span>
+          <span className="text-[10px] text-muted-foreground">52 x 70</span>
+        </div>
+        <div className="rounded-lg bg-muted/60 p-1.5">
+          <span className="block font-bold text-foreground">G</span>
+          <span className="text-[10px] text-muted-foreground">54 x 72</span>
+        </div>
+        <div className="rounded-lg bg-muted/60 p-1.5">
+          <span className="block font-bold text-foreground">GG</span>
+          <span className="text-[10px] text-muted-foreground">56 x 74</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Renderizador com suporte a marcadores, links Markdown e Cards Visuais
  */
 function FormattedText({ text }: { text: string }) {
   const paragraphs = text.split("\n\n");
@@ -49,6 +112,12 @@ function FormattedText({ text }: { text: string }) {
                       if (match) {
                         const linkText = match[1];
                         const linkUrl = match[2];
+                        const isProduct = linkUrl.startsWith("/") && (linkUrl.includes("/futebol") || linkUrl.includes("/ciclismo") || linkUrl.includes("/basquete") || linkUrl.includes("/produtos"));
+
+                        if (isProduct) {
+                          return <ProductCardWidget key={partIdx} name={linkText} url={linkUrl} />;
+                        }
+
                         const isExternal = linkUrl.startsWith("http");
 
                         return (
@@ -126,6 +195,7 @@ export function ChatMessageList({ messages, isLoading, onFeedback, onQuickSelect
             msg.content.toLowerCase().includes("valor unitário") ||
             msg.content.toLowerCase().includes("whatsapp") ||
             msg.content.toLowerCase().includes("consultor"));
+        const hasSizeChart = !isUser && (msg.content.toLowerCase().includes("medida") || msg.content.toLowerCase().includes("tabela"));
 
         return (
           <div
@@ -154,6 +224,8 @@ export function ChatMessageList({ messages, isLoading, onFeedback, onQuickSelect
               >
                 <FormattedText text={msg.content} />
 
+                {hasSizeChart && <SizeChartWidget content={msg.content} />}
+
                 {/* Quick Action Chips para primeira interação */}
                 {isFirstAssistantMsg && onQuickSelect && (
                   <div className="mt-4 pt-3 border-t border-border/50 space-y-2">
@@ -180,7 +252,12 @@ export function ChatMessageList({ messages, isLoading, onFeedback, onQuickSelect
                   <div className="mt-3.5 pt-3 border-t border-border/50 flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-2">
                       <a
-                        href={buildWhatsAppUrl("Olá Fabi! Fiz uma simulação de orçamento no chat e gostaria de dar início ao meu pedido com maquete 3D!")}
+                        href={buildWhatsAppUrl(
+                          `Olá equipe Fase Sport! Concluí a triagem de orçamento com a Fabi pelo site:\n\n${msg.content
+                            .replace(/\[(.*?)\]\(.*?\)/g, "$1")
+                            .replace(/\*\*/g, "")
+                            .slice(0, 450)}\n\nGostaria de dar seguimento com o atendimento humano e receber meu layout 3D!`
+                        )}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={cn(
@@ -190,7 +267,7 @@ export function ChatMessageList({ messages, isLoading, onFeedback, onQuickSelect
                       >
                         <span className="flex items-center gap-2">
                           <MessageCircle className="size-4 animate-pulse" />
-                          Pedir no WhatsApp em 1-Clique
+                          Enviar Triagem no WhatsApp em 1-Clique
                         </span>
                         <ArrowRight className="size-3.5 group-hover:translate-x-1 transition-transform" />
                       </a>
