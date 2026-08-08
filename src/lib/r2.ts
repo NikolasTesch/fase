@@ -16,7 +16,7 @@ export const r2 = new S3Client({
 });
 
 export const BUCKET = process.env.R2_BUCKET_NAME ?? "fasesport-media";
-export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 
 export const WEBP_QUALITY = 80;
 

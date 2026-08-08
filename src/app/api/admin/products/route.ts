@@ -22,6 +22,7 @@ const ProductSchema = z.object({
   sortOrder: z.number().int().default(0),
   categoryId: z.string().min(1),
   subcategoryId: z.string().optional().nullable(),
+  artId: z.string().cuid().optional().nullable(),
 });
 
 export async function GET() {
@@ -67,13 +68,24 @@ export async function POST(req: NextRequest) {
       return formatZodError(validated.error);
     }
 
-    const { simulatorUrl, subcategoryId, ...data } = validated.data;
+    const { simulatorUrl, subcategoryId, artId, ...data } = validated.data;
+
+    if (artId) {
+      const art = await prisma.artFile.findUnique({
+        where: { id: artId },
+        select: { id: true },
+      });
+      if (!art) {
+        return errorResponse("Arte não encontrada", 400);
+      }
+    }
 
     const product = await prisma.product.create({
       data: {
         ...data,
         simulatorUrl: simulatorUrl || null,
         subcategoryId: subcategoryId || null,
+        artId: artId || null,
       },
     });
 

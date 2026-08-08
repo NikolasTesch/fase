@@ -55,13 +55,6 @@ export function canAccessRoute(role: AdminRole, pathname: string, method: string
 
   if (role !== "T2_VENDEDOR") return false;
 
-  if (pathname === "/admin/conteudo" || pathname.startsWith("/admin/conteudo/")) return true;
-  if (pathname === "/api/admin/art-tags" && method === "GET") return true;
-  if (pathname === "/api/admin/arts" && method === "GET") return true;
-  if (pathname === "/api/admin/arts/upload" && method === "POST") return true;
-  // Ownership (createdById) é checado na rota, não aqui
-  if (/^\/api\/admin\/arts\/[^/]+$/.test(pathname) && (method === "PATCH" || method === "DELETE")) return true;
-  if (/^\/api\/admin\/arts\/[^/]+\/(preview|download)$/.test(pathname) && method === "GET") return true;
   if (pathname === "/api/admin/auth/logout" && method === "POST") return true;
 
   return false;

@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
     if (file.size > MAX_FILE_SIZE) {
       return Response.json(
-        { message: "Arquivo muito grande. Máximo 10 MB." },
+        { message: "Arquivo muito grande. Máximo 50 MB." },
         { status: 400 }
       );
     }

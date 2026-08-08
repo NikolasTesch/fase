@@ -55,6 +55,8 @@ model Product {
   subcategory   Subcategory?   @relation(fields: [subcategoryId], references: [id])
   subcategoryId String?
   images        ProductImage[]
+  art           ArtFile?       @relation(fields: [artId], references: [id], onDelete: SetNull)
+  artId         String?        @unique
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -179,18 +181,10 @@ model SizeChart {
   updatedAt DateTime @updatedAt
 }
 
-model ArtTag {
-  id   String    @id @default(cuid())
-  name String    @unique
-  slug String    @unique
-  arts ArtFile[]
-}
-
 model ArtFile {
   id               String    @id @default(cuid())
   name             String
-  description      String?
-  previewFileId    String    // Drive file id da imagem de preview
+  previewUrl       String    // R2 público (NEXT_PUBLIC_R2_URL) — servido na página pública
   previewMimeType  String
   originalFileId   String    // Drive file id do arquivo original (.cdr/.svg/.pdf)
   originalFileName String    // ex.: "escudo-corinthians.cdr"
@@ -200,7 +194,7 @@ model ArtFile {
   updatedAt        DateTime  @updatedAt
   createdBy        AdminUser? @relation(fields: [createdById], references: [id], onDelete: SetNull)
   createdById      String?
-  tags             ArtTag[]
+  product          Product?
 }
 
 model ChatSession {

@@ -40,14 +40,6 @@ async function main() {
     console.log("⚠ Vendedor (T2): SELLER_SEED_EMAIL/SELLER_SEED_PASSWORD ausentes — pulando");
   }
 
-  // ─── Tags de arte ─────────────────────────────────────────────────────────
-  const artTags = ["Escudo", "Mascote", "Patrocinador", "Futebol", "Vôlei", "Basquete", "Handebol", "Número", "Time"];
-  for (const name of artTags) {
-    const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-    await prisma.artTag.upsert({ where: { slug }, update: {}, create: { name, slug } });
-  }
-  console.log(`✓ ${artTags.length} tags de arte`);
-
   // ─── Categorias ──────────────────────────────────────────────────────────
   const categoriesData = [
     {

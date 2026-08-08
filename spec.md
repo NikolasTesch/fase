@@ -57,7 +57,7 @@ Local:  Docker Compose (Next.js + PostgreSQL)
 | **Tailwind CSS + shadcn/ui** | Design system consistente. shadcn/ui fornece componentes acessíveis e customizáveis sem lock-in de biblioteca. |
 | **Prisma ORM** | Type-safe database access. Migrations automáticas. Suporte nativo ao PostgreSQL (Neon). Schema como fonte de verdade. |
 | **Cloudflare R2** | S3-compatible. Zero egress fees. Worker para otimização de imagem on-the-fly (resize, WebP conversion). |
-| **Google Drive (artes)** | Artes (logotipos, escudos, vetoriais) em pasta privada via service account (scope `drive.file`) — nunca há link público; preview/download via API autenticada. |
+| **Google Drive (artes)** | Arte 1:1 por produto: arquivo original vetorial (`.cdr`/`.svg`/`.pdf`) em pasta privada via service account (scope `drive.file`) — nunca há link público; preview (WebP) público no Cloudflare R2 |
 | **Neon Database** | PostgreSQL serverless com branching. Escala para zero quando inativo. Ideal para projeto em crescimento. |
 | **Framer Motion** | Animações declarativas no React. Viewport-based animations para a landing page. Otimizado para performance. |
 | **React Hook Form + Zod** | Formulário multi-step com validação client e server-side. Schema compartilhado entre frontend e API. |
@@ -251,6 +251,8 @@ model Product {
   subcategory   Subcategory?   @relation(fields: [subcategoryId], references: [id])
   subcategoryId String?
   images        ProductImage[]
+  art           ArtFile?       @relation(fields: [artId], references: [id], onDelete: SetNull)
+  artId         String?        @unique
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -375,28 +377,20 @@ model SizeChart {
   updatedAt DateTime @updatedAt
 }
 
-model ArtTag {
-  id   String    @id @default(cuid())
-  name String    @unique
-  slug String    @unique
-  arts ArtFile[]
-}
-
 model ArtFile {
   id               String    @id @default(cuid())
   name             String
-  description      String?
-  previewFileId    String    // Drive file id da imagem de preview
+  previewUrl       String    // R2 público (NEXT_PUBLIC_R2_URL) — servido na página pública
   previewMimeType  String
-  originalFileId   String    // Drive file id do arquivo original
-  originalFileName String
+  originalFileId   String    // Drive file id do arquivo original (.cdr/.svg/.pdf)
+  originalFileName String    // ex.: "escudo-corinthians.cdr"
   originalMimeType String
   sizeBytes        Int?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   createdBy        AdminUser? @relation(fields: [createdById], references: [id], onDelete: SetNull)
   createdById      String?
-  tags             ArtTag[]
+  product          Product?
 }
 
 model ChatSession {
@@ -448,15 +442,9 @@ Todas as rotas `/api/admin/*` exigem cookie `admin_token` válido (validação n
 | `GET` | `/api/admin/users` | T1 | Lista usuários (sem `passwordHash`) |
 | `POST` | `/api/admin/users` | T1 | Cria usuário (bcrypt 12; P2002 → 409) |
 | `PATCH` | `/api/admin/users/:id` | T1 | Edita role/isActive/senha (guard de auto-desativação) |
-| `GET` | `/api/admin/arts` | T1 + T2 (GET) | Lista artes (`?q=`, `?tagId=`); nunca expõe `*FileId` |
-| `POST` | `/api/admin/arts/upload` | T1 + T2 | Upload multipart (preview + original) → Google Drive; validação MIME/ext/tamanho/magic bytes |
-| `PATCH` | `/api/admin/arts/:id` | T1 (todas) / T2 (próprias) | Edita metadados/tags |
-| `DELETE` | `/api/admin/arts/:id` | T1 (todas) / T2 (próprias) | Exclui arte + arquivos no Drive (best-effort) |
-| `GET` | `/api/admin/arts/:id/preview` | T1 (todas) / T2 (próprias) | Stream do preview (autenticado, `nosniff`) |
-| `GET` | `/api/admin/arts/:id/download` | T1 (todas) / T2 (próprias) | Download do original (`Content-Disposition: attachment`) |
-| `GET` | `/api/admin/art-tags` | T1 + T2 (GET) | Lista tags com contagem |
-| `POST` | `/api/admin/art-tags` | T1 | Cria tag (slug automático; P2002 → 409) |
-| `PATCH/DELETE` | `/api/admin/art-tags/:id` | T1 | Renomeia/exclui tag |
+| `POST` | `/api/admin/products/art` | T1 | Upload da arte do produto (multipart: `file` preview + `original` vetorial + `productId`) — preview convertido para WebP no R2, original no Google Drive; validação MIME/ext/tamanho/magic bytes |
+| `DELETE` | `/api/admin/products/art/:artId` | T1 | Exclui arte + arquivos (Drive e R2, best-effort) |
+| `GET` | `/api/admin/products/art/:artId/download` | T1 | Download do original vetorial do Drive (`Content-Disposition: attachment`) |
 | `GET/POST` | `/api/admin/products` | T1 | Lista/cria produtos |
 | `PATCH/DELETE` | `/api/admin/products/:id` | T1 | Atualiza / soft-delete (`isActive: false`) |
 | `DELETE` | `/api/admin/products/images/:imageId` | T1 | Remove imagem + arquivo no R2 (best-effort) |
@@ -484,8 +472,8 @@ Todas as rotas `/api/admin/*` exigem cookie `admin_token` válido (validação n
 **Bibliotecas:** `jose` (JWT) + `bcryptjs` (hash, rounds: 12).
 
 **Modelo de papéis:**
-- `T1_GERENCIA` — acesso total ao painel (dashboard, leads, produtos, usuários, tags, todas as artes)
-- `T2_VENDEDOR` — acesso apenas a `/admin/conteudo` (artes próprias + tags em leitura)
+- `T1_GERENCIA` — acesso total ao painel (dashboard, leads, produtos, usuários, artes dos produtos)
+- `T2_VENDEDOR` — sem módulos acessíveis no painel; acesso apenas ao logout (perfil inativo no sidebar)
 
 **Fluxo de login (`POST /api/admin/auth/login`):**
 1. Valida CSRF (Origin/Referer) e rate limit (10/15min por IP, fail-closed → `503` se Redis fora)
@@ -493,7 +481,7 @@ Todas as rotas `/api/admin/*` exigem cookie `admin_token` válido (validação n
 3. Rejeita usuário inativo (`isActive: false` → `401`)
 4. JWT HS256 com payload `{ sub, email, role, isActive }`, expiração `JWT_EXPIRES_IN` (default `7d`)
 5. Cookie `admin_token` httpOnly, secure, `SameSite=Strict`, `Path=/`, `Max-Age=604800`
-6. Resposta `{ success: true, role }` — o client redireciona por papel (T2 → `/admin/conteudo`)
+6. Resposta `{ success: true, role }` — o client redireciona para `/admin/dashboard` (todos os papéis)
 
 **Segredo (`src/lib/auth-jwt.ts`):** fail-closed — `getJwtSecret()` **lança erro** se `JWT_SECRET` ausente (sem fallback hardcoded).
 
@@ -504,9 +492,9 @@ Todas as rotas `/api/admin/*` exigem cookie `admin_token` válido (validação n
 - `requireAdmin()` — para server components/páginas (redirect `/admin/login`)
 - `requireApiAdmin()` — para API routes (401 JSON)
 - `requireT1Admin()` — API routes T1-only (403 para T2)
-- `canAccessRoute(role, pathname, method)` — matcher puro testável (T2: `/admin/conteudo*`, GET arts/tags, upload, PATCH/DELETE/GET de artes próprias, logout)
+- `canAccessRoute(role, pathname, method)` — matcher puro testável (T2: apenas `POST /api/admin/auth/logout`; todo o resto é T1)
 
-**Gate de páginas:** route group `(t1)` em `src/app/(admin)/admin/(t1)/layout.tsx` redireciona não-T1 para `/admin/conteudo` — 100% server-side, consulta o banco por requisição antes de renderizar (protege PII de leads, LGPD).
+**Gate de páginas:** route group `(t1)` em `src/app/(admin)/admin/(t1)/layout.tsx` redireciona não-T1 para `/admin/dashboard` — 100% server-side, consulta o banco por requisição antes de renderizar (protege PII de leads, LGPD).
 
 **Seed (usuários):**
 ```bash
@@ -816,6 +804,8 @@ fasesport-media/
 │   └── {testimonial-id}/
 │       ├── photo.webp
 │       └── logo.webp
+├── arts/
+│   └── {timestamp}-{name}.webp   # Preview da arte do produto (WebP público)
 └── site/
     ├── logo.svg
     ├── og-image.jpg
@@ -1162,7 +1152,7 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 
 ## 18. Progresso de Implementação
 
-> **Atualizado:** 2026-08-06 — V1 completa + evolução: RBAC T1/T2, artes no Google Drive, página Usuários, Chat Fabi (RAG), grade de produtos no admin, migração `middleware`→`proxy` (Next 16), otimizações (índices no Lead, remoção de rotas públicas mortas, OG image raiz, sitemap cacheado). Aguardando: conteúdo real + integrações de produção (Redis Upstash, chaves RAG, credenciais Drive).
+> **Atualizado:** 2026-08-08 — V1 completa + evolução: RBAC T1/T2 (T2 sem módulos — só logout), arte 1:1 anexada ao produto (original no Google Drive + preview WebP no R2), página Usuários, Chat Fabi (RAG), grade de produtos no admin, migração `middleware`→`proxy` (Next 16), otimizações (índices no Lead, remoção de rotas públicas mortas, OG image raiz, sitemap cacheado). Removida a biblioteca de artes autônoma (`/admin/conteudo`, `ArtTag`, rotas `arts/*` e `art-tags/*`). Aguardando: conteúdo real + integrações de produção (Redis Upstash, chaves RAG, credenciais Drive).
 
 ### 18.1 Concluído
 
@@ -1179,9 +1169,9 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 - [x] Componentes shadcn/ui configurados com design system (Button, Input, Card, etc.)
 
 #### Banco de dados
-- [x] `prisma/schema.prisma` — Category, Subcategory, Product, ProductImage, Lead, Testimonial, Faq, SiteSetting, InstagramPost, ModalityItem, SizeChart, ChatSession, ChatMessage, AdminUser (RBAC T1/T2), ArtTag, ArtFile — índices em `Lead(status, createdAt)` e `Lead(phone)`
+- [x] `prisma/schema.prisma` — Category, Subcategory, Product (com `artId` 1:1), ProductImage, Lead, Testimonial, Faq, SiteSetting, InstagramPost, ModalityItem, SizeChart, ChatSession, ChatMessage, AdminUser (RBAC T1/T2), ArtFile — índices em `Lead(status, createdAt)` e `Lead(phone)`
 - [x] `docker/docker-compose.yml` + `docker/Dockerfile.dev`
-- [x] `prisma/seed.ts` — admin (T1), vendedor opcional (T2 via `SELLER_SEED_*`), 9 tags de arte, catálogo completo, depoimentos, FAQs, modalidades e medidas
+- [x] `prisma/seed.ts` — admin (T1), vendedor opcional (T2 via `SELLER_SEED_*`), catálogo completo, depoimentos, FAQs, modalidades e medidas
 
 #### Libs compartilhadas
 - [x] `src/lib/db.ts` — singleton Prisma
@@ -1197,7 +1187,7 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 #### Auth, proxy e RBAC
 - [x] `src/proxy.ts` (Next 16 — convenção `middleware` renomeada) — JWT guard em `/admin` e `/api/admin`
 - [x] `src/lib/auth.ts` — `getAdminUser`, `requireAdmin`, `requireApiAdmin`, `requireT1Admin`, `canAccessRoute` (matcher puro testável); `getJwtSecret()` fail-closed (lança se `JWT_SECRET` ausente)
-- [x] Route group `(t1)` — gate server-side por requisição (redirect não-T1 → `/admin/conteudo`)
+- [x] Route group `(t1)` — gate server-side por requisição (redirect não-T1 → `/admin/dashboard`)
 
 #### API Routes — Públicas
 - [x] `POST /api/contact` — cria lead, CSRF, rate limit fail-closed, notificação por e-mail
@@ -1219,8 +1209,8 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 - [x] `PATCH/DELETE /api/admin/faqs/[id]`
 - [x] `POST /api/admin/upload` — upload para R2, registra ProductImage (valida alvo antes de subir — sem órfãos)
 - [x] `GET/POST /api/admin/users` + `PATCH /api/admin/users/[id]` — gestão de usuários (T1, bcrypt 12, auto-desativação bloqueada)
-- [x] `GET/POST/PATCH/DELETE /api/admin/art-tags` + `[id]` — tags de arte (T1 muta, T2 lê)
-- [x] `GET/POST /api/admin/arts` + `arts/upload` + `arts/[id]` + `preview/download` — artes no Google Drive (ownership T2, nunca expõe `*FileId`)
+- [x] `GET/POST/PATCH/DELETE /api/admin/art-tags` + `[id]` — tags de arte (T1 muta, T2 lê) — **removidas** com a biblioteca de artes
+- [x] `POST /api/admin/products/art` + `DELETE products/art/[artId]` + `GET products/art/[artId]/download` — arte do produto (T1): preview WebP → R2, original → Drive
 - [x] `GET/POST/PATCH/DELETE /api/admin/size-charts` + `[type]`
 - [x] `GET/POST/PATCH/DELETE /api/admin/instagram` + `[id]`
 - [x] `GET/POST/PATCH/DELETE /api/admin/modalities` + `[id]`
@@ -1229,7 +1219,7 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 
 #### CMS Admin — Páginas
 - [x] `src/app/(admin)/layout.tsx` — sidebar filtrada por role + `getAdminUser` server-side
-- [x] `src/app/admin/login/page.tsx` — redirect por papel (T2 → `/admin/conteudo`)
+- [x] `src/app/admin/login/page.tsx` — redirect para `/admin/dashboard` (todos os papéis)
 - [x] `src/app/(admin)/admin/(t1)/dashboard/page.tsx` — cards de resumo + atalhos
 - [x] `src/app/(admin)/admin/(t1)/leads/page.tsx` — tabela com filtro de status + painel lateral
 - [x] `src/app/(admin)/admin/(t1)/categorias/page.tsx` + `CategoryRow.tsx` — edição inline de ordem/ativo
@@ -1240,7 +1230,7 @@ test('Responsividade mobile (375px)', async ({ page }) => {
 - [x] `src/app/(admin)/admin/(t1)/produtos/[id]/page.tsx`
 - [x] `src/app/(admin)/admin/(t1)/produtos/_components/ProductForm.tsx` — form completo com upload de imagens
 - [x] `src/app/(admin)/admin/(t1)/usuarios/page.tsx` + `UsuariosClient.tsx` — criar/editar/desativar usuários
-- [x] `src/app/(admin)/admin/conteudo/page.tsx` + `ConteudoClient.tsx` — biblioteca de artes + tags (abas por role)
+- [x] `src/app/(admin)/admin/conteudo/page.tsx` + `ConteudoClient.tsx` — biblioteca de artes + tags (abas por role) — **removida**; arte agora é anexada 1:1 ao produto via `POST /api/admin/products/art`
 - [x] `src/app/(admin)/admin/(t1)/chat-analytics/page.tsx` — métricas do chat Fabi
 - [x] `src/app/(admin)/admin/(t1)/instagram/page.tsx` + `HeroVideoUploader` — vídeo hero + posts
 

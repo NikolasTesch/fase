@@ -13,7 +13,6 @@ import {
   Camera,
   Ruler,
   Shirt,
-  Images,
   UserCog,
   Bot,
 } from "lucide-react";
@@ -32,21 +31,25 @@ const NAV = [
   { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
   { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
   { href: "/admin/instagram", label: "Instagram", icon: Camera },
-  { href: "/admin/conteudo", label: "Conteúdo", icon: Images },
   { href: "/admin/usuarios", label: "Usuários", icon: UserCog },
 ];
 
 export function AdminSidebarClient({ role }: { role: AdminRole }) {
   const pathname = usePathname();
 
-  const items =
-    role === "T2_VENDEDOR"
-      ? NAV.filter((item) => item.href === "/admin/conteudo")
-      : NAV;
+  if (role === "T2_VENDEDOR") {
+    return (
+      <ul className="space-y-1">
+        <li className="px-3.5 py-2.5 text-sm text-muted-foreground">
+          Seu perfil não tem módulos acessíveis no momento. Fale com o administrador.
+        </li>
+      </ul>
+    );
+  }
 
   return (
     <ul className="space-y-1">
-      {items.map(({ href, label, icon: Icon }, i) => {
+      {NAV.map(({ href, label, icon: Icon }, i) => {
         const isActive = pathname === href || pathname.startsWith(href + "/");
 
         return (

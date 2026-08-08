@@ -2,22 +2,24 @@ import sharp from "sharp";
 import { NextRequest, NextResponse } from "next/server";
 import type { AdminUser } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { requireApiAdmin, canAccessRoute } from "@/lib/auth";
+import { requireT1Admin } from "@/lib/auth";
 import { validateCsrf } from "@/lib/csrf";
 import { getClientIp } from "@/lib/ip";
 import { uploadRatelimit } from "@/lib/ratelimit";
 import { formatZodError, errorResponse } from "@/lib/errors";
+import { convertToWebP, uploadToR2, deleteFromR2 } from "@/lib/r2";
+import { uploadArtFile, deleteDriveFile } from "@/lib/drive";
 import {
-  ArtUploadSchema,
+  ArtSchema,
   ART_PREVIEW_MIME,
   ART_ORIGINAL_EXTENSIONS,
   ART_MAX_PREVIEW_SIZE,
   ART_MAX_ORIGINAL_SIZE,
-} from "@/lib/validations/arts";
-import { uploadArtFile, deleteDriveFile } from "@/lib/drive";
+} from "@/lib/validations/art";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // 60 segundos de timeout para uploads grandes
 
 async function fileToBuffer(file: File): Promise<Buffer> {
   const chunks: Uint8Array[] = [];
@@ -30,15 +32,17 @@ async function fileToBuffer(file: File): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
+function r2KeyFromUrl(url: string): string | null {
+  const baseUrl = process.env.NEXT_PUBLIC_R2_URL;
+  if (!baseUrl) return null;
+  return url.startsWith(`${baseUrl}/`) ? url.slice(baseUrl.length + 1) : null;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const auth = await requireApiAdmin();
+    const auth = await requireT1Admin();
     if (auth instanceof NextResponse) return auth;
     const user = auth as AdminUser;
-
-    if (!canAccessRoute(user.role, req.nextUrl.pathname, "POST")) {
-      return errorResponse("Acesso negado", 403);
-    }
 
     const csrf = validateCsrf(req);
     if (!csrf.valid) return errorResponse(csrf.reason ?? "Requisição rejeitada", 400);
@@ -50,31 +54,17 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     const original = formData.get("original") as File | null;
-    const name = (formData.get("name") as string)?.trim() ?? "";
-    const description = (formData.get("description") as string)?.trim() || undefined;
-    const rawTagIds = formData.get("tagIds") as string | null;
+    const productId = (formData.get("productId") as string)?.trim() || null;
 
     if (!file || !original) {
       return errorResponse("Envie o preview e o arquivo original.", 400);
     }
 
-    let tagIds: unknown = [];
-    if (rawTagIds) {
-      try {
-        tagIds = JSON.parse(rawTagIds);
-      } catch {
-        return errorResponse("tagIds inválido.", 400);
-      }
-    }
-
-    const validated = ArtUploadSchema.safeParse({ name, description, tagIds });
-    if (!validated.success) return formatZodError(validated.error);
-
     if (!(ART_PREVIEW_MIME as readonly string[]).includes(file.type)) {
       return errorResponse("Tipo de preview não permitido. Use PNG, JPG, WebP ou GIF.", 400);
     }
     if (file.size > ART_MAX_PREVIEW_SIZE) {
-      return errorResponse("Preview muito grande. Máximo 10 MB.", 400);
+      return errorResponse("Preview muito grande. Máximo 25 MB.", 400);
     }
 
     const previewBuf = await fileToBuffer(file);
@@ -92,12 +82,27 @@ export async function POST(req: NextRequest) {
       return errorResponse("Extensão do arquivo original não permitida.", 400);
     }
     if (original.size > ART_MAX_ORIGINAL_SIZE) {
-      return errorResponse("Arquivo original muito grande. Máximo 20 MB.", 400);
+      return errorResponse("Arquivo original muito grande. Máximo 100 MB.", 400);
     }
 
-    const existingTags = await prisma.artTag.findMany({
-      where: { id: { in: validated.data.tagIds } },
-    });
+    const name = original.name.replace(/\.[^.]+$/, "");
+    const validated = ArtSchema.safeParse({ name });
+    if (!validated.success) return formatZodError(validated.error);
+
+    // Valida existência do produto ANTES de subir arquivos — evita arte órfã
+    // quando o productId aponta para nada; também captura a arte atual para
+    // substituição sem acumular registros mortos
+    let existingArt: { id: string; previewUrl: string; originalFileId: string } | null = null;
+    if (productId) {
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+        include: { art: true },
+      });
+      if (!product) {
+        return errorResponse("Produto não encontrado", 404);
+      }
+      existingArt = product.art;
+    }
 
     const originalBuf = await fileToBuffer(original);
     // Originais não-imagem (.cdr/.ai/.eps/.svg/.pdf) não são validáveis por magic
@@ -106,45 +111,80 @@ export async function POST(req: NextRequest) {
     const originalMime =
       isImageExt && original.type ? original.type : "application/octet-stream";
 
-    let previewId: string | null = null;
-    let originalId: string | null = null;
+    let previewUrl: string | null = null;
+    let originalFileId: string | null = null;
     try {
-      previewId = await uploadArtFile(previewBuf, `${name}-preview`, file.type);
-      originalId = await uploadArtFile(
-        originalBuf,
-        original.name,
-        originalMime
-      );
+      const { buffer: webpBuf, mimeType: webpMime } = await convertToWebP(previewBuf, file.type);
+      previewUrl = await uploadToR2(`arts/${Date.now()}-${name}.webp`, webpBuf, webpMime);
+      originalFileId = await uploadArtFile(originalBuf, original.name, originalMime);
 
-      const art = await prisma.artFile.create({
-        data: {
-          name: validated.data.name,
-          description: validated.data.description ?? null,
-          previewFileId: previewId,
-          previewMimeType: file.type,
-          originalFileId: originalId,
-          originalFileName: original.name,
-          originalMimeType: originalMime,
-          sizeBytes: original.size,
-          createdById: user.id,
-          tags: { connect: existingTags.map((t) => ({ id: t.id })) },
-        },
-      });
-
-      return Response.json({ id: art.id, name: art.name }, { status: 201 });
-    } catch (error) {
-      // best-effort: remove do Drive qualquer arquivo já enviado (inclui o caso
-      // de o 2º upload falhar após o 1º ter subido — evita arquivos órfãos)
-      if (previewId) {
+      // Substitui a arte anterior do produto (arquivos + registro) — best-effort
+      if (existingArt) {
+        const oldKey = r2KeyFromUrl(existingArt.previewUrl);
+        if (oldKey) {
+          try {
+            await deleteFromR2(oldKey);
+          } catch {
+            // ignora falha do cleanup
+          }
+        }
         try {
-          await deleteDriveFile(previewId);
+          await deleteDriveFile(existingArt.originalFileId);
+        } catch {
+          // ignora falha do cleanup
+        }
+        try {
+          await prisma.artFile.delete({ where: { id: existingArt.id } });
         } catch {
           // ignora falha do cleanup
         }
       }
-      if (originalId) {
+
+      const art = await prisma.artFile.create({
+        data: {
+          name: validated.data.name,
+          previewUrl,
+          previewMimeType: webpMime,
+          originalFileId,
+          originalFileName: original.name,
+          originalMimeType: originalMime,
+          sizeBytes: original.size,
+          createdById: user.id,
+        },
+      });
+
+      if (productId) {
+        await prisma.product.update({
+          where: { id: productId },
+          data: { artId: art.id },
+        });
+      }
+
+      return Response.json(
+        {
+          id: art.id,
+          previewUrl: art.previewUrl,
+          originalFileName: art.originalFileName,
+          previewMimeType: art.previewMimeType,
+        },
+        { status: 201 }
+      );
+    } catch (error) {
+      // best-effort: remove do R2/Drive qualquer arquivo já enviado (inclui o caso
+      // de o 2º upload falhar após o 1º ter subido — evita arquivos órfãos)
+      if (previewUrl) {
+        const r2Key = r2KeyFromUrl(previewUrl);
+        if (r2Key) {
+          try {
+            await deleteFromR2(r2Key);
+          } catch {
+            // ignora falha do cleanup
+          }
+        }
+      }
+      if (originalFileId) {
         try {
-          await deleteDriveFile(originalId);
+          await deleteDriveFile(originalFileId);
         } catch {
           // ignora falha do cleanup
         }
@@ -152,7 +192,7 @@ export async function POST(req: NextRequest) {
       throw error;
     }
   } catch (error) {
-    console.error("[POST /api/admin/arts/upload]", error);
+    console.error("[POST /api/admin/products/art]", error);
     if (
       error instanceof Error &&
       typeof error.message === "string" &&

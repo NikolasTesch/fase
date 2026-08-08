@@ -75,7 +75,7 @@ Configure todas as variáveis no painel da Vercel (Settings → Environment Vari
 
 ### Google Drive (Artes)
 
-As artes (logotipos, escudos, arquivos vetoriais) são armazenadas em uma pasta privada do Google Drive, acessada via conta de serviço — nunca há link público. Configuração:
+Cada produto tem **uma arte** anexada (relação 1:1). O **arquivo original** (vetorial: `.cdr`, `.svg`, `.pdf`) é armazenado em uma pasta privada do Google Drive, acessada via conta de serviço — nunca há link público. O **preview** (imagem convertida para WebP) vai para o Cloudflare R2 público e é exibido na página do produto. Configuração:
 
 1. **Criar projeto no Google Cloud** — acesse [Google Cloud Console](https://console.cloud.google.com), crie um projeto (ex: `fase-sport-arts`).
 2. **Habilitar a Google Drive API** — em APIs & Services → Library, ative `Google Drive API` para o projeto.
@@ -86,7 +86,7 @@ As artes (logotipos, escudos, arquivos vetoriais) são armazenadas em uma pasta 
 | Variável | Descrição |
 |---|---|
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Conteúdo JSON completo da chave da conta de serviço (ex: `{"type":"service_account",...}`) |
-| `GOOGLE_DRIVE_ARTS_FOLDER_ID` | ID da pasta do Drive onde as artes são salvas (ex: `1xxxxxxxxxxxxxxxxxxxxxxxx`) |
+| `GOOGLE_DRIVE_ARTS_FOLDER_ID` | ID da pasta do Drive onde os arquivos originais das artes são salvos (ex: `1xxxxxxxxxxxxxxxxxxxxxxxx`) |
 
 ### Chat Fabi (RAG / IA)
 

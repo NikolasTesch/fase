@@ -25,6 +25,7 @@ const UpdateSchema = z.object({
   sortOrder: z.number().int().optional(),
   categoryId: z.string().optional(),
   subcategoryId: z.string().optional().nullable(),
+  artId: z.string().cuid().optional().nullable(),
 });
 
 export async function PATCH(req: NextRequest, { params }: Params) {
@@ -50,7 +51,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       return formatZodError(validated.error);
     }
 
-    const { simulatorUrl, ...rest } = validated.data;
+    const { simulatorUrl, artId, ...rest } = validated.data;
 
     const product = await prisma.product.update({
       where: { id },
@@ -59,6 +60,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         ...(simulatorUrl !== undefined && {
           simulatorUrl: simulatorUrl || null,
         }),
+        ...(artId !== undefined && { artId }),
       },
     });
 

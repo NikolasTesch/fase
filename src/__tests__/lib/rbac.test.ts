@@ -13,49 +13,9 @@ describe("canAccessRoute — T1_GERENCIA", () => {
   it("libera POST /api/admin/users", () => {
     expect(canAccessRoute("T1_GERENCIA", "/api/admin/users", "POST")).toBe(true);
   });
-
-  it("libera DELETE /api/admin/art-tags", () => {
-    expect(canAccessRoute("T1_GERENCIA", "/api/admin/art-tags", "DELETE")).toBe(true);
-  });
 });
 
 describe("canAccessRoute — T2_VENDEDOR", () => {
-  it("libera /admin/conteudo", () => {
-    expect(canAccessRoute("T2_VENDEDOR", "/admin/conteudo", "GET")).toBe(true);
-  });
-
-  it("libera subpaths de /admin/conteudo/", () => {
-    expect(canAccessRoute("T2_VENDEDOR", "/admin/conteudo/x", "GET")).toBe(true);
-  });
-
-  it("libera GET /api/admin/art-tags", () => {
-    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/art-tags", "GET")).toBe(true);
-  });
-
-  it("libera GET /api/admin/arts", () => {
-    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts", "GET")).toBe(true);
-  });
-
-  it("libera POST /api/admin/arts/upload", () => {
-    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts/upload", "POST")).toBe(true);
-  });
-
-  it("libera GET /api/admin/arts/abc/download", () => {
-    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts/abc/download", "GET")).toBe(true);
-  });
-
-  it("libera GET /api/admin/arts/abc/preview", () => {
-    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts/abc/preview", "GET")).toBe(true);
-  });
-
-  it("libera PATCH /api/admin/arts/abc", () => {
-    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts/abc", "PATCH")).toBe(true);
-  });
-
-  it("libera DELETE /api/admin/arts/abc (ownership é checado na rota via createdById, não aqui)", () => {
-    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts/abc", "DELETE")).toBe(true);
-  });
-
   it("libera POST /api/admin/auth/logout", () => {
     expect(canAccessRoute("T2_VENDEDOR", "/api/admin/auth/logout", "POST")).toBe(true);
   });
@@ -72,23 +32,59 @@ describe("canAccessRoute — T2_VENDEDOR", () => {
     expect(canAccessRoute("T2_VENDEDOR", "/admin/usuarios", "GET")).toBe(false);
   });
 
+  it("bloqueia /admin/conteudo (página removida)", () => {
+    expect(canAccessRoute("T2_VENDEDOR", "/admin/conteudo", "GET")).toBe(false);
+  });
+
+  it("bloqueia subpaths de /admin/conteudo/", () => {
+    expect(canAccessRoute("T2_VENDEDOR", "/admin/conteudo/x", "GET")).toBe(false);
+  });
+
   it("bloqueia GET /api/admin/users", () => {
     expect(canAccessRoute("T2_VENDEDOR", "/api/admin/users", "GET")).toBe(false);
+  });
+
+  it("bloqueia GET /api/admin/arts (rotas removidas)", () => {
+    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts", "GET")).toBe(false);
+  });
+
+  it("bloqueia POST /api/admin/arts/upload", () => {
+    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts/upload", "POST")).toBe(false);
+  });
+
+  it("bloqueia PATCH /api/admin/arts/abc", () => {
+    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts/abc", "PATCH")).toBe(false);
+  });
+
+  it("bloqueia DELETE /api/admin/arts/abc", () => {
+    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts/abc", "DELETE")).toBe(false);
+  });
+
+  it("bloqueia GET /api/admin/arts/abc/preview", () => {
+    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts/abc/preview", "GET")).toBe(false);
+  });
+
+  it("bloqueia GET /api/admin/arts/abc/download", () => {
+    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts/abc/download", "GET")).toBe(false);
+  });
+
+  it("bloqueia GET /api/admin/art-tags (rotas removidas)", () => {
+    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/art-tags", "GET")).toBe(false);
+  });
+
+  it("bloqueia POST /api/admin/art-tags", () => {
+    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/art-tags", "POST")).toBe(false);
   });
 
   it("bloqueia PATCH /api/admin/art-tags/1", () => {
     expect(canAccessRoute("T2_VENDEDOR", "/api/admin/art-tags/1", "PATCH")).toBe(false);
   });
 
-  it("bloqueia POST /api/admin/art-tags (mutação é T1-only)", () => {
-    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/art-tags", "POST")).toBe(false);
+  it("bloqueia DELETE /api/admin/art-tags/1", () => {
+    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/art-tags/1", "DELETE")).toBe(false);
   });
 
-  it("bloqueia POST /api/admin/arts (rota de criação é /upload)", () => {
-    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts", "POST")).toBe(false);
-  });
-
-  it("bloqueia GET /api/admin/arts/abc/outro (4º segmento fora de preview|download)", () => {
-    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/arts/abc/outro", "GET")).toBe(false);
+  it("bloqueia POST /api/admin/auth/login (logout é a única ação permitida)", () => {
+    expect(canAccessRoute("T2_VENDEDOR", "/api/admin/auth/login", "POST")).toBe(false);
   });
 });

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
+import { ProductArt } from "@/components/products/ProductArt";
 import { ProductGallery } from "@/components/products/ProductGallery";
 import { ProductWhatsAppCta } from "@/components/products/ProductWhatsAppCta";
 import { ProductSpecifications } from "@/components/products/ProductSpecifications";
@@ -62,6 +63,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
         select: { url: true, altText: true },
       },
       category: { select: { slug: true, name: true } },
+      art: {
+        select: {
+          id: true,
+          name: true,
+          previewUrl: true,
+          previewMimeType: true,
+          originalFileName: true,
+        },
+      },
     },
   });
 
@@ -127,6 +137,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {product.description}
             </p>
           ) : null}
+
+          {product.art ? <ProductArt art={product.art} /> : null}
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <ProductWhatsAppCta
