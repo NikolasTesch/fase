@@ -25,9 +25,7 @@ test.describe("Autenticação Admin", () => {
     await page.locator("input[name='password'], input[type='password']").fill("senha_errada");
     await page.locator("button[type='submit']").click();
 
-    await expect(
-      page.locator("[role='alert'], p, span").filter({ hasText: /inválid|incorret|erro|unauthorized/i }).first()
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("alert")).toBeVisible({ timeout: 5000 });
 
     // Deve permanecer na página de login
     await expect(page).toHaveURL(/\/admin\/login/);

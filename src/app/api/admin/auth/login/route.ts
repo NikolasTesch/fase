@@ -24,20 +24,12 @@ export async function POST(req: NextRequest) {
     }
 
     const ip = getClientIp(req);
-    
-    try {
-      const { success } = await loginRatelimit.limit(`login:${ip}`);
-      if (!success) {
-        return Response.json(
-          { message: "Muitas tentativas. Tente novamente em 15 minutos." },
-          { status: 429 }
-        );
-      }
-    } catch (rlError) {
-      console.error("[loginRatelimit] Error:", rlError);
+
+    const { success } = await loginRatelimit.limit(`login:${ip}`);
+    if (!success) {
       return Response.json(
-        { message: "Serviço temporariamente indisponível. Tente novamente." },
-        { status: 503 }
+        { message: "Muitas tentativas. Tente novamente em 15 minutos." },
+        { status: 429 }
       );
     }
 
